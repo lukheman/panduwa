@@ -26,8 +26,5 @@ class Inventaris extends Model
         return $this->belongsTo(Pengeluaran::class, 'id_pengeluaran');
     }
 
-    public function mutasiAsets()
-    {
-        return $this->hasMany(MutasiAset::class, 'id_inventaris');
-    }
+
 }

@@ -15,7 +15,7 @@
 
     {{-- Summary Cards --}}
     <div class="row g-4 mb-4">
-        <div class="col-md-6">
+        <div class="col-md-4">
             <x-layout.modern-card class="border-start border-4 border-danger h-100">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
@@ -28,7 +28,7 @@
                 </div>
             </x-layout.modern-card>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
             <x-layout.modern-card class="border-start border-4 border-warning h-100">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
@@ -37,6 +37,19 @@
                     </div>
                     <div class="bg-warning bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
                         <i class="fas fa-money-bill-wave text-warning fs-4"></i>
+                    </div>
+                </div>
+            </x-layout.modern-card>
+        </div>
+        <div class="col-md-4">
+            <x-layout.modern-card class="border-start border-4 border-info h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted mb-1 fw-semibold text-uppercase small">Sisa Anggaran Total</p>
+                        <h3 class="fw-bold {{ $sisaAnggaran < 0 ? 'text-danger' : 'text-body' }} mb-0">{{ $this->formatRupiah($sisaAnggaran) }}</h3>
+                    </div>
+                    <div class="bg-info bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                        <i class="fas fa-piggy-bank text-info fs-4"></i>
                     </div>
                 </div>
             </x-layout.modern-card>
@@ -93,6 +106,7 @@
                             <td class="text-muted">{{ Str::limit($pengeluaran->keterangan ?? '-', 40) }}</td>
                             <td>
                                 <div class="d-flex gap-1">
+                                    <x-ui.btn-view wire:click="openViewModal({{ $pengeluaran->id }})" tooltip="Detail" :iconOnly="true" />
                                     <x-ui.btn-edit wire:click="openEditModal({{ $pengeluaran->id }})" tooltip="Edit" />
                                     <x-ui.btn-delete wire:click="confirmDelete({{ $pengeluaran->id }})" tooltip="Hapus" />
                                 </div>
@@ -207,6 +221,52 @@
                         </x-ui.button>
                     </div>
                 </form>
+            </div>
+        </div>
+    @endif
+
+    @if ($showViewModal && $viewingPengeluaran)
+        <div class="modal-backdrop-custom" wire:click.self="closeViewModal">
+            <div class="modal-content-custom" wire:click.stop>
+                <div class="modal-header-custom">
+                    <h5 class="modal-title-custom">Detail Pengeluaran</h5>
+                    <button type="button" class="modal-close-btn" wire:click="closeViewModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-3">
+                    <table class="table table-borderless table-sm">
+                        <tr>
+                            <td class="text-muted" style="width: 140px;">Tanggal Transaksi</td>
+                            <td>: <span class="fw-semibold">{{ \Carbon\Carbon::parse($viewingPengeluaran->tanggal)->format('d F Y') }}</span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Kategori</td>
+                            <td>: <span class="fw-semibold">{{ $viewingPengeluaran->kategori->nama_kategori ?? 'Tidak Ada' }}</span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Jumlah</td>
+                            <td>: <span class="fw-bold text-danger">{{ $this->formatRupiah($viewingPengeluaran->jumlah) }}</span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Terkait Kegiatan</td>
+                            <td>: 
+                                @if($viewingPengeluaran->kegiatan)
+                                    <x-ui.badge variant="info" icon="fas fa-tasks">{{ $viewingPengeluaran->kegiatan->nama_kegiatan }}</x-ui.badge>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Keterangan</td>
+                            <td>: {{ $viewingPengeluaran->keterangan ?? '-' }}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="d-flex justify-content-end mt-2">
+                    <x-ui.button type="button" variant="outline" wire:click="closeViewModal">Tutup</x-ui.button>
+                </div>
             </div>
         </div>
     @endif

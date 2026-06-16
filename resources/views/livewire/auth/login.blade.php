@@ -12,7 +12,7 @@
         <!-- Login Form -->
         <form wire:submit="submit">
             <!-- Role Selection Tabs -->
-            <x-ui.tabs variant="pills" class="mb-4 nav-justified">
+            <x-ui.tabs variant="underline" class="mb-4 nav-justified gap-2">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link {{ $role === 'admin' ? 'active' : '' }}" wire:click="$set('role', 'admin')" type="button" role="tab">Admin</button>
                 </li>
@@ -25,7 +25,7 @@
             </x-ui.tabs>
 
             <!-- Email Field -->
-            <div class="form-floating position-relative">
+            <div class="form-floating position-relative mt-2">
                 <i class="fas fa-envelope input-icon"></i>
                 <input type="email" wire:model="email" class="form-control @error('email') is-invalid @enderror"
                     id="email" placeholder="Alamat Email" autofocus>

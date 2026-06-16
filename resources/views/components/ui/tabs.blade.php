@@ -76,7 +76,7 @@
     }
 
     .tabs-wrapper .nav-tabs-underline {
-        border-bottom: 1px solid var(--border-color);
+        border-bottom: none;
     }
 
     .tabs-wrapper .nav-tabs-underline .nav-link {

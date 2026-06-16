@@ -568,9 +568,7 @@
             @if(Route::has($routePrefix . 'inventaris'))
             <x-layout.sidebar-link href="{{ route($routePrefix . 'inventaris') }}" icon="fas fa-boxes" :active="request()->routeIs($routePrefix . 'inventaris')">Inventaris</x-layout.sidebar-link>
             @endif
-            @if(Auth::guard('admin')->check())
-            <x-layout.sidebar-link href="{{ route('admin.mutasi-aset') }}" icon="fas fa-exchange-alt" :active="request()->routeIs('admin.mutasi-aset')">Mutasi Aset</x-layout.sidebar-link>
-            @endif
+
         </x-layout.sidebar-section>
         @endif
 
@@ -700,15 +698,7 @@
             });
             @endif
 
-            @if(Auth::guard('admin')->check() && Route::has('admin.mutasi-aset'))
-            routes.push({
-                id: 'mutasi-aset',
-                title: 'Mutasi Aset',
-                icon: '<i class="fas fa-exchange-alt"></i>',
-                section: 'Operasional & Aset',
-                handler: () => { window.location.href = "{{ route('admin.mutasi-aset') }}"; }
-            });
-            @endif
+
 
             @if(Auth::guard('admin')->check() && Route::has('admin.kategori'))
             routes.push({

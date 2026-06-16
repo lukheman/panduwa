@@ -108,6 +108,7 @@
                             </td>
                             <td>
                                 <div class="d-flex gap-1">
+                                    <x-ui.btn-view wire:click="openViewModal({{ $inventaris->id }})" tooltip="Detail" :iconOnly="true" />
                                     <x-ui.btn-edit wire:click="openEditModal({{ $inventaris->id }})" tooltip="Edit" />
                                     <x-ui.btn-delete wire:click="confirmDelete({{ $inventaris->id }})" tooltip="Hapus" />
                                 </div>
@@ -232,6 +233,65 @@
                         </x-ui.button>
                     </div>
                 </form>
+            </div>
+        </div>
+    @endif
+
+    @if ($showViewModal && $viewingInventaris)
+        <div class="modal-backdrop-custom" wire:click.self="closeViewModal">
+            <div class="modal-content-custom" wire:click.stop>
+                <div class="modal-header-custom">
+                    <h5 class="modal-title-custom">Detail Inventaris</h5>
+                    <button type="button" class="modal-close-btn" wire:click="closeViewModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-3">
+                    <table class="table table-borderless table-sm">
+                        <tr>
+                            <td class="text-muted" style="width: 140px;">Nama Barang</td>
+                            <td>: <span class="fw-bold">{{ $viewingInventaris->nama_barang }}</span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Kode Barang</td>
+                            <td>: <span class="font-monospace text-primary">{{ $viewingInventaris->kode_barang }}</span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Lokasi</td>
+                            <td>: {{ $viewingInventaris->lokasi }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Tanggal Perolehan</td>
+                            <td>: {{ \Carbon\Carbon::parse($viewingInventaris->tanggal_perolehan)->format('d F Y') }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Kondisi</td>
+                            <td>: <x-ui.badge :variant="$this->getKondisiBadgeVariant($viewingInventaris->kondisi)">{{ $viewingInventaris->kondisi }}</x-ui.badge></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Nilai Aset</td>
+                            <td>: <span class="fw-bold text-success">{{ $this->formatRupiah($viewingInventaris->nilai_aset) }}</span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Dari Pengeluaran</td>
+                            <td>: 
+                                @if($viewingInventaris->pengeluaran)
+                                    Rp {{ number_format($viewingInventaris->pengeluaran->jumlah, 0, ',', '.') }}
+                                    <br><small class="text-muted ms-2">{{ $viewingInventaris->pengeluaran->keterangan }}</small>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Keterangan Tambahan</td>
+                            <td>: {{ $viewingInventaris->keterangan ?? '-' }}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="d-flex justify-content-end mt-2">
+                    <x-ui.button type="button" variant="outline" wire:click="closeViewModal">Tutup</x-ui.button>
+                </div>
             </div>
         </div>
     @endif

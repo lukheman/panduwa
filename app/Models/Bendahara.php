@@ -26,8 +26,5 @@ class Bendahara extends Authenticatable
 
 
 
-    public function mutasiAsets()
-    {
-        return $this->hasMany(MutasiAset::class, 'id_bendahara');
-    }
+
 }

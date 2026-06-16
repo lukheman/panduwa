@@ -40,7 +40,7 @@ class DatabaseSeeder extends Seeder
             PemasukanSeeder::class,
             PengeluaranSeeder::class,
             InventarisSeeder::class,
-            MutasiAsetSeeder::class,
+
         ]);
     }
 }

@@ -33,7 +33,6 @@
                         <th>ID</th>
                         <th>Nama Kategori</th>
                         <th>Deskripsi</th>
-                        <th>Dibuat Pada</th>
                         <th style="width: 120px;">Aksi</th>
                     </tr>
                 </thead>
@@ -43,7 +42,6 @@
                             <td>{{ $kategori->id }}</td>
                             <td class="fw-semibold text-body">{{ $kategori->nama_kategori }}</td>
                             <td class="text-secondary">{{ $kategori->deskripsi ?? '-' }}</td>
-                            <td class="text-muted">{{ $kategori->created_at->format('M d, Y') }}</td>
                             <td>
                                 <div class="d-flex gap-1">
                                     <x-ui.btn-edit wire:click="openEditModal({{ $kategori->id }})" tooltip="Edit" />

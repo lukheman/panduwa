@@ -31,6 +31,9 @@ class PengeluaranManagement extends Component
     public bool $showDeleteModal = false;
     public ?int $deletingPengeluaranId = null;
 
+    public ?Pengeluaran $viewingPengeluaran = null;
+    public bool $showViewModal = false;
+
     protected function rules(): array
     {
         return [
@@ -132,6 +135,18 @@ class PengeluaranManagement extends Component
         $this->resetValidation();
     }
 
+    public function openViewModal(int $id): void
+    {
+        $this->viewingPengeluaran = Pengeluaran::with(['kategori', 'kegiatan'])->findOrFail($id);
+        $this->showViewModal = true;
+    }
+
+    public function closeViewModal(): void
+    {
+        $this->showViewModal = false;
+        $this->viewingPengeluaran = null;
+    }
+
     public function confirmDelete(int $id): void
     {
         $this->deletingPengeluaranId = $id;
@@ -177,6 +192,8 @@ class PengeluaranManagement extends Component
 
         $totalPengeluaran = (clone $query)->sum('jumlah');
         $totalBulanIni = (clone $query)->whereMonth('tanggal', date('m'))->whereYear('tanggal', date('Y'))->sum('jumlah');
+        $totalPemasukan = \App\Models\Pemasukan::sum('jumlah');
+        $sisaAnggaran = $totalPemasukan - $totalPengeluaran;
 
         $pengeluarans = $query->when($this->search, function ($q) {
                 $q->where('keterangan', 'like', '%' . $this->search . '%')
@@ -197,6 +214,7 @@ class PengeluaranManagement extends Component
             'kegiatans' => $kegiatans,
             'totalPengeluaran' => $totalPengeluaran,
             'totalBulanIni' => $totalBulanIni,
+            'sisaAnggaran' => $sisaAnggaran,
         ]);
     }
 }

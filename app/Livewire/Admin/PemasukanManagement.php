@@ -26,6 +26,9 @@ class PemasukanManagement extends Component
     public bool $showDeleteModal = false;
     public ?int $deletingPemasukanId = null;
 
+    public ?Pemasukan $viewingPemasukan = null;
+    public bool $showViewModal = false;
+
     protected function rules(): array
     {
         return [
@@ -89,6 +92,18 @@ class PemasukanManagement extends Component
         $this->resetValidation();
     }
 
+    public function openViewModal(int $id): void
+    {
+        $this->viewingPemasukan = Pemasukan::findOrFail($id);
+        $this->showViewModal = true;
+    }
+
+    public function closeViewModal(): void
+    {
+        $this->showViewModal = false;
+        $this->viewingPemasukan = null;
+    }
+
     public function confirmDelete(int $id): void
     {
         $this->deletingPemasukanId = $id;
@@ -132,6 +147,8 @@ class PemasukanManagement extends Component
         
         $totalPemasukan = (clone $query)->sum('jumlah');
         $totalBulanIni = (clone $query)->whereMonth('tanggal', date('m'))->whereYear('tanggal', date('Y'))->sum('jumlah');
+        $totalPengeluaran = \App\Models\Pengeluaran::sum('jumlah');
+        $sisaAnggaran = $totalPemasukan - $totalPengeluaran;
 
         $pemasukans = $query->when($this->search, function ($q) {
                 $q->where('sumber_dana', 'like', '%' . $this->search . '%')
@@ -145,6 +162,7 @@ class PemasukanManagement extends Component
             'pemasukans' => $pemasukans,
             'totalPemasukan' => $totalPemasukan,
             'totalBulanIni' => $totalBulanIni,
+            'sisaAnggaran' => $sisaAnggaran,
         ]);
     }
 }

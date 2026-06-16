@@ -30,6 +30,9 @@ class InventarisManagement extends Component
     public bool $showDeleteModal = false;
     public ?int $deletingInventarisId = null;
 
+    public ?Inventaris $viewingInventaris = null;
+    public bool $showViewModal = false;
+
     protected function rules(): array
     {
         $rules = [
@@ -110,6 +113,18 @@ class InventarisManagement extends Component
         $this->showModal = false;
         $this->resetForm();
         $this->resetValidation();
+    }
+
+    public function openViewModal(int $id): void
+    {
+        $this->viewingInventaris = Inventaris::with('pengeluaran')->findOrFail($id);
+        $this->showViewModal = true;
+    }
+
+    public function closeViewModal(): void
+    {
+        $this->showViewModal = false;
+        $this->viewingInventaris = null;
     }
 
     public function confirmDelete(int $id): void

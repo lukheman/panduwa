@@ -19,7 +19,7 @@ use App\Livewire\Admin\PemasukanManagement;
 use App\Livewire\Admin\PengeluaranManagement;
 use App\Livewire\Admin\KegiatanManagement;
 use App\Livewire\Admin\InventarisManagement;
-use App\Livewire\Admin\MutasiAsetManagement;
+
 use App\Livewire\Admin\SisaAnggaran;
 use App\Livewire\Admin\LaporanRealisasi;
 
@@ -57,7 +57,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
 
     // Aset & Inventaris
     Route::get('/inventaris', InventarisManagement::class)->name('admin.inventaris');
-    Route::get('/mutasi-aset', MutasiAsetManagement::class)->name('admin.mutasi-aset');
+
 
     // Pengaturan & Sistem
     Route::get('/users', UserManagement::class)->name('admin.users');
