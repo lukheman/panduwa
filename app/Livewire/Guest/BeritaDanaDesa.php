@@ -8,14 +8,13 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.guest')]
-#[Title('PANDUWA - Desa Waindawula')]
-class LandingPage extends Component
+#[Title('Berita Penggunaan Dana Desa - PANDUWA')]
+class BeritaDanaDesa extends Component
 {
     public function render()
     {
         $kegiatans = Kegiatan::withSum('pengeluarans', 'jumlah')
             ->orderBy('created_at', 'desc')
-            ->take(6)
             ->get();
 
         $totalPemasukan = \App\Models\Pemasukan::sum('jumlah');
@@ -25,10 +24,9 @@ class LandingPage extends Component
         $pengeluarans = \App\Models\Pengeluaran::with(['kategori', 'inventaris'])
             ->orderBy('tanggal', 'desc')
             ->orderBy('id', 'desc')
-            ->take(6)
             ->get();
 
-        return view('livewire.guest.landing-page', [
+        return view('livewire.guest.berita-dana-desa', [
             'kegiatans' => $kegiatans,
             'totalPemasukan' => $totalPemasukan,
             'totalPengeluaran' => $totalPengeluaran,

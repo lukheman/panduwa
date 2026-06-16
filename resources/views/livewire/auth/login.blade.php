@@ -6,7 +6,7 @@
                 <i class="fas fa-landmark"></i>
             </div>
             <h1>Selamat Datang</h1>
-            <p>Silakan masuk ke SIWANDA</p>
+            <p>Silakan masuk ke PANDUWA</p>
         </div>
 
         <!-- Login Form -->

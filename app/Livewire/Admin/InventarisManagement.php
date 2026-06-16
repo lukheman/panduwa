@@ -23,7 +23,6 @@ class InventarisManagement extends Component
     public string $tanggal_perolehan = '';
     public string $nilai_aset = '';
     public string $kondisi = 'Baik';
-    public ?int $id_pengeluaran = null;
 
     public ?int $editingInventarisId = null;
     public bool $showModal = false;
@@ -41,7 +40,6 @@ class InventarisManagement extends Component
             'tanggal_perolehan' => ['required', 'date'],
             'nilai_aset' => ['required', 'numeric', 'min:0', 'max:9999999999999'],
             'kondisi' => ['required', 'string', 'max:255'],
-            'id_pengeluaran' => ['nullable', 'exists:pengeluaran,id'],
         ];
 
         if ($this->editingInventarisId) {
@@ -83,7 +81,6 @@ class InventarisManagement extends Component
         $this->tanggal_perolehan = $inventaris->tanggal_perolehan;
         $this->nilai_aset = (string) $inventaris->nilai_aset;
         $this->kondisi = $inventaris->kondisi;
-        $this->id_pengeluaran = $inventaris->id_pengeluaran;
         
         $this->showModal = true;
     }
@@ -91,10 +88,6 @@ class InventarisManagement extends Component
     public function save(): void
     {
         $validated = $this->validate();
-
-        if (empty($validated['id_pengeluaran'])) {
-            $validated['id_pengeluaran'] = null;
-        }
 
         if ($this->editingInventarisId) {
             $inventaris = Inventaris::findOrFail($this->editingInventarisId);
@@ -158,7 +151,6 @@ class InventarisManagement extends Component
         $this->tanggal_perolehan = date('Y-m-d');
         $this->nilai_aset = '';
         $this->kondisi = 'Baik';
-        $this->id_pengeluaran = null;
         $this->editingInventarisId = null;
     }
 
@@ -192,11 +184,8 @@ class InventarisManagement extends Component
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        $pengeluarans = Pengeluaran::orderBy('tanggal', 'desc')->get();
-
         return view('livewire.admin.inventaris-management', [
             'inventarises' => $inventarises,
-            'pengeluarans' => $pengeluarans,
             'totalAset' => $totalAset,
             'totalNilaiAset' => $totalNilaiAset,
             'asetKondisiBaik' => $asetKondisiBaik,

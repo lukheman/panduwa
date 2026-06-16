@@ -23,6 +23,13 @@ class PengeluaranManagement extends Component
     public string $keterangan = '';
     public ?int $id_kategori_transaksi = null;
     public ?int $id_kegiatan = null;
+
+    // Inventaris integration
+    public bool $is_inventaris = false;
+    public string $inventaris_kode = '';
+    public string $inventaris_nama = '';
+    public string $inventaris_lokasi = '';
+    public string $inventaris_kondisi = 'baik';
     
     public ?array $selectedKegiatanInfo = null;
 
@@ -36,13 +43,22 @@ class PengeluaranManagement extends Component
 
     protected function rules(): array
     {
-        return [
+        $rules = [
             'tanggal' => ['required', 'date'],
             'jumlah' => ['required', 'numeric', 'min:0', 'max:9999999999999'],
             'keterangan' => ['nullable', 'string'],
             'id_kategori_transaksi' => ['required', 'exists:kategori_transaksi,id'],
             'id_kegiatan' => ['nullable', 'exists:kegiatan,id'],
         ];
+
+        if ($this->is_inventaris) {
+            $rules['inventaris_kode'] = ['required', 'string', 'max:50'];
+            $rules['inventaris_nama'] = ['required', 'string', 'max:255'];
+            $rules['inventaris_lokasi'] = ['required', 'string', 'max:255'];
+            $rules['inventaris_kondisi'] = ['required', 'in:baik,rusak ringan,rusak berat'];
+        }
+
+        return $rules;
     }
 
     public function mount()
@@ -53,6 +69,13 @@ class PengeluaranManagement extends Component
     public function updatedSearch(): void
     {
         $this->resetPage();
+    }
+
+    public function updatedIsInventaris($value): void
+    {
+        if ($value && empty($this->inventaris_kode)) {
+            $this->inventaris_kode = 'INV-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -4));
+        }
     }
 
     public function updatedIdKegiatan($value): void
@@ -93,7 +116,7 @@ class PengeluaranManagement extends Component
 
     public function openEditModal(int $id): void
     {
-        $pengeluaran = Pengeluaran::findOrFail($id);
+        $pengeluaran = Pengeluaran::with('inventaris')->findOrFail($id);
         
         $this->editingPengeluaranId = $id;
         $this->tanggal = $pengeluaran->tanggal;
@@ -101,6 +124,20 @@ class PengeluaranManagement extends Component
         $this->keterangan = $pengeluaran->keterangan ?? '';
         $this->id_kategori_transaksi = $pengeluaran->id_kategori_transaksi;
         $this->id_kegiatan = $pengeluaran->id_kegiatan;
+        
+        if ($pengeluaran->inventaris) {
+            $this->is_inventaris = true;
+            $this->inventaris_kode = $pengeluaran->inventaris->kode_barang;
+            $this->inventaris_nama = $pengeluaran->inventaris->nama_barang;
+            $this->inventaris_lokasi = $pengeluaran->inventaris->lokasi;
+            $this->inventaris_kondisi = $pengeluaran->inventaris->kondisi;
+        } else {
+            $this->is_inventaris = false;
+            $this->inventaris_kode = '';
+            $this->inventaris_nama = '';
+            $this->inventaris_lokasi = '';
+            $this->inventaris_kondisi = 'baik';
+        }
         
         $this->updatedIdKegiatan($this->id_kegiatan);
         
@@ -155,10 +192,52 @@ class PengeluaranManagement extends Component
 
         if ($this->editingPengeluaranId) {
             $pengeluaran = Pengeluaran::findOrFail($this->editingPengeluaranId);
-            $pengeluaran->update($validated);
+            $pengeluaran->update([
+                'tanggal' => $validated['tanggal'],
+                'jumlah' => $validated['jumlah'],
+                'keterangan' => $validated['keterangan'],
+                'id_kategori_transaksi' => $validated['id_kategori_transaksi'],
+                'id_kegiatan' => $validated['id_kegiatan'],
+            ]);
+
+            if ($this->is_inventaris) {
+                \App\Models\Inventaris::updateOrCreate(
+                    ['id_pengeluaran' => $pengeluaran->id],
+                    [
+                        'kode_barang' => $this->inventaris_kode,
+                        'nama_barang' => $this->inventaris_nama,
+                        'lokasi' => $this->inventaris_lokasi,
+                        'kondisi' => $this->inventaris_kondisi,
+                        'tanggal_perolehan' => $this->tanggal,
+                        'nilai_aset' => $this->jumlah,
+                    ]
+                );
+            } else {
+                \App\Models\Inventaris::where('id_pengeluaran', $pengeluaran->id)->delete();
+            }
+
             session()->flash('success', 'Data pengeluaran berhasil diperbarui.');
         } else {
-            Pengeluaran::create($validated);
+            $pengeluaran = Pengeluaran::create([
+                'tanggal' => $validated['tanggal'],
+                'jumlah' => $validated['jumlah'],
+                'keterangan' => $validated['keterangan'],
+                'id_kategori_transaksi' => $validated['id_kategori_transaksi'],
+                'id_kegiatan' => $validated['id_kegiatan'],
+            ]);
+
+            if ($this->is_inventaris) {
+                \App\Models\Inventaris::create([
+                    'id_pengeluaran' => $pengeluaran->id,
+                    'kode_barang' => $this->inventaris_kode,
+                    'nama_barang' => $this->inventaris_nama,
+                    'lokasi' => $this->inventaris_lokasi,
+                    'kondisi' => $this->inventaris_kondisi,
+                    'tanggal_perolehan' => $this->tanggal,
+                    'nilai_aset' => $this->jumlah,
+                ]);
+            }
+
             session()->flash('success', 'Data pengeluaran berhasil ditambahkan.');
         }
 
@@ -174,7 +253,7 @@ class PengeluaranManagement extends Component
 
     public function openViewModal(int $id): void
     {
-        $this->viewingPengeluaran = Pengeluaran::with(['kategori', 'kegiatan'])->findOrFail($id);
+        $this->viewingPengeluaran = Pengeluaran::with(['kategori', 'kegiatan', 'inventaris'])->findOrFail($id);
         $this->showViewModal = true;
     }
 
@@ -216,6 +295,12 @@ class PengeluaranManagement extends Component
         $this->id_kegiatan = null;
         $this->selectedKegiatanInfo = null;
         $this->editingPengeluaranId = null;
+        
+        $this->is_inventaris = false;
+        $this->inventaris_kode = '';
+        $this->inventaris_nama = '';
+        $this->inventaris_lokasi = '';
+        $this->inventaris_kondisi = 'baik';
     }
 
     public function formatRupiah($angka)

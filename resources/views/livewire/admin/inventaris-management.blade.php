@@ -73,7 +73,6 @@
                         <th>Lokasi</th>
                         <th>Nilai Aset (Rp)</th>
                         <th>Kondisi</th>
-                        <th>Asal Pengeluaran</th>
                         <th style="width: 120px;">Aksi</th>
                     </tr>
                 </thead>
@@ -90,17 +89,6 @@
                                 <x-ui.badge :variant="$this->getKondisiBadgeVariant($inventaris->kondisi)">
                                     {{ $inventaris->kondisi }}
                                 </x-ui.badge>
-                            </td>
-                            <td>
-                                @if($inventaris->pengeluaran)
-                                    <div class="small text-secondary" title="{{ $inventaris->pengeluaran->keterangan }}">
-                                        <i class="fas fa-receipt text-danger me-1"></i> Rp {{ number_format($inventaris->pengeluaran->jumlah, 0, ',', '.') }}
-                                        <br>
-                                        <small class="text-muted">{{ \Carbon\Carbon::parse($inventaris->pengeluaran->tanggal)->format('d M Y') }}</small>
-                                    </div>
-                                @else
-                                    <span class="text-muted small">-</span>
-                                @endif
                             </td>
                             <td>
                                 <div class="d-flex gap-1">
@@ -204,22 +192,6 @@
                         @error('nilai_aset') <span class="text-danger small">{{ $message }}</span> @enderror
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Asal Pengeluaran Transaksi (Opsional)</label>
-                        <select class="form-control" wire:model="id_pengeluaran">
-                            <option value="">-- Tidak Terkait Transaksi --</option>
-                            @foreach($pengeluarans as $pengeluaran)
-                                <option value="{{ $pengeluaran->id }}">
-                                    [{{ \Carbon\Carbon::parse($pengeluaran->tanggal)->format('d M') }}]
-                                    Rp {{ number_format($pengeluaran->jumlah, 0, ',', '.') }} -
-                                    {{ Str::limit($pengeluaran->keterangan ?? 'Tanpa Keterangan', 30) }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <div class="form-text text-muted small">Pilih jika barang ini dibeli melalui transaksi pengeluaran.</div>
-                        @error('id_pengeluaran') <span class="text-danger small">{{ $message }}</span> @enderror
-                    </div>
-
                     <div class="d-flex justify-content-end gap-2 mt-4">
                         <x-ui.button type="button" variant="secondary" wire:click="closeModal">
                             Batal
@@ -267,17 +239,6 @@
                         <tr>
                             <td class="text-muted">Nilai Aset</td>
                             <td>: <span class="fw-bold text-success">{{ $this->formatRupiah($viewingInventaris->nilai_aset) }}</span></td>
-                        </tr>
-                        <tr>
-                            <td class="text-muted">Dari Pengeluaran</td>
-                            <td>:
-                                @if($viewingInventaris->pengeluaran)
-                                    Rp {{ number_format($viewingInventaris->pengeluaran->jumlah, 0, ',', '.') }}
-                                    <br><small class="text-muted ms-2">{{ $viewingInventaris->pengeluaran->keterangan }}</small>
-                                @else
-                                    <span class="text-muted">-</span>
-                                @endif
-                            </td>
                         </tr>
                         <tr>
                             <td class="text-muted">Keterangan Tambahan</td>

@@ -15,7 +15,6 @@ class PengeluaranSeeder extends Seeder
             'tanggal' => '2023-03-05',
             'keterangan' => 'Pembelian semen dan material posyandu',
             'id_kegiatan' => 1, // Posyandu Mekar
-            'id_bendahara' => 1,
         ]);
         
         Pengeluaran::create([
@@ -24,7 +23,6 @@ class PengeluaranSeeder extends Seeder
             'tanggal' => '2023-03-10',
             'keterangan' => 'Pembelian Laptop Kantor',
             'id_kegiatan' => null, // Tidak terikat kegiatan
-            'id_bendahara' => 1,
         ]);
     }
 }

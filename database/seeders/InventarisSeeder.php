@@ -17,7 +17,6 @@ class InventarisSeeder extends Seeder
             'nilai_aset' => 5000000.00,
             'kondisi' => 'Baik',
             'id_pengeluaran' => 2, // Merujuk ke pengeluaran laptop
-            'id_bendahara' => 1,
         ]);
 
         Inventaris::create([
@@ -28,7 +27,6 @@ class InventarisSeeder extends Seeder
             'nilai_aset' => 2500000.00,
             'kondisi' => 'Baik',
             'id_pengeluaran' => null, // Mungkin dibeli tahun lalu
-            'id_bendahara' => 1,
         ]);
     }
 }

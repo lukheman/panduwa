@@ -14,7 +14,6 @@ class PemasukanSeeder extends Seeder
             'jumlah' => 150000000.00,
             'tanggal' => '2023-01-15',
             'keterangan' => 'Pencairan tahap 1',
-            'id_bendahara' => 1,
         ]);
 
         Pemasukan::create([
@@ -22,7 +21,6 @@ class PemasukanSeeder extends Seeder
             'jumlah' => 80000000.00,
             'tanggal' => '2023-02-10',
             'keterangan' => 'Pencairan tahap 1 ADD',
-            'id_bendahara' => 1,
         ]);
     }
 }

@@ -1,5 +1,5 @@
 @props([
-    'title' => 'SIWANDA',
+    'title' => 'PANDUWA',
     'description' => 'A beautiful, modern admin dashboard template built with Laravel, Livewire, and Tailwind CSS',
     'type' => 'guest',
 ])
@@ -717,8 +717,13 @@
         <div class="site-navbar-container">
             <a href="/" class="site-brand">
                 <i class="fas fa-landmark"></i>
-                <span>SIWANDA</span>
+                <span>PANDUWA</span>
             </a>
+
+            <ul class="site-nav">
+                <li><a href="{{ route('home') }}" class="site-nav-link">Beranda</a></li>
+                <li><a href="{{ route('berita') }}" class="site-nav-link">Berita</a></li>
+            </ul>
 
             <div class="site-navbar-actions">
                 <a href="{{ route('login') }}" class="btn-nav btn-nav-primary">Masuk Sistem</a>
@@ -739,7 +744,7 @@
 
         <footer class="footer mt-auto py-4 border-top">
             <div class="container text-center">
-                <p class="mb-0 text-muted">&copy; {{ date('Y') }} SIWANDA - Sistem Informasi Keuangan Desa</p>
+                <p class="mb-0 text-muted">&copy; {{ date('Y') }} PANDUWA - Pelaporan Aset dan Dana Desa Waindawula</p>
             </div>
         </footer>
     @endif

@@ -1,5 +1,5 @@
 @props([
-    'brandName' => 'SIWANDA',
+    'brandName' => 'PANDUWA',
     'brandIcon' => 'fas fa-landmark'
 ])
 

@@ -3,7 +3,7 @@
     <section class="hero position-relative vh-100 d-flex align-items-center" style="background: url('{{ asset('assets/images/kantor-desa.png') }}') center/cover no-repeat; margin-top: -73px; padding-top: 73px;">
         <!-- Dark Overlay for text readability -->
         <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark" style="opacity: 0.6; z-index: 0;"></div>
-        
+
         <div class="container position-relative z-1 text-white text-center">
             <div class="row justify-content-center">
                 <div class="col-lg-8">
@@ -27,7 +27,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Shape Divider -->
         <div class="position-absolute bottom-0 start-0 w-100 overflow-hidden" style="line-height: 0;">
             <svg viewBox="0 0 1200 120" preserveAspectRatio="none" style="display: block; width: 100%; height: 60px; fill: #ffffff;">
@@ -35,6 +35,7 @@
             </svg>
         </div>
     </section>
+
     <!-- Lokasi Desa Section -->
     <section id="lokasi" class="py-5 bg-white">
         <div class="container py-5">
@@ -45,35 +46,17 @@
                     <p class="text-secondary mb-4" style="line-height: 1.8;">
                         Desa Waindawula terletak di lokasi yang strategis dengan akses yang mudah dijangkau. Kunjungi Kantor Kepala Desa kami untuk mendapatkan informasi dan layanan administrasi publik secara langsung pada jam kerja operasional (Senin - Jumat, 08:00 - 15:00 WIB).
                     </p>
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="bg-danger bg-opacity-10 text-danger rounded-circle p-3 me-3">
-                            <i class="fas fa-map-marker-alt fs-5"></i>
-                        </div>
-                        <div>
-                            <h5 class="fw-bold mb-1">Alamat Lengkap</h5>
-                            <p class="text-muted small mb-0">Desa Waindawula</p>
-                        </div>
-                    </div>
-                    <div class="d-flex align-items-center">
-                        <div class="bg-success bg-opacity-10 text-success rounded-circle p-3 me-3">
-                            <i class="fas fa-phone-alt fs-5"></i>
-                        </div>
-                        <div>
-                            <h5 class="fw-bold mb-1">Kontak Informasi</h5>
-                            <p class="text-muted small mb-0">(0298) 1234567</p>
-                        </div>
-                    </div>
                 </div>
                 <div class="col-lg-6">
                     <div class="rounded-4 overflow-hidden shadow-lg border border-light" style="height: 400px; background: #e9ecef;">
                         <!-- Embed Google Maps -->
-                        <iframe 
-                            src="https://maps.google.com/maps?q=-5.673305,122.5191325&t=&z=15&ie=UTF8&iwloc=&output=embed" 
-                            width="100%" 
-                            height="100%" 
-                            style="border:0;" 
-                            allowfullscreen="" 
-                            loading="lazy" 
+                        <iframe
+                            src="https://maps.google.com/maps?q=-5.673305,122.5191325&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                            width="100%"
+                            height="100%"
+                            style="border:0;"
+                            allowfullscreen=""
+                            loading="lazy"
                             referrerpolicy="no-referrer-when-downgrade">
                         </iframe>
                     </div>

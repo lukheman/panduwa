@@ -14,7 +14,6 @@ class KegiatanSeeder extends Seeder
             'lokasi' => 'Dusun 1, RT 02/RW 01',
             'anggaran' => 50000000.00,
             'status' => 'berjalan',
-            'id_bendahara' => 1,
         ]);
 
         Kegiatan::create([
@@ -22,7 +21,6 @@ class KegiatanSeeder extends Seeder
             'lokasi' => 'Balai Desa',
             'anggaran' => 15000000.00,
             'status' => 'selesai',
-            'id_bendahara' => 1,
         ]);
     }
 }

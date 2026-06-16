@@ -1,6 +1,6 @@
 <div>
     {{-- Page Header --}}
-    <x-layout.page-header title="Dashboard Sistem" subtitle="Selamat datang, {{ Auth::user()->nama }}! Berikut adalah ringkasan data sistem SIWANDA hari ini.">
+    <x-layout.page-header title="Dashboard Sistem" subtitle="Selamat datang, {{ Auth::user()->nama }}! Berikut adalah ringkasan data sistem PANDUWA hari ini.">
         <x-slot:actions>
             <a href="{{ route('admin.users') }}" class="btn btn-modern btn-primary-modern">
                 <i class="fas fa-users-cog me-2"></i>Kelola Pengguna

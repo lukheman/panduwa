@@ -1,6 +1,6 @@
 @props([
     'title' => 'Modern Admin Dashboard',
-    'brandName' => 'SIWANDA',
+    'brandName' => 'PANDUWA',
     'brandIcon' => 'fas fa-landmark'
 ])
 

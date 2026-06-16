@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 // Guest & Auth
 use App\Livewire\Guest\LandingPage;
+use App\Livewire\Guest\BeritaDanaDesa;
 use App\Livewire\Auth\Login;
 
 // Admin Core
@@ -31,6 +32,7 @@ use App\Livewire\Admin\LaporanRealisasi;
 
 // Guest Routes
 Route::get('/', LandingPage::class)->name('home');
+Route::get('/berita-dana-desa', BeritaDanaDesa::class)->name('berita');
 
 // Auth Routes
 Route::middleware('guest:admin,bendahara,kepala_desa')->group(function () {

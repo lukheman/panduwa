@@ -1,5 +1,15 @@
 <div>
     <x-layout.page-header title="Sisa Anggaran" subtitle="Laporan Sisa Anggaran Desa & Realisasi Kegiatan">
+        <x-slot:actions>
+            <x-ui.button variant="primary" wire:click="downloadPdf" wire:loading.attr="disabled">
+                <span wire:loading.remove wire:target="downloadPdf">
+                    <i class="fas fa-file-pdf me-2"></i> Download PDF
+                </span>
+                <span wire:loading wire:target="downloadPdf">
+                    <i class="fas fa-spinner fa-spin me-2"></i> Mengunduh...
+                </span>
+            </x-ui.button>
+        </x-slot:actions>
     </x-layout.page-header>
 
     {{-- Ringkasan Kas Global --}}

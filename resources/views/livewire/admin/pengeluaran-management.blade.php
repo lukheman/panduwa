@@ -132,7 +132,7 @@
 
     @if ($showModal)
         <div class="modal-backdrop-custom" wire:click.self="closeModal">
-            <div class="modal-content-custom" wire:click.stop style="max-height: 90vh; overflow-y: auto;">
+            <div class="modal-content-custom" wire:click.stop style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
                 <div class="modal-header-custom">
                     <h5 class="modal-title-custom">
                         {{ $editingPengeluaranId ? 'Edit Pengeluaran' : 'Catat Pengeluaran Baru' }}
@@ -207,6 +207,61 @@
                         error="{{ $errors->first('keterangan') }}"
                     />
 
+                    <div class="mb-4 mt-4 pt-3 border-top">
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="isInventarisSwitch" wire:model.live="is_inventaris">
+                            <label class="form-check-label fw-semibold" for="isInventarisSwitch">
+                                <i class="fas fa-box-open text-primary me-1"></i> Simpan juga sebagai Inventaris Aset Desa
+                            </label>
+                            <div class="form-text text-muted small mt-1">Aktifkan ini jika pengeluaran adalah untuk pembelian barang fisik/aset desa. Data akan langsung terinput ke tabel inventaris.</div>
+                        </div>
+
+                        @if($is_inventaris)
+                            <div class="p-3 bg-light rounded border border-primary border-opacity-25">
+                                <h6 class="fw-bold mb-3 text-primary"><i class="fas fa-boxes me-2"></i>Detail Aset Inventaris</h6>
+                                
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <x-form.input
+                                            id="inventaris_kode"
+                                            label="Kode Barang *"
+                                            wire:model="inventaris_kode"
+                                            placeholder="Misal: INV-001"
+                                            error="{{ $errors->first('inventaris_kode') }}"
+                                        />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <x-form.input
+                                            id="inventaris_nama"
+                                            label="Nama Barang *"
+                                            wire:model="inventaris_nama"
+                                            placeholder="Misal: Laptop Asus"
+                                            error="{{ $errors->first('inventaris_nama') }}"
+                                        />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <x-form.input
+                                            id="inventaris_lokasi"
+                                            label="Lokasi Aset *"
+                                            wire:model="inventaris_lokasi"
+                                            placeholder="Misal: Ruang Kepala Desa"
+                                            error="{{ $errors->first('inventaris_lokasi') }}"
+                                        />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Kondisi <span class="text-danger">*</span></label>
+                                        <select class="form-control" wire:model="inventaris_kondisi" required>
+                                            <option value="baik">Baik</option>
+                                            <option value="rusak ringan">Rusak Ringan</option>
+                                            <option value="rusak berat">Rusak Berat</option>
+                                        </select>
+                                        @error('inventaris_kondisi') <span class="text-danger small">{{ $message }}</span> @enderror
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+
                     <div class="d-flex justify-content-end gap-2 mt-4">
                         <x-ui.button type="button" variant="secondary" wire:click="closeModal">
                             Batal
@@ -258,6 +313,38 @@
                             <td>: {{ $viewingPengeluaran->keterangan ?? '-' }}</td>
                         </tr>
                     </table>
+
+                    @if($viewingPengeluaran && $viewingPengeluaran->inventaris)
+                        <div class="mt-3 p-3 bg-light rounded border">
+                            <h6 class="fw-bold mb-2 text-primary border-bottom pb-2"><i class="fas fa-box me-2"></i>Data Inventaris Terkait</h6>
+                            <table class="table table-borderless table-sm mb-0">
+                                <tr>
+                                    <td class="text-muted" style="width: 140px;">Kode Barang</td>
+                                    <td>: <span class="fw-bold text-dark">{{ $viewingPengeluaran->inventaris->kode_barang }}</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Nama Barang</td>
+                                    <td>: <span class="fw-semibold">{{ $viewingPengeluaran->inventaris->nama_barang }}</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Lokasi</td>
+                                    <td>: <span>{{ $viewingPengeluaran->inventaris->lokasi }}</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Kondisi</td>
+                                    <td>: 
+                                        @if($viewingPengeluaran->inventaris->kondisi === 'baik')
+                                            <span class="badge bg-success badge-modern"><i class="fas fa-check-circle me-1"></i>Baik</span>
+                                        @elseif($viewingPengeluaran->inventaris->kondisi === 'rusak ringan')
+                                            <span class="badge bg-warning badge-modern text-dark"><i class="fas fa-exclamation-circle me-1"></i>Rusak Ringan</span>
+                                        @else
+                                            <span class="badge bg-danger badge-modern"><i class="fas fa-times-circle me-1"></i>Rusak Berat</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    @endif
                 </div>
                 <div class="d-flex justify-content-end mt-2">
                     <x-ui.button type="button" variant="secondary" wire:click="closeViewModal">Tutup</x-ui.button>

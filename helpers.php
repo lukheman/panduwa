@@ -265,7 +265,7 @@ function getConfig(): array
 {
     $file = __DIR__ . '/config.json';
     $default = [
-        'app_name' => 'SIWANDA',
+        'app_name' => 'PANDUWA',
         'db_host' => '127.0.0.1',
         'db_port' => '3306',
         'db_name' => 'siwanda',
