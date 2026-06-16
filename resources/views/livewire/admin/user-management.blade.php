@@ -1,22 +1,22 @@
 <div>
     {{-- Page Header --}}
-    <x-layout.page-header title="User Management" subtitle="Manage all users in the system">
+    <x-layout.page-header title="Manajemen Pengguna" subtitle="Kelola seluruh pengguna di dalam sistem">
         <x-slot:actions>
             <x-ui.button variant="primary" icon="fas fa-plus" wire:click="openCreateModal">
-                Add User
+                Tambah Pengguna
             </x-ui.button>
         </x-slot:actions>
     </x-layout.page-header>
 
     {{-- Flash Messages --}}
     @if (session('success'))
-        <x-ui.alert variant="success" title="Success!" class="mb-4">
+        <x-ui.alert variant="success" title="Sukses!" class="mb-4">
             {{ session('success') }}
         </x-ui.alert>
     @endif
 
     @if (session('error'))
-        <x-ui.alert variant="danger" title="Error!" class="mb-4">
+        <x-ui.alert variant="danger" title="Gagal!" class="mb-4">
             {{ session('error') }}
         </x-ui.alert>
     @endif
@@ -38,11 +38,11 @@
 
         {{-- Search and Filters --}}
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h5 class="mb-0 fw-semibold text-body">List of {{ ucfirst(str_replace('_', ' ', $roleType)) }}</h5>
+            <h5 class="mb-0 fw-semibold text-body">Daftar {{ ucfirst(str_replace('_', ' ', $roleType)) }}</h5>
             <div style="max-width: 300px; width: 100%;">
                 <x-form.input
                     wire:model.live.debounce.300ms="search"
-                    placeholder="Search {{ str_replace('_', ' ', $roleType) }}..."
+                    placeholder="Cari {{ str_replace('_', ' ', $roleType) }}..."
                     icon="fas fa-search"
                     class="mb-0"
                 />
@@ -54,10 +54,9 @@
             <table class="table table-modern">
                 <thead>
                     <tr>
-                        <th>User</th>
+                        <th>Pengguna</th>
                         <th>Email</th>
-                        <th>Created</th>
-                        <th style="width: 120px;">Actions</th>
+                        <th style="width: 120px;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -72,16 +71,14 @@
                                     @endif
                                     <div>
                                         <div class="fw-semibold text-body">{{ $user->nama }}</div>
-                                        <small class="text-muted">ID: {{ $user->{$pk} }}</small>
                                     </div>
                                 </div>
                             </td>
                             <td class="text-secondary">{{ $user->email }}</td>
-                            <td class="text-muted">{{ $user->created_at->format('M d, Y') }}</td>
                             <td>
                                 <div class="d-flex gap-1">
-                                    <x-ui.btn-edit wire:click="openEditModal({{ $user->{$pk} }})" tooltip="Edit user" />
-                                    <x-ui.btn-delete wire:click="confirmDelete({{ $user->{$pk} }})" tooltip="Delete user" />
+                                    <x-ui.btn-edit wire:click="openEditModal({{ $user->{$pk} }})" tooltip="Edit pengguna" />
+                                    <x-ui.btn-delete wire:click="confirmDelete({{ $user->{$pk} }})" tooltip="Hapus pengguna" />
                                 </div>
                             </td>
                         </tr>
@@ -90,8 +87,8 @@
                             <td colspan="4" class="text-center py-4">
                                 <x-ui.empty-state
                                     icon="fas fa-users"
-                                    title="No users found"
-                                    description="Try adjusting your search query or add a new user."
+                                    title="Pengguna tidak ditemukan"
+                                    description="Coba ubah kata kunci pencarian Anda atau tambahkan pengguna baru."
                                 />
                             </td>
                         </tr>
@@ -114,7 +111,7 @@
             <div class="modal-content-custom" wire:click.stop>
                 <div class="modal-header-custom">
                     <h5 class="modal-title-custom">
-                        {{ $editingUserId ? 'Edit ' . ucfirst(str_replace('_', ' ', $roleType)) : 'Create New ' . ucfirst(str_replace('_', ' ', $roleType)) }}
+                        {{ $editingUserId ? 'Edit ' . ucfirst(str_replace('_', ' ', $roleType)) : 'Tambah ' . ucfirst(str_replace('_', ' ', $roleType)) . ' Baru' }}
                     </h5>
                     <button type="button" class="modal-close-btn" wire:click="closeModal">
                         <i class="fas fa-times"></i>
@@ -124,9 +121,9 @@
                 <form wire:submit="save">
                     <x-form.input
                         id="nama"
-                        label="Name"
+                        label="Nama"
                         wire:model="nama"
-                        placeholder="Enter full name"
+                        placeholder="Masukkan nama lengkap"
                         required="true"
                         error="{{ $errors->first('nama') }}"
                     />
@@ -136,7 +133,7 @@
                         id="email"
                         label="Email"
                         wire:model="email"
-                        placeholder="Enter email address"
+                        placeholder="Masukkan alamat email"
                         required="true"
                         error="{{ $errors->first('email') }}"
                     />
@@ -146,26 +143,26 @@
                         id="password"
                         label="Password"
                         wire:model="password"
-                        placeholder="{{ $editingUserId ? 'Enter new password' : 'Enter password' }}"
+                        placeholder="{{ $editingUserId ? 'Masukkan password baru' : 'Masukkan password' }}"
                         required="{{ !$editingUserId }}"
-                        hint="{{ $editingUserId ? '(leave blank to keep current)' : '' }}"
+                        hint="{{ $editingUserId ? '(kosongkan jika tidak ingin mengubah password saat ini)' : '' }}"
                         error="{{ $errors->first('password') }}"
                     />
 
                     <x-form.input
                         type="password"
                         id="password_confirmation"
-                        label="Confirm Password"
+                        label="Konfirmasi Password"
                         wire:model="password_confirmation"
-                        placeholder="Confirm password"
+                        placeholder="Konfirmasi password"
                     />
 
                     <div class="d-flex justify-content-end gap-2 mt-4">
                         <x-ui.button type="button" variant="outline" wire:click="closeModal">
-                            Cancel
+                            Batal
                         </x-ui.button>
                         <x-ui.button type="submit" variant="primary">
-                            {{ $editingUserId ? 'Update' : 'Create' }}
+                            {{ $editingUserId ? 'Perbarui' : 'Simpan' }}
                         </x-ui.button>
                     </div>
                 </form>
@@ -176,15 +173,15 @@
     {{-- Delete Confirmation Modal --}}
     <x-ui.confirm-modal
         :show="$showDeleteModal"
-        title="Confirm Delete"
-        message="Are you sure you want to delete this user? This action cannot be undone."
+        title="Konfirmasi Hapus"
+        message="Apakah Anda yakin ingin menghapus pengguna ini? Tindakan ini tidak dapat dibatalkan."
         on-confirm="deleteUser"
         on-cancel="cancelDelete"
         variant="danger"
         icon="fas fa-exclamation-triangle"
     >
         <x-slot:confirmButton>
-            <i class="fas fa-trash-alt me-2"></i>Delete User
+            <i class="fas fa-trash-alt me-2"></i>Hapus Pengguna
         </x-slot:confirmButton>
     </x-ui.confirm-modal>
 </div>

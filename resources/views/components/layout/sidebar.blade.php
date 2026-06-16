@@ -1,6 +1,6 @@
 @props([
     'brandName' => 'SIWANDA',
-    'brandIcon' => 'fas fa-layer-group'
+    'brandIcon' => 'fas fa-landmark'
 ])
 
 <div class="sidebar" id="sidebar">

@@ -1,0 +1,9 @@
+{
+    "app_name": "SIWANDA",
+    "db_host": "127.0.0.1",
+    "db_port": "3306",
+    "db_name": "siwanda",
+    "db_user": "root",
+    "db_pass": "",
+    "serve_port": "8000"
+}

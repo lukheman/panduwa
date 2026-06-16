@@ -30,15 +30,11 @@
             <span class="input-group-text" style="background: var(--input-bg); border-color: var(--border-color);">
                 <i class="fas fa-search" style="color: var(--text-muted);"></i>
             </span>
-            <input type="text" class="form-control" placeholder="{{ $searchPlaceholder }}" style="background: var(--input-bg); border-color: var(--border-color); color: var(--text-primary);">
+            <input type="text" class="form-control" placeholder="{{ $searchPlaceholder }} (Ctrl+K)" style="background: var(--input-bg); border-color: var(--border-color); color: var(--text-primary); cursor: pointer;" readonly onclick="document.querySelector('ninja-keys').open()">
         </div>
     </div>
     <div class="d-flex align-items-center gap-3">
-        @if($showThemeToggle)
-            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
-                <i id="theme-icon" class="fas fa-moon"></i>
-            </button>
-        @endif
+
         <button class="btn btn-link position-relative">
             <i class="fas fa-bell" style="color: var(--text-secondary); font-size: 1.25rem;"></i>
             @if($notificationCount > 0)
@@ -59,9 +55,10 @@
         @if($showLogout)
             <form method="POST" action="{{ route('logout') }}" class="d-inline">
                 @csrf
-                <button type="submit" class="btn btn-link" title="Logout" style="color: var(--text-secondary);">
-                    <i class="fas fa-sign-out-alt" style="font-size: 1.25rem;"></i>
-                </button>
+                <x-ui.button type="submit" variant="danger" title="Keluar dari sistem" style="border-radius: 12px; font-weight: 600; transition: all 0.2s ease;">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="d-none d-sm-inline">Keluar</span>
+                </x-ui.button>
             </form>
         @endif
         {{ $actions ?? '' }}

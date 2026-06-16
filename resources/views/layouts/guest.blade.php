@@ -22,31 +22,19 @@
 
     <style>
         :root {
-            --primary-color: #6366f1;
-            --primary-dark: #4f46e5;
-            --primary-light: #818cf8;
-            --secondary-color: #0ea5e9;
-            --success-color: #10b981;
-            --warning-color: #f59e0b;
-            --danger-color: #ef4444;
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
-            --text-muted: #94a3b8;
-            --border-color: #e2e8f0;
-            --bg-light: #f8fafc;
-            --bg-white: #ffffff;
-        }
-
-        [data-theme="dark"] {
-            --primary-color: #818cf8;
-            --primary-dark: #6366f1;
-            --primary-light: #a5b4fc;
-            --text-primary: #f1f5f9;
-            --text-secondary: #cbd5e1;
-            --text-muted: #94a3b8;
-            --border-color: #334155;
-            --bg-light: #0f172a;
-            --bg-white: #1e293b;
+            --primary-color: #4a6741;
+            --primary-dark: #3d5a3e;
+            --primary-light: #7a9e6a;
+            --secondary-color: #8a6e3a;
+            --success-color: #5a8a3a;
+            --warning-color: #c8a050;
+            --danger-color: #c05a3a;
+            --text-primary: #2d2a1e;
+            --text-secondary: #7a6e52;
+            --text-muted: #a09070;
+            --border-color: #c8b99a;
+            --bg-light: #f5f0e8;
+            --bg-white: #f9f6ee;
         }
 
         * {
@@ -80,9 +68,7 @@
             transition: all 0.3s ease;
         }
 
-        [data-theme="dark"] .site-navbar {
-            background: rgba(15, 23, 42, 0.95);
-        }
+
 
         .site-navbar-container {
             max-width: 1280px;
@@ -730,14 +716,11 @@
     <nav class="site-navbar">
         <div class="site-navbar-container">
             <a href="/" class="site-brand">
-                <i class="fas fa-layer-group"></i>
+                <i class="fas fa-landmark"></i>
                 <span>SIWANDA</span>
             </a>
 
             <div class="site-navbar-actions">
-                <button class="theme-toggle" onclick="toggleTheme()">
-                    <i class="fas fa-moon" id="theme-icon"></i>
-                </button>
                 <a href="{{ route('login') }}" class="btn-nav btn-nav-primary">Masuk Sistem</a>
             </div>
         </div>
@@ -765,38 +748,7 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <script>
-        // Theme Toggle
-        function initTheme() {
-            const savedTheme = localStorage.getItem('theme');
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-            if (savedTheme) {
-                document.documentElement.setAttribute('data-theme', savedTheme);
-            } else if (prefersDark) {
-                document.documentElement.setAttribute('data-theme', 'dark');
-            }
-
-            updateThemeIcon();
-        }
-
-        function toggleTheme() {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateThemeIcon();
-        }
-
-        function updateThemeIcon() {
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            const themeIcon = document.getElementById('theme-icon');
-            if (themeIcon) {
-                themeIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
-            }
-        }
-
-        initTheme();
 
         // Smooth scroll
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {

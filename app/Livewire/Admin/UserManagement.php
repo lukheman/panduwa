@@ -13,7 +13,7 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-#[Title('User Management')]
+#[Title('Manajemen Pengguna')]
 class UserManagement extends Component
 {
     use WithPagination;
@@ -123,14 +123,16 @@ class UserManagement extends Component
             }
 
             $user->save();
-            session()->flash('success', ucfirst($this->roleType) . ' updated successfully.');
+            $roleName = $this->roleType === 'kepala_desa' ? 'Kepala Desa' : ucfirst($this->roleType);
+            session()->flash('success', $roleName . ' berhasil diperbarui.');
         } else {
             $modelClass::create([
                 'nama' => $validated['nama'],
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
             ]);
-            session()->flash('success', ucfirst($this->roleType) . ' created successfully.');
+            $roleName = $this->roleType === 'kepala_desa' ? 'Kepala Desa' : ucfirst($this->roleType);
+            session()->flash('success', $roleName . ' berhasil ditambahkan.');
         }
 
         $this->closeModal();
@@ -154,7 +156,8 @@ class UserManagement extends Component
         if ($this->deletingUserId) {
             $modelClass = $this->getModelClass();
             $modelClass::destroy($this->deletingUserId);
-            session()->flash('success', ucfirst($this->roleType) . ' deleted successfully.');
+            $roleName = $this->roleType === 'kepala_desa' ? 'Kepala Desa' : ucfirst($this->roleType);
+            session()->flash('success', $roleName . ' berhasil dihapus.');
         }
 
         $this->showDeleteModal = false;

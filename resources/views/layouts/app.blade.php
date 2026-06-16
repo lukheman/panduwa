@@ -1,7 +1,7 @@
 @props([
     'title' => 'Modern Admin Dashboard',
     'brandName' => 'SIWANDA',
-    'brandIcon' => 'fas fa-layer-group'
+    'brandIcon' => 'fas fa-landmark'
 ])
 
 <!DOCTYPE html>
@@ -615,43 +615,135 @@
 
     <script src="{{ asset('assets/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script>
-        // Theme Toggle Functionality
-        function initTheme() {
-            const savedTheme = localStorage.getItem('theme');
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-            if (savedTheme) {
-                document.documentElement.setAttribute('data-theme', savedTheme);
-            } else if (prefersDark) {
-                document.documentElement.setAttribute('data-theme', 'dark');
-            }
-
-            updateThemeIcon();
-        }
-
-        function toggleTheme() {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateThemeIcon();
-        }
-
-        function updateThemeIcon() {
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            const themeIcon = document.getElementById('theme-icon');
-            if (themeIcon) {
-                themeIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
-            }
-        }
-
-        // Initialize theme on page load
-        initTheme();
 
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('show');
         }
+    </script>
+    <ninja-keys placeholder="Type a command or search..."></ninja-keys>
+    <script type="module" src="https://unpkg.com/ninja-keys?module"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const ninja = document.querySelector('ninja-keys');
+            
+            const routes = [];
+            
+            @if(Route::has($routePrefix . 'dashboard'))
+            routes.push({
+                id: 'dashboard',
+                title: 'Dashboard',
+                hotkey: 'ctrl+D',
+                icon: '<i class="fas fa-home"></i>',
+                section: 'Navigation',
+                handler: () => { window.location.href = "{{ route($routePrefix . 'dashboard') }}"; }
+            });
+            @endif
+            
+            @if(Route::has($routePrefix . 'pemasukan'))
+            routes.push({
+                id: 'pemasukan',
+                title: 'Pemasukan',
+                icon: '<i class="fas fa-wallet"></i>',
+                section: 'Keuangan',
+                handler: () => { window.location.href = "{{ route($routePrefix . 'pemasukan') }}"; }
+            });
+            @endif
+
+            @if(Route::has($routePrefix . 'pengeluaran'))
+            routes.push({
+                id: 'pengeluaran',
+                title: 'Pengeluaran',
+                icon: '<i class="fas fa-hand-holding-usd"></i>',
+                section: 'Keuangan',
+                handler: () => { window.location.href = "{{ route($routePrefix . 'pengeluaran') }}"; }
+            });
+            @endif
+
+            @if(Route::has($routePrefix . 'sisa-anggaran'))
+            routes.push({
+                id: 'sisa-anggaran',
+                title: 'Laporan Sisa Anggaran',
+                icon: '<i class="fas fa-chart-pie"></i>',
+                section: 'Laporan',
+                handler: () => { window.location.href = "{{ route($routePrefix . 'sisa-anggaran') }}"; }
+            });
+            @endif
+
+            @if(Route::has($routePrefix . 'laporan-realisasi'))
+            routes.push({
+                id: 'laporan-realisasi',
+                title: 'Laporan Realisasi',
+                icon: '<i class="fas fa-file-pdf"></i>',
+                section: 'Laporan',
+                handler: () => { window.location.href = "{{ route($routePrefix . 'laporan-realisasi') }}"; }
+            });
+            @endif
+
+            @if(Route::has($routePrefix . 'kegiatan'))
+            routes.push({
+                id: 'kegiatan',
+                title: 'Kegiatan',
+                icon: '<i class="fas fa-tasks"></i>',
+                section: 'Operasional & Aset',
+                handler: () => { window.location.href = "{{ route($routePrefix . 'kegiatan') }}"; }
+            });
+            @endif
+
+            @if(Route::has($routePrefix . 'inventaris'))
+            routes.push({
+                id: 'inventaris',
+                title: 'Inventaris',
+                icon: '<i class="fas fa-boxes"></i>',
+                section: 'Operasional & Aset',
+                handler: () => { window.location.href = "{{ route($routePrefix . 'inventaris') }}"; }
+            });
+            @endif
+
+            @if(Auth::guard('admin')->check() && Route::has('admin.mutasi-aset'))
+            routes.push({
+                id: 'mutasi-aset',
+                title: 'Mutasi Aset',
+                icon: '<i class="fas fa-exchange-alt"></i>',
+                section: 'Operasional & Aset',
+                handler: () => { window.location.href = "{{ route('admin.mutasi-aset') }}"; }
+            });
+            @endif
+
+            @if(Auth::guard('admin')->check() && Route::has('admin.kategori'))
+            routes.push({
+                id: 'kategori',
+                title: 'Kategori Transaksi',
+                icon: '<i class="fas fa-tags"></i>',
+                section: 'Master Data',
+                handler: () => { window.location.href = "{{ route('admin.kategori') }}"; }
+            });
+            @endif
+
+            @if(Auth::guard('admin')->check() && Route::has('admin.users'))
+            routes.push({
+                id: 'users',
+                title: 'Pengguna',
+                icon: '<i class="fas fa-users"></i>',
+                section: 'Master Data',
+                handler: () => { window.location.href = "{{ route('admin.users') }}"; }
+            });
+            @endif
+
+            @if(Route::has($routePrefix . 'profile'))
+            routes.push({
+                id: 'profile',
+                title: 'Profil',
+                icon: '<i class="fas fa-user-circle"></i>',
+                section: 'Akun',
+                handler: () => { window.location.href = "{{ route($routePrefix . 'profile') }}"; }
+            });
+            @endif
+            
+
+
+            ninja.data = routes;
+        });
     </script>
     @livewireScripts
 </body>

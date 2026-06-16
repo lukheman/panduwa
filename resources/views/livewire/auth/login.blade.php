@@ -3,7 +3,7 @@
         <!-- Brand Logo -->
         <div class="brand-logo">
             <div class="icon-wrapper">
-                <i class="fas fa-layer-group"></i>
+                <i class="fas fa-landmark"></i>
             </div>
             <h1>Selamat Datang</h1>
             <p>Silakan masuk ke SIWANDA</p>
