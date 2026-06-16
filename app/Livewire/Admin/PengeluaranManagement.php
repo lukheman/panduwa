@@ -38,7 +38,7 @@ class PengeluaranManagement extends Component
     {
         return [
             'tanggal' => ['required', 'date'],
-            'jumlah' => ['required', 'numeric', 'min:0'],
+            'jumlah' => ['required', 'numeric', 'min:0', 'max:9999999999999'],
             'keterangan' => ['nullable', 'string'],
             'id_kategori_transaksi' => ['required', 'exists:kategori_transaksi,id'],
             'id_kegiatan' => ['nullable', 'exists:kegiatan,id'],
@@ -114,6 +114,43 @@ class PengeluaranManagement extends Component
         // Convert empty string for id_kegiatan to null
         if (empty($validated['id_kegiatan'])) {
             $validated['id_kegiatan'] = null;
+        }
+
+        // Check overall sisa anggaran
+        $totalPemasukan = \App\Models\Pemasukan::sum('jumlah');
+        $totalPengeluaran = Pengeluaran::sum('jumlah');
+        
+        if ($this->editingPengeluaranId) {
+            $current = Pengeluaran::find($this->editingPengeluaranId);
+            if ($current) {
+                $totalPengeluaran -= $current->jumlah;
+            }
+        }
+        
+        $sisaAnggaran = $totalPemasukan - $totalPengeluaran;
+        
+        if ($validated['jumlah'] > $sisaAnggaran) {
+            $this->addError('jumlah', 'Sisa Anggaran Keseluruhan Desa (' . $this->formatRupiah($sisaAnggaran) . ') tidak mencukupi untuk pengeluaran ini.');
+            return;
+        }
+
+        // Check if kegiatan budget is enough
+        if ($validated['id_kegiatan']) {
+            $kegiatan = Kegiatan::withSum('pengeluarans', 'jumlah')->find($validated['id_kegiatan']);
+            if ($kegiatan) {
+                $realisasi = $kegiatan->pengeluarans_sum_jumlah ?? 0;
+                
+                if ($this->editingPengeluaranId && isset($current) && $current->id_kegiatan == $validated['id_kegiatan']) {
+                    $realisasi -= $current->jumlah;
+                }
+                
+                $sisaKegiatan = $kegiatan->anggaran - $realisasi;
+                
+                if ($validated['jumlah'] > $sisaKegiatan) {
+                    $this->addError('jumlah', 'Sisa Anggaran untuk Kegiatan ini (' . $this->formatRupiah($sisaKegiatan) . ') tidak mencukupi.');
+                    return;
+                }
+            }
         }
 
         if ($this->editingPengeluaranId) {

@@ -214,8 +214,8 @@
                             <option value="">-- Tidak Terkait Transaksi --</option>
                             @foreach($pengeluarans as $pengeluaran)
                                 <option value="{{ $pengeluaran->id }}">
-                                    [{{ \Carbon\Carbon::parse($pengeluaran->tanggal)->format('d M') }}] 
-                                    Rp {{ number_format($pengeluaran->jumlah, 0, ',', '.') }} - 
+                                    [{{ \Carbon\Carbon::parse($pengeluaran->tanggal)->format('d M') }}]
+                                    Rp {{ number_format($pengeluaran->jumlah, 0, ',', '.') }} -
                                     {{ Str::limit($pengeluaran->keterangan ?? 'Tanpa Keterangan', 30) }}
                                 </option>
                             @endforeach
@@ -274,7 +274,7 @@
                         </tr>
                         <tr>
                             <td class="text-muted">Dari Pengeluaran</td>
-                            <td>: 
+                            <td>:
                                 @if($viewingInventaris->pengeluaran)
                                     Rp {{ number_format($viewingInventaris->pengeluaran->jumlah, 0, ',', '.') }}
                                     <br><small class="text-muted ms-2">{{ $viewingInventaris->pengeluaran->keterangan }}</small>
@@ -290,7 +290,7 @@
                     </table>
                 </div>
                 <div class="d-flex justify-content-end mt-2">
-                    <x-ui.button type="button" variant="outline" wire:click="closeViewModal">Tutup</x-ui.button>
+                    <x-ui.button type="button" variant="secondary" wire:click="closeViewModal">Tutup</x-ui.button>
                 </div>
             </div>
         </div>

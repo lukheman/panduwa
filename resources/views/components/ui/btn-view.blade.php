@@ -2,7 +2,7 @@
     'size' => 'sm', // 'sm', 'md', 'lg'
     'tooltip' => 'View Details',
     'iconOnly' => false,
-    'label' => 'View'
+    'label' => 'Detail'
 ])
 
 @php
@@ -17,7 +17,7 @@
 @endphp
 
 <x-ui.button
-    variant="info"
+    variant="secondary"
     :size="$size"
     title="{{ $tooltip }}"
     {{ $attributes->merge(['class' => 'action-btn action-btn-view', 'style' => $btnSize]) }}

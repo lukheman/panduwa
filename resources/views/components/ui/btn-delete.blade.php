@@ -2,7 +2,7 @@
     'size' => 'sm', // 'sm', 'md', 'lg'
     'tooltip' => 'Delete',
     'iconOnly' => false,
-    'label' => 'Delete'
+    'label' => 'Hapus'
 ])
 
 @php

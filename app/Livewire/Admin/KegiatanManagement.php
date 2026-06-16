@@ -39,7 +39,7 @@ class KegiatanManagement extends Component
         return [
             'nama_kegiatan' => ['required', 'string', 'max:255'],
             'lokasi' => ['required', 'string', 'max:255'],
-            'anggaran' => ['required', 'numeric', 'min:0'],
+            'anggaran' => ['required', 'numeric', 'min:0', 'max:9999999999999'],
             'status' => ['required', 'in:perencanaan,berjalan,selesai'],
             'foto_progres' => ['nullable', 'image', 'max:2048'], // 2MB Max
         ];
@@ -90,6 +90,24 @@ class KegiatanManagement extends Component
     public function save(): void
     {
         $this->validate();
+
+        // Cek sisa anggaran yang bisa dialokasikan
+        $totalPemasukan = \App\Models\Pemasukan::sum('jumlah');
+        $totalPengeluaranNonKegiatan = \App\Models\Pengeluaran::whereNull('id_kegiatan')->sum('jumlah');
+        $totalAnggaranKegiatanLain = \App\Models\Kegiatan::query();
+        
+        if ($this->editingKegiatanId) {
+            $totalAnggaranKegiatanLain->where('id', '!=', $this->editingKegiatanId);
+        }
+        
+        $totalAnggaranKegiatanLain = $totalAnggaranKegiatanLain->sum('anggaran');
+        
+        $sisaAnggaranTersedia = $totalPemasukan - $totalPengeluaranNonKegiatan - $totalAnggaranKegiatanLain;
+
+        if ($this->anggaran > $sisaAnggaranTersedia) {
+            $this->addError('anggaran', 'Sisa anggaran desa yang belum dialokasikan hanya ' . $this->formatRupiah($sisaAnggaranTersedia) . '.');
+            return;
+        }
 
         $path = $this->existing_foto_progres;
         

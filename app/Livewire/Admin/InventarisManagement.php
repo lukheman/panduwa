@@ -39,7 +39,7 @@ class InventarisManagement extends Component
             'nama_barang' => ['required', 'string', 'max:255'],
             'lokasi' => ['required', 'string', 'max:255'],
             'tanggal_perolehan' => ['required', 'date'],
-            'nilai_aset' => ['required', 'numeric', 'min:0'],
+            'nilai_aset' => ['required', 'numeric', 'min:0', 'max:9999999999999'],
             'kondisi' => ['required', 'string', 'max:255'],
             'id_pengeluaran' => ['nullable', 'exists:pengeluaran,id'],
         ];

@@ -212,7 +212,7 @@
                     </table>
                 </div>
                 <div class="d-flex justify-content-end mt-2">
-                    <x-ui.button type="button" variant="outline" wire:click="closeViewModal">Tutup</x-ui.button>
+                    <x-ui.button type="button" variant="secondary" wire:click="closeViewModal">Tutup</x-ui.button>
                 </div>
             </div>
         </div>

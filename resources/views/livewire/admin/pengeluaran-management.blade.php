@@ -185,7 +185,7 @@
                         </select>
                         <div class="form-text text-muted small mb-2">Pilih jika pengeluaran ini memotong anggaran suatu kegiatan.</div>
                         @error('id_kegiatan') <span class="text-danger small">{{ $message }}</span> @enderror
-                        
+
                         @if($selectedKegiatanInfo)
                             <div class="p-3 bg-light rounded mt-2 border">
                                 <div class="d-flex justify-content-between mb-1">
@@ -250,7 +250,7 @@
                         </tr>
                         <tr>
                             <td class="text-muted">Terkait Kegiatan</td>
-                            <td>: 
+                            <td>:
                                 @if($viewingPengeluaran->kegiatan)
                                     <x-ui.badge variant="info" icon="fas fa-tasks">{{ $viewingPengeluaran->kegiatan->nama_kegiatan }}</x-ui.badge>
                                 @else
@@ -265,7 +265,7 @@
                     </table>
                 </div>
                 <div class="d-flex justify-content-end mt-2">
-                    <x-ui.button type="button" variant="outline" wire:click="closeViewModal">Tutup</x-ui.button>
+                    <x-ui.button type="button" variant="secondary" wire:click="closeViewModal">Tutup</x-ui.button>
                 </div>
             </div>
         </div>

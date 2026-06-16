@@ -33,7 +33,7 @@ class PemasukanManagement extends Component
     {
         return [
             'sumber_dana' => ['required', 'string', 'max:255'],
-            'jumlah' => ['required', 'numeric', 'min:0'],
+            'jumlah' => ['required', 'numeric', 'min:0', 'max:9999999999999'],
             'tanggal' => ['required', 'date'],
             'keterangan' => ['nullable', 'string'],
         ];
