@@ -16,7 +16,7 @@ class Profile extends Component
 {
     use WithFileUploads;
 
-    public string $name = '';
+    public string $nama = '';
     public string $email = '';
     public string $current_password = '';
     public string $password = '';
@@ -30,7 +30,7 @@ class Profile extends Component
     public function mount(): void
     {
         $user = Auth::user();
-        $this->name = $user->name;
+        $this->nama = $user->nama ?? '';
         $this->email = $user->email;
         $this->currentAvatar = $user->avatar;
     }
@@ -38,8 +38,8 @@ class Profile extends Component
     protected function rules(): array
     {
         $rules = [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email,' . Auth::id()],
+            'nama' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:admin,email,' . Auth::id() . ',id_admin'],
         ];
 
         if ($this->showPasswordSection && $this->password) {
@@ -118,7 +118,7 @@ class Profile extends Component
         $validated = $this->validate();
 
         $user = Auth::user();
-        $user->name = $validated['name'];
+        $user->nama = $validated['nama'];
         $user->email = $validated['email'];
         $user->save();
 

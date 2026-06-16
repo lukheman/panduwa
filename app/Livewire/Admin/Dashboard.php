@@ -2,59 +2,56 @@
 
 namespace App\Livewire\Admin;
 
-use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use App\Models\Admin;
+use App\Models\Bendahara;
+use App\Models\KepalaDesa;
+use App\Models\KategoriTransaksi;
+use App\Models\Kegiatan;
+use App\Models\Inventaris;
+use App\Models\Pemasukan;
+use App\Models\Pengeluaran;
 
-#[Title('Dashboard')]
+#[Title('Dashboard Admin')]
 class Dashboard extends Component
 {
     public function render()
     {
-        // Sample data for orders table
-        $orders = collect([
-            (object) [
-                'order_id' => '#ORD-2024',
-                'customer_name' => 'Alice Johnson',
-                'product_name' => 'Wireless Headphones',
-                'amount' => '$129.99',
-                'status' => 'Delivered',
-                'status_variant' => 'success',
-                'status_icon' => 'fas fa-check-circle',
-                'created_at' => now()->subDay()
-            ],
-            (object) [
-                'order_id' => '#ORD-2023',
-                'customer_name' => 'Bob Smith',
-                'product_name' => 'Smart Watch',
-                'amount' => '$299.99',
-                'status' => 'Pending',
-                'status_variant' => 'warning',
-                'status_icon' => 'fas fa-clock',
-                'created_at' => now()->subDay()
-            ],
-            (object) [
-                'order_id' => '#ORD-2022',
-                'customer_name' => 'Carol White',
-                'product_name' => 'Laptop Stand',
-                'amount' => '$49.99',
-                'status' => 'Shipped',
-                'status_variant' => 'secondary',
-                'status_icon' => 'fas fa-shipping-fast',
-                'created_at' => now()->subDays(2)
-            ],
-            (object) [
-                'order_id' => '#ORD-2021',
-                'customer_name' => 'David Lee',
-                'product_name' => 'USB-C Hub',
-                'amount' => '$79.99',
-                'status' => 'Delivered',
-                'status_variant' => 'success',
-                'status_icon' => 'fas fa-check-circle',
-                'created_at' => now()->subDays(2)
-            ],
-        ]);
+        $totalUsers = Admin::count() + Bendahara::count() + KepalaDesa::count();
+        $totalKategori = KategoriTransaksi::count();
+        $totalKegiatan = Kegiatan::count();
+        $totalInventaris = Inventaris::count();
+        
+        $totalPemasukan = Pemasukan::sum('jumlah');
+        $totalPengeluaran = Pengeluaran::sum('jumlah');
 
-        return view('livewire.admin.dashboard', compact('orders'));
+        // Recent users (mix from 3 tables, since it's hard to order by created_at across 3 tables efficiently in Eloquent without union, we can just get latest from each and merge, then sort)
+        $admins = Admin::latest()->take(3)->get()->map(function($u) {
+            $u->role = 'Admin';
+            return $u;
+        });
+        $bendaharas = Bendahara::latest()->take(3)->get()->map(function($u) {
+            $u->role = 'Bendahara';
+            return $u;
+        });
+        $kades = KepalaDesa::latest()->take(3)->get()->map(function($u) {
+            $u->role = 'Kepala Desa';
+            return $u;
+        });
+
+        $recentUsers = $admins->concat($bendaharas)->concat($kades)
+            ->sortByDesc('created_at')
+            ->take(5);
+
+        return view('livewire.admin.dashboard', [
+            'totalUsers' => $totalUsers,
+            'totalKategori' => $totalKategori,
+            'totalKegiatan' => $totalKegiatan,
+            'totalInventaris' => $totalInventaris,
+            'totalPemasukan' => $totalPemasukan,
+            'totalPengeluaran' => $totalPengeluaran,
+            'recentUsers' => $recentUsers,
+        ]);
     }
 }

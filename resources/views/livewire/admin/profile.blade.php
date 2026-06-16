@@ -37,7 +37,7 @@
                     @endif
                 </div>
 
-                <h4 class="text-body fw-semibold">{{ Auth::user()->name }}</h4>
+                <h4 class="text-body fw-semibold">{{ Auth::user()->nama }}</h4>
                 <p class="text-muted mb-3">{{ Auth::user()->email }}</p>
                 <x-ui.badge variant="primary" icon="fas fa-user-shield">Administrator</x-ui.badge>
 
@@ -131,12 +131,12 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <x-form.input
-                                id="name"
+                                id="nama"
                                 label="Nama Lengkap"
-                                wire:model="name"
+                                wire:model="nama"
                                 placeholder="Masukkan nama lengkap"
                                 required="true"
-                                error="{{ $errors->first('name') }}"
+                                error="{{ $errors->first('nama') }}"
                             />
                         </div>
 

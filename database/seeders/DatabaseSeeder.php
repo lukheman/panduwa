@@ -2,9 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\Admin;
+use Illuminate\Support\Facades\Hash;
+use App\Models\Bendahara;
+use App\Models\KepalaDesa;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,12 +15,32 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Admin',
+        Admin::create([
+            'nama' => 'Administrator Utama',
             'email' => 'admin@gmail.com',
-            'password' => 'password123'
+            'password' => Hash::make('password123'),
+        ]);
+
+        Bendahara::create([
+            'nama' => 'Budi Santoso',
+            'email' => 'bendahara@gmail.com',
+            'password' => Hash::make('password123'),
+        ]);
+
+        KepalaDesa::create([
+            'nama' => 'H. Rahmat Hidayat',
+            'email' => 'kepaladesa@gmail.com',
+            'password' => Hash::make('password123'),
+        ]);
+
+        $this->call([
+            KategoriTransaksiSeeder::class,
+            KegiatanSeeder::class,
+            PemasukanSeeder::class,
+            PengeluaranSeeder::class,
+            InventarisSeeder::class,
+            MutasiAsetSeeder::class,
         ]);
     }
 }

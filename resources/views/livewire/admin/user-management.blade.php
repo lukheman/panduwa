@@ -23,13 +23,26 @@
 
     {{-- Users Table Card --}}
     <x-layout.modern-card>
+        {{-- Role Tabs --}}
+        <x-ui.tabs variant="pills" class="mb-4">
+            <li class="nav-item">
+                <button class="nav-link {{ $roleType === 'admin' ? 'active' : '' }}" wire:click="$set('roleType', 'admin')">Admin</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link {{ $roleType === 'bendahara' ? 'active' : '' }}" wire:click="$set('roleType', 'bendahara')">Bendahara</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link {{ $roleType === 'kepala_desa' ? 'active' : '' }}" wire:click="$set('roleType', 'kepala_desa')">Kepala Desa</button>
+            </li>
+        </x-ui.tabs>
+
         {{-- Search and Filters --}}
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h5 class="mb-0 fw-semibold text-body">All Users</h5>
+            <h5 class="mb-0 fw-semibold text-body">List of {{ ucfirst(str_replace('_', ' ', $roleType)) }}</h5>
             <div style="max-width: 300px; width: 100%;">
                 <x-form.input
                     wire:model.live.debounce.300ms="search"
-                    placeholder="Search users..."
+                    placeholder="Search {{ str_replace('_', ' ', $roleType) }}..."
                     icon="fas fa-search"
                     class="mb-0"
                 />
@@ -44,41 +57,37 @@
                         <th>User</th>
                         <th>Email</th>
                         <th>Created</th>
-                        <th>Status</th>
                         <th style="width: 120px;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($users as $user)
-                        <tr wire:key="user-{{ $user->id }}">
+                        <tr wire:key="user-{{ $user->{$pk} }}">
                             <td>
                                 <div class="d-flex align-items-center gap-3">
-                                    <div class="user-avatar">{{ $user->initials() }}</div>
+                                    @if($user->hasAvatar())
+                                        <img src="{{ $user->avatarUrl() }}" alt="Avatar" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                                    @else
+                                        <div class="user-avatar">{{ $user->initials() }}</div>
+                                    @endif
                                     <div>
-                                        <div class="fw-semibold text-body">{{ $user->name }}</div>
-                                        <small class="text-muted">ID: {{ $user->id }}</small>
+                                        <div class="fw-semibold text-body">{{ $user->nama }}</div>
+                                        <small class="text-muted">ID: {{ $user->{$pk} }}</small>
                                     </div>
                                 </div>
                             </td>
                             <td class="text-secondary">{{ $user->email }}</td>
                             <td class="text-muted">{{ $user->created_at->format('M d, Y') }}</td>
                             <td>
-                                @if($user->email_verified_at)
-                                    <x-ui.badge variant="success" icon="fas fa-check-circle">Verified</x-ui.badge>
-                                @else
-                                    <x-ui.badge variant="warning" icon="fas fa-clock">Pending</x-ui.badge>
-                                @endif
-                            </td>
-                            <td>
                                 <div class="d-flex gap-1">
-                                    <x-ui.btn-edit wire:click="openEditModal({{ $user->id }})" tooltip="Edit user" />
-                                    <x-ui.btn-delete wire:click="confirmDelete({{ $user->id }})" tooltip="Delete user" />
+                                    <x-ui.btn-edit wire:click="openEditModal({{ $user->{$pk} }})" tooltip="Edit user" />
+                                    <x-ui.btn-delete wire:click="confirmDelete({{ $user->{$pk} }})" tooltip="Delete user" />
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center py-4">
+                            <td colspan="4" class="text-center py-4">
                                 <x-ui.empty-state
                                     icon="fas fa-users"
                                     title="No users found"
@@ -105,7 +114,7 @@
             <div class="modal-content-custom" wire:click.stop>
                 <div class="modal-header-custom">
                     <h5 class="modal-title-custom">
-                        {{ $editingUserId ? 'Edit User' : 'Create New User' }}
+                        {{ $editingUserId ? 'Edit ' . ucfirst(str_replace('_', ' ', $roleType)) : 'Create New ' . ucfirst(str_replace('_', ' ', $roleType)) }}
                     </h5>
                     <button type="button" class="modal-close-btn" wire:click="closeModal">
                         <i class="fas fa-times"></i>
@@ -114,12 +123,12 @@
 
                 <form wire:submit="save">
                     <x-form.input
-                        id="name"
+                        id="nama"
                         label="Name"
-                        wire:model="name"
+                        wire:model="nama"
                         placeholder="Enter full name"
                         required="true"
-                        error="{{ $errors->first('name') }}"
+                        error="{{ $errors->first('nama') }}"
                     />
 
                     <x-form.input
@@ -156,7 +165,7 @@
                             Cancel
                         </x-ui.button>
                         <x-ui.button type="submit" variant="primary">
-                            {{ $editingUserId ? 'Update User' : 'Create User' }}
+                            {{ $editingUserId ? 'Update' : 'Create' }}
                         </x-ui.button>
                     </div>
                 </form>

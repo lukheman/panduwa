@@ -382,7 +382,7 @@
         .auth-section {
             min-height: calc(100vh - 73px);
             margin-top: 73px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: url('/assets/images/kantor-desa.png') center/cover no-repeat;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -391,58 +391,15 @@
             overflow: hidden;
         }
 
-        /* Animated background shapes */
-        .bg-shapes {
+        .auth-section::before {
+            content: '';
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            overflow: hidden;
+            background: rgba(0, 0, 0, 0.6);
             z-index: 0;
-        }
-
-        .bg-shapes .shape {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            animation: float 15s infinite ease-in-out;
-        }
-
-        .bg-shapes .shape:nth-child(1) {
-            width: 400px;
-            height: 400px;
-            top: -100px;
-            left: -100px;
-            animation-delay: 0s;
-        }
-
-        .bg-shapes .shape:nth-child(2) {
-            width: 300px;
-            height: 300px;
-            bottom: -50px;
-            right: -50px;
-            animation-delay: -5s;
-        }
-
-        .bg-shapes .shape:nth-child(3) {
-            width: 200px;
-            height: 200px;
-            top: 50%;
-            left: 50%;
-            animation-delay: -10s;
-        }
-
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0) rotate(0deg);
-            }
-            33% {
-                transform: translateY(-30px) rotate(10deg);
-            }
-            66% {
-                transform: translateY(20px) rotate(-5deg);
-            }
         }
 
         .login-container {
@@ -774,25 +731,14 @@
         <div class="site-navbar-container">
             <a href="/" class="site-brand">
                 <i class="fas fa-layer-group"></i>
-                <span>AdminPro</span>
+                <span>SIWANDA</span>
             </a>
-
-            <ul class="site-nav">
-                <li><a href="/#features" class="site-nav-link">Features</a></li>
-                <li><a href="/#components" class="site-nav-link">Components</a></li>
-                <li><a href="/#pricing" class="site-nav-link">Pricing</a></li>
-                <li><a href="/#contact" class="site-nav-link">Contact</a></li>
-            </ul>
 
             <div class="site-navbar-actions">
                 <button class="theme-toggle" onclick="toggleTheme()">
                     <i class="fas fa-moon" id="theme-icon"></i>
                 </button>
-                <a href="{{ route('login') }}" class="btn-nav btn-nav-outline">Sign In</a>
-                <a href="{{ route('register') }}" class="btn-nav btn-nav-primary">Get Started</a>
-                <button class="mobile-menu-btn">
-                    <i class="fas fa-bars"></i>
-                </button>
+                <a href="{{ route('login') }}" class="btn-nav btn-nav-primary">Masuk Sistem</a>
             </div>
         </div>
     </nav>
@@ -800,12 +746,6 @@
     @if($type === 'auth')
         {{-- Auth Pages: gradient section with animated shapes --}}
         <section class="auth-section">
-            <div class="bg-shapes">
-                <div class="shape"></div>
-                <div class="shape"></div>
-                <div class="shape"></div>
-            </div>
-
             {{ $slot }}
         </section>
     @else
@@ -814,57 +754,9 @@
             {{ $slot }}
         </main>
 
-        <footer class="footer">
-            <div class="container">
-                <div class="footer-container">
-                    <div class="footer-brand">
-                        <a href="/" class="site-brand">
-                            <i class="fas fa-layer-group"></i>
-                            <span>AdminPro</span>
-                        </a>
-                        <p>A modern, elegant admin dashboard template built with Laravel, Livewire, and Tailwind CSS.</p>
-                    </div>
-
-                    <div class="footer-links">
-                        <div class="footer-column">
-                            <h4>Product</h4>
-                            <ul>
-                                <li><a href="#features">Features</a></li>
-                                <li><a href="#components">Components</a></li>
-                                <li><a href="#pricing">Pricing</a></li>
-                                <li><a href="#">Changelog</a></li>
-                            </ul>
-                        </div>
-                        <div class="footer-column">
-                            <h4>Resources</h4>
-                            <ul>
-                                <li><a href="#">Documentation</a></li>
-                                <li><a href="#">Tutorials</a></li>
-                                <li><a href="#">Blog</a></li>
-                                <li><a href="#">Support</a></li>
-                            </ul>
-                        </div>
-                        <div class="footer-column">
-                            <h4>Company</h4>
-                            <ul>
-                                <li><a href="#">About</a></li>
-                                <li><a href="#">Careers</a></li>
-                                <li><a href="#">Privacy</a></li>
-                                <li><a href="#">Terms</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="footer-bottom">
-                    <p>&copy; {{ date('Y') }} AdminPro. All rights reserved.</p>
-                    <div class="footer-social">
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-github"></i></a>
-                        <a href="#"><i class="fab fa-linkedin"></i></a>
-                        <a href="#"><i class="fab fa-youtube"></i></a>
-                    </div>
-                </div>
+        <footer class="footer mt-auto py-4 border-top">
+            <div class="container text-center">
+                <p class="mb-0 text-muted">&copy; {{ date('Y') }} SIWANDA - Sistem Informasi Keuangan Desa</p>
             </div>
         </footer>
     @endif

@@ -16,18 +16,24 @@ class Login extends Component
     #[Rule(['required', 'email'])]
     public string $email = '';
 
-    #[Rule([])]
+    #[Rule('required')]
     public string $password = '';
+
+    public string $role = 'admin';
 
     public bool $remember = false;
 
     public function submit()
     {
-        $credentials = $this->validate();
+        $credentials = $this->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
 
-        if (Auth::attempt($credentials, $this->remember)) {
+        if (Auth::guard($this->role)->attempt($credentials, $this->remember)) {
             session()->regenerate();
-            return redirect()->to(route('dashboard'));
+            $rolePrefix = $this->role === 'kepala_desa' ? 'kepala_desa' : $this->role;
+            return redirect()->route($rolePrefix . '.dashboard');
         }
 
         $this->addError('email', __('auth.failed'));

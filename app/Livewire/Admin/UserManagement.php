@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Admin;
 
-use App\Models\User;
+use App\Models\Admin;
+use App\Models\Bendahara;
+use App\Models\KepalaDesa;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Attributes\Layout;
@@ -16,12 +18,15 @@ class UserManagement extends Component
 {
     use WithPagination;
 
-    // Search
+    // Search & Filter
     #[Url(as: 'q')]
     public string $search = '';
 
+    #[Url(as: 'role')]
+    public string $roleType = 'admin'; // 'admin', 'bendahara', 'kepala_desa'
+
     // Form fields
-    public string $name = '';
+    public string $nama = '';
     public string $email = '';
     public string $password = '';
     public string $password_confirmation = '';
@@ -35,17 +40,20 @@ class UserManagement extends Component
     protected function rules(): array
     {
         $rules = [
-            'name' => ['required', 'string', 'max:255'],
+            'nama' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
         ];
 
+        $table = $this->getTableName();
+
         if ($this->editingUserId) {
-            $rules['email'][] = 'unique:users,email,' . $this->editingUserId;
+            $pk = $this->roleType === 'admin' ? 'id_admin' : 'id';
+            $rules['email'][] = "unique:{$table},email," . $this->editingUserId . ",{$pk}";
             if ($this->password) {
                 $rules['password'] = ['confirmed', Password::defaults()];
             }
         } else {
-            $rules['email'][] = 'unique:users,email';
+            $rules['email'][] = "unique:{$table},email";
             $rules['password'] = ['required', 'confirmed', Password::defaults()];
         }
 
@@ -57,6 +65,29 @@ class UserManagement extends Component
         $this->resetPage();
     }
 
+    public function updatedRoleType(): void
+    {
+        $this->resetPage();
+    }
+
+    protected function getModelClass()
+    {
+        return match($this->roleType) {
+            'bendahara' => Bendahara::class,
+            'kepala_desa' => KepalaDesa::class,
+            default => Admin::class,
+        };
+    }
+
+    protected function getTableName()
+    {
+        return match($this->roleType) {
+            'bendahara' => 'bendaharas',
+            'kepala_desa' => 'kepala_desas',
+            default => 'admins',
+        };
+    }
+
     public function openCreateModal(): void
     {
         $this->resetForm();
@@ -66,9 +97,11 @@ class UserManagement extends Component
 
     public function openEditModal(int $userId): void
     {
-        $user = User::findOrFail($userId);
+        $modelClass = $this->getModelClass();
+        $user = $modelClass::findOrFail($userId);
+        
         $this->editingUserId = $userId;
-        $this->name = $user->name;
+        $this->nama = $user->nama;
         $this->email = $user->email;
         $this->password = '';
         $this->password_confirmation = '';
@@ -78,10 +111,11 @@ class UserManagement extends Component
     public function save(): void
     {
         $validated = $this->validate();
+        $modelClass = $this->getModelClass();
 
         if ($this->editingUserId) {
-            $user = User::findOrFail($this->editingUserId);
-            $user->name = $validated['name'];
+            $user = $modelClass::findOrFail($this->editingUserId);
+            $user->nama = $validated['nama'];
             $user->email = $validated['email'];
 
             if (!empty($this->password)) {
@@ -89,14 +123,14 @@ class UserManagement extends Component
             }
 
             $user->save();
-            session()->flash('success', 'User updated successfully.');
+            session()->flash('success', ucfirst($this->roleType) . ' updated successfully.');
         } else {
-            User::create([
-                'name' => $validated['name'],
+            $modelClass::create([
+                'nama' => $validated['nama'],
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
             ]);
-            session()->flash('success', 'User created successfully.');
+            session()->flash('success', ucfirst($this->roleType) . ' created successfully.');
         }
 
         $this->closeModal();
@@ -118,8 +152,9 @@ class UserManagement extends Component
     public function deleteUser(): void
     {
         if ($this->deletingUserId) {
-            User::destroy($this->deletingUserId);
-            session()->flash('success', 'User deleted successfully.');
+            $modelClass = $this->getModelClass();
+            $modelClass::destroy($this->deletingUserId);
+            session()->flash('success', ucfirst($this->roleType) . ' deleted successfully.');
         }
 
         $this->showDeleteModal = false;
@@ -134,7 +169,7 @@ class UserManagement extends Component
 
     protected function resetForm(): void
     {
-        $this->name = '';
+        $this->nama = '';
         $this->email = '';
         $this->password = '';
         $this->password_confirmation = '';
@@ -143,9 +178,12 @@ class UserManagement extends Component
 
     public function render()
     {
-        $users = User::query()
+        $modelClass = $this->getModelClass();
+        $pk = $this->roleType === 'admin' ? 'id_admin' : 'id';
+
+        $users = $modelClass::query()
             ->when($this->search, function ($query) {
-                $query->where('name', 'like', '%' . $this->search . '%')
+                $query->where('nama', 'like', '%' . $this->search . '%')
                     ->orWhere('email', 'like', '%' . $this->search . '%');
             })
             ->orderBy('created_at', 'desc')
@@ -153,6 +191,7 @@ class UserManagement extends Component
 
         return view('livewire.admin.user-management', [
             'users' => $users,
+            'pk' => $pk,
         ]);
     }
 }

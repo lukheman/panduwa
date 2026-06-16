@@ -1,135 +1,92 @@
 <div>
     {{-- Page Header --}}
-    <x-layout.page-header title="Dashboard Overview" subtitle="Welcome back, John! Here's what's happening today.">
+    <x-layout.page-header title="Dashboard Sistem" subtitle="Selamat datang, {{ Auth::user()->nama }}! Berikut adalah ringkasan data sistem SIWANDA hari ini.">
         <x-slot:actions>
-            <x-ui.button variant="primary" icon="fas fa-plus">New Report</x-ui.button>
+            <a href="{{ route('admin.users') }}" class="btn btn-modern btn-primary-modern">
+                <i class="fas fa-users-cog me-2"></i>Kelola Pengguna
+            </a>
         </x-slot:actions>
     </x-layout.page-header>
 
     {{-- Stats Cards --}}
     <div class="row g-4 mb-4">
         <div class="col-md-6 col-lg-3">
-            <x-layout.stat-card icon="fas fa-dollar-sign" label="Total Revenue" value="$48,574"
-                trend-value="12.5% from last month" trend-direction="up" variant="primary" />
+            <x-layout.stat-card icon="fas fa-users" label="Total Pengguna" value="{{ number_format($totalUsers) }}"
+                trend-value="Keseluruhan" trend-direction="up" variant="primary" />
         </div>
         <div class="col-md-6 col-lg-3">
-            <x-layout.stat-card icon="fas fa-shopping-bag" label="New Orders" value="1,245"
-                trend-value="8.2% from last month" trend-direction="up" variant="secondary" />
+            <x-layout.stat-card icon="fas fa-tags" label="Kategori Transaksi" value="{{ number_format($totalKategori) }}"
+                trend-value="Aktif" trend-direction="up" variant="info" />
         </div>
         <div class="col-md-6 col-lg-3">
-            <x-layout.stat-card icon="fas fa-users" label="Total Users" value="8,456" trend-value="15.3% from last month"
-                trend-direction="up" variant="success" />
+            <x-layout.stat-card icon="fas fa-briefcase" label="Total Kegiatan" value="{{ number_format($totalKegiatan) }}"
+                trend-value="Pelaksanaan" trend-direction="up" variant="success" />
         </div>
         <div class="col-md-6 col-lg-3">
-            <x-layout.stat-card icon="fas fa-chart-pie" label="Conversion Rate" value="3.24%"
-                trend-value="2.1% from last month" trend-direction="down" variant="warning" />
+            <x-layout.stat-card icon="fas fa-boxes" label="Total Inventaris" value="{{ number_format($totalInventaris) }}"
+                trend-value="Aset Desa" trend-direction="up" variant="warning" />
         </div>
     </div>
 
-    {{-- Component Preview Section --}}
-    <div class="component-preview">
-        <h2 class="mb-4" style="color: #1e293b; font-weight: 700;">UI Components Preview</h2>
-
-        {{-- Buttons Preview --}}
-        <div class="preview-section">
-            <div class="preview-title">Buttons</div>
-            <div class="d-flex flex-wrap gap-2">
-                <x-ui.button variant="primary">Primary Button</x-ui.button>
-                <x-ui.button variant="secondary">Secondary Button</x-ui.button>
-                <x-ui.button variant="success">Success Button</x-ui.button>
-                <x-ui.button variant="warning">Warning Button</x-ui.button>
-                <x-ui.button variant="danger">Danger Button</x-ui.button>
-                <x-ui.button variant="outline">Outline Button</x-ui.button>
-            </div>
-        </div>
-
-        {{-- Badges Preview --}}
-        <div class="preview-section">
-            <div class="preview-title">Badges</div>
-            <div class="d-flex flex-wrap gap-2">
-                <x-ui.badge variant="primary" icon="fas fa-circle">Primary</x-ui.badge>
-                <x-ui.badge variant="success" icon="fas fa-check-circle">Success</x-ui.badge>
-                <x-ui.badge variant="warning" icon="fas fa-exclamation-circle">Warning</x-ui.badge>
-                <x-ui.badge variant="danger" icon="fas fa-times-circle">Danger</x-ui.badge>
-                <x-ui.badge variant="info" icon="fas fa-info-circle">Info</x-ui.badge>
-            </div>
-        </div>
-
-        {{-- Alerts Preview --}}
-        <div class="preview-section">
-            <div class="preview-title">Alerts</div>
-            <x-ui.alert variant="success" title="Success!" class="mb-3">
-                Your changes have been saved successfully.
-            </x-ui.alert>
-            <x-ui.alert variant="danger" title="Error!" class="mb-3">
-                There was a problem processing your request.
-            </x-ui.alert>
-            <x-ui.alert variant="info" title="Info!">
-                You have 3 new notifications waiting for you.
-            </x-ui.alert>
-        </div>
-
-        {{-- Progress Bars Preview --}}
-        <div class="preview-section">
-            <div class="preview-title">Progress Bars</div>
-            <x-ui.progress-bar :value="75" label="Project Progress" variant="primary" class="mb-3" />
-            <x-ui.progress-bar :value="45" label="Storage Used" variant="secondary" class="mb-3" />
-            <x-ui.progress-bar :value="32" label="CPU Usage" variant="success" />
-        </div>
-
-        {{-- Feature Cards Preview --}}
-        <div class="preview-section">
-            <div class="preview-title">Feature Cards</div>
-            <div class="row g-3">
-                <div class="col-md-4">
-                    <x-layout.feature-card icon="fas fa-rocket" title="Fast Performance"
-                        description="Lightning fast load times and smooth interactions" variant="primary" />
+    {{-- Financial Overview (for context, although managed by Bendahara) --}}
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <x-layout.modern-card class="h-100">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h5 class="fw-semibold mb-0 text-body">Total Pemasukan</h5>
+                    <div class="icon-circle bg-success bg-opacity-10 text-success">
+                        <i class="fas fa-arrow-down"></i>
+                    </div>
                 </div>
-                <div class="col-md-4">
-                    <x-layout.feature-card icon="fas fa-shield-alt" title="Secure by Default"
-                        description="Enterprise-grade security for your data" variant="secondary" />
+                <h2 class="fw-bold mb-2 text-success">Rp {{ number_format($totalPemasukan, 0, ',', '.') }}</h2>
+                <p class="text-muted mb-0 small">Seluruh dana masuk desa</p>
+            </x-layout.modern-card>
+        </div>
+        <div class="col-md-6">
+            <x-layout.modern-card class="h-100">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h5 class="fw-semibold mb-0 text-body">Total Pengeluaran</h5>
+                    <div class="icon-circle bg-danger bg-opacity-10 text-danger">
+                        <i class="fas fa-arrow-up"></i>
+                    </div>
                 </div>
-                <div class="col-md-4">
-                    <x-layout.feature-card icon="fas fa-mobile-alt" title="Mobile Responsive"
-                        description="Perfect experience on any device" variant="success" />
-                </div>
-            </div>
+                <h2 class="fw-bold mb-2 text-danger">Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}</h2>
+                <p class="text-muted mb-0 small">Seluruh dana keluar desa</p>
+            </x-layout.modern-card>
         </div>
     </div>
 
-    {{-- Recent Orders Table --}}
-    <x-layout.table-card title="Recent Orders" view-all-href="#orders" :headers="['Order ID', 'Customer', 'Product', 'Amount', 'Status', 'Date']">
-        <tr>
-            <td><strong style="color: #1e293b;">#ORD-2024</strong></td>
-            <td>Alice Johnson</td>
-            <td>Wireless Headphones</td>
-            <td><strong style="color: #1e293b;">$129.99</strong></td>
-            <td><x-ui.badge variant="success" icon="fas fa-check-circle">Delivered</x-ui.badge></td>
-            <td class="text-muted">Jan 10, 2026</td>
-        </tr>
-        <tr>
-            <td><strong style="color: #1e293b;">#ORD-2023</strong></td>
-            <td>Bob Smith</td>
-            <td>Smart Watch</td>
-            <td><strong style="color: #1e293b;">$299.99</strong></td>
-            <td><x-ui.badge variant="warning" icon="fas fa-clock">Pending</x-ui.badge></td>
-            <td class="text-muted">Jan 10, 2026</td>
-        </tr>
-        <tr>
-            <td><strong style="color: #1e293b;">#ORD-2022</strong></td>
-            <td>Carol White</td>
-            <td>Laptop Stand</td>
-            <td><strong style="color: #1e293b;">$49.99</strong></td>
-            <td><x-ui.badge variant="secondary" icon="fas fa-shipping-fast">Shipped</x-ui.badge></td>
-            <td class="text-muted">Jan 9, 2026</td>
-        </tr>
-        <tr>
-            <td><strong style="color: #1e293b;">#ORD-2021</strong></td>
-            <td>David Lee</td>
-            <td>USB-C Hub</td>
-            <td><strong style="color: #1e293b;">$79.99</strong></td>
-            <td><x-ui.badge variant="success" icon="fas fa-check-circle">Delivered</x-ui.badge></td>
-            <td class="text-muted">Jan 9, 2026</td>
-        </tr>
+    {{-- Recent Users Table --}}
+    <x-layout.table-card title="Pengguna Sistem Terbaru" view-all-href="{{ route('admin.users') }}" :headers="['Nama', 'Email', 'Role', 'Tanggal Bergabung']">
+        @forelse($recentUsers as $user)
+            <tr>
+                <td>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.9rem;">
+                            {{ strtoupper(substr($user->nama, 0, 2)) }}
+                        </div>
+                        <strong style="color: #1e293b;">{{ $user->nama }}</strong>
+                    </div>
+                </td>
+                <td>{{ $user->email }}</td>
+                <td>
+                    @if($user->role === 'Admin')
+                        <x-ui.badge variant="primary" icon="fas fa-user-shield">{{ $user->role }}</x-ui.badge>
+                    @elseif($user->role === 'Bendahara')
+                        <x-ui.badge variant="success" icon="fas fa-wallet">{{ $user->role }}</x-ui.badge>
+                    @else
+                        <x-ui.badge variant="info" icon="fas fa-user-tie">{{ $user->role }}</x-ui.badge>
+                    @endif
+                </td>
+                <td class="text-muted">{{ $user->created_at->format('d M Y') }}</td>
+            </tr>
+        @empty
+            <tr>
+                <td colspan="4" class="text-center text-muted py-4">
+                    <i class="fas fa-inbox fa-2x mb-3 text-secondary"></i>
+                    <p class="mb-0">Belum ada data pengguna</p>
+                </td>
+            </tr>
+        @endforelse
     </x-layout.table-card>
 </div>
