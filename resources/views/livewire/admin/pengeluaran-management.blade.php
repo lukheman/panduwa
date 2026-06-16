@@ -106,7 +106,7 @@
                             <td class="text-muted">{{ Str::limit($pengeluaran->keterangan ?? '-', 40) }}</td>
                             <td>
                                 <div class="d-flex gap-1">
-                                    <x-ui.btn-view wire:click="openViewModal({{ $pengeluaran->id }})" tooltip="Detail" :iconOnly="true" />
+                                    <x-ui.btn-view wire:click="openViewModal({{ $pengeluaran->id }})" tooltip="Detail" />
                                     <x-ui.btn-edit wire:click="openEditModal({{ $pengeluaran->id }})" tooltip="Edit" />
                                     <x-ui.btn-delete wire:click="confirmDelete({{ $pengeluaran->id }})" tooltip="Hapus" />
                                 </div>

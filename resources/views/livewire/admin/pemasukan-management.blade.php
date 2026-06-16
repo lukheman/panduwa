@@ -96,7 +96,7 @@
                             <td class="text-muted">{{ $pemasukan->keterangan ?? '-' }}</td>
                             <td>
                                 <div class="d-flex gap-1">
-                                    <x-ui.btn-view wire:click="openViewModal({{ $pemasukan->id }})" tooltip="Detail" :iconOnly="true" />
+                                    <x-ui.btn-view wire:click="openViewModal({{ $pemasukan->id }})" tooltip="Detail" />
                                     <x-ui.btn-edit wire:click="openEditModal({{ $pemasukan->id }})" tooltip="Edit" />
                                     <x-ui.btn-delete wire:click="confirmDelete({{ $pemasukan->id }})" tooltip="Hapus" />
                                 </div>

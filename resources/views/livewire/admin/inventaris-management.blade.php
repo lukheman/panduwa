@@ -108,7 +108,7 @@
                             </td>
                             <td>
                                 <div class="d-flex gap-1">
-                                    <x-ui.btn-view wire:click="openViewModal({{ $inventaris->id }})" tooltip="Detail" :iconOnly="true" />
+                                    <x-ui.btn-view wire:click="openViewModal({{ $inventaris->id }})" tooltip="Detail" />
                                     <x-ui.btn-edit wire:click="openEditModal({{ $inventaris->id }})" tooltip="Edit" />
                                     <x-ui.btn-delete wire:click="confirmDelete({{ $inventaris->id }})" tooltip="Hapus" />
                                 </div>
