@@ -19,7 +19,7 @@ class Dashboard extends Component
         $saldoKas = $totalPemasukan - $totalPengeluaran;
 
         // 2. Statistik Kegiatan
-        $kegiatanAktif = Kegiatan::whereIn('status', ['perencanaan', 'berjalan'])->count();
+        $kegiatanAktif = Kegiatan::whereIn('status', [\App\Enums\StatusKegiatan::PERENCANAAN, \App\Enums\StatusKegiatan::BERJALAN])->count();
         $totalAnggaranKegiatan = Kegiatan::sum('anggaran');
         
         // 3. Aktivitas Keuangan Terbaru (Gabungan 5 Pemasukan & Pengeluaran Terakhir)

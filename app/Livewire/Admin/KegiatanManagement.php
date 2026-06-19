@@ -40,7 +40,7 @@ class KegiatanManagement extends Component
             'nama_kegiatan' => ['required', 'string', 'max:255'],
             'lokasi' => ['required', 'string', 'max:255'],
             'anggaran' => ['required', 'numeric', 'min:0', 'max:9999999999999'],
-            'status' => ['required', 'in:perencanaan,berjalan,selesai'],
+            'status' => ['required', \Illuminate\Validation\Rule::enum(\App\Enums\StatusKegiatan::class)],
             'foto_progres' => ['nullable', 'image', 'max:2048'], // 2MB Max
         ];
     }
@@ -81,7 +81,7 @@ class KegiatanManagement extends Component
         $this->nama_kegiatan = $kegiatan->nama_kegiatan;
         $this->lokasi = $kegiatan->lokasi;
         $this->anggaran = (string) $kegiatan->anggaran;
-        $this->status = $kegiatan->status;
+        $this->status = $kegiatan->status->value;
         $this->existing_foto_progres = $kegiatan->foto_progres;
         $this->foto_progres = null;
         
@@ -202,20 +202,18 @@ class KegiatanManagement extends Component
 
     public function getStatusBadgeVariant($status)
     {
-        return match($status) {
-            'berjalan' => 'primary',
-            'selesai' => 'success',
-            default => 'warning',
-        };
+        if ($status instanceof \App\Enums\StatusKegiatan) {
+            return $status->getColor();
+        }
+        return 'warning';
     }
     
     public function getStatusIcon($status)
     {
-        return match($status) {
-            'berjalan' => 'fas fa-spinner fa-spin',
-            'selesai' => 'fas fa-check-circle',
-            default => 'fas fa-calendar-alt',
-        };
+        if ($status instanceof \App\Enums\StatusKegiatan) {
+            return $status->getIcon();
+        }
+        return 'fas fa-calendar-alt';
     }
 
     public function render()

@@ -328,7 +328,7 @@ class PengeluaranManagement extends Component
             ->paginate(10);
 
         $kategoris = KategoriTransaksi::all();
-        $kegiatans = Kegiatan::where('status', '!=', 'selesai')->get();
+        $kegiatans = Kegiatan::where('status', '!=', \App\Enums\StatusKegiatan::SELESAI)->get();
 
         return view('livewire.admin.pengeluaran-management', [
             'pengeluarans' => $pengeluarans,

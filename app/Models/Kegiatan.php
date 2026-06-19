@@ -19,6 +19,10 @@ class Kegiatan extends Model
         'foto_progres',
     ];
 
+    protected $casts = [
+        'status' => \App\Enums\StatusKegiatan::class,
+    ];
+
     public function pengeluarans()
     {
         return $this->hasMany(Pengeluaran::class, 'id_kegiatan');

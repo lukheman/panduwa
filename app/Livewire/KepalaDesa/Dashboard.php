@@ -26,9 +26,9 @@ class Dashboard extends Component
 
         // 2. Statistik Kegiatan
         $totalKegiatan = Kegiatan::count();
-        $kegiatanBerjalan = Kegiatan::where('status', 'berjalan')->count();
-        $kegiatanSelesai = Kegiatan::where('status', 'selesai')->count();
-        $kegiatanBelumMulai = Kegiatan::where('status', 'belum_mulai')->count();
+        $kegiatanBerjalan = Kegiatan::where('status', \App\Enums\StatusKegiatan::BERJALAN)->count();
+        $kegiatanSelesai = Kegiatan::where('status', \App\Enums\StatusKegiatan::SELESAI)->count();
+        $kegiatanBelumMulai = Kegiatan::where('status', \App\Enums\StatusKegiatan::PERENCANAAN)->count();
 
         // 3. Ringkasan Aset
         $totalAset = Inventaris::count();

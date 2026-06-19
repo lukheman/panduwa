@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('nama_kegiatan');
             $table->string('lokasi');
             $table->decimal('anggaran', 15, 2);
-            $table->enum('status', ['perencanaan', 'berjalan', 'selesai'])->default('perencanaan');
+            $table->enum('status', \App\Enums\StatusKegiatan::values())->default(\App\Enums\StatusKegiatan::PERENCANAAN->value);
             $table->string('foto_progres')->nullable();
             $table->foreignId('id_bendahara')->constrained('bendahara')->onDelete('cascade');
             $table->timestamps();
