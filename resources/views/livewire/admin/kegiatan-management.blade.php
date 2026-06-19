@@ -42,7 +42,7 @@
                         {{-- Status Badge (Absolute) --}}
                         <div class="position-absolute" style="top: 1rem; right: 1rem;">
                             <x-ui.badge :variant="$this->getStatusBadgeVariant($kegiatan->status)" :icon="$this->getStatusIcon($kegiatan->status)">
-                                {{ ucfirst($kegiatan->status) }}
+                                {{ ucfirst($kegiatan->status->getLabel()) }}
                             </x-ui.badge>
                         </div>
                     </div>
@@ -302,11 +302,11 @@
                                 @endforeach
                             </x-layout.table>
                         @else
-                            <x-ui.empty-state 
-                                icon="fas fa-receipt" 
-                                title="Belum Ada Transaksi" 
-                                description="Belum ada rincian pemakaian dana untuk kegiatan ini." 
-                                size="sm" 
+                            <x-ui.empty-state
+                                icon="fas fa-receipt"
+                                title="Belum Ada Transaksi"
+                                description="Belum ada rincian pemakaian dana untuk kegiatan ini."
+                                size="sm"
                             />
                         @endif
                     </div>
