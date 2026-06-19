@@ -86,7 +86,7 @@
                                         <i class="fas fa-calendar-alt me-1"></i> {{ \Carbon\Carbon::parse($kegiatan->tanggal_mulai)->format('d M Y') }}
                                     </span>
                                     <span class="badge {{ $kegiatan->status === 'selesai' ? 'bg-success' : ($kegiatan->status === 'berjalan' ? 'bg-warning text-dark' : 'bg-secondary') }}">
-                                        {{ ucfirst($kegiatan->status) }}
+                                        {{ ucfirst($kegiatan->status->getLabel()) }}
                                     </span>
                                 </div>
                                 <h5 class="card-title fw-bold mb-3">{{ $kegiatan->nama_kegiatan }}</h5>
