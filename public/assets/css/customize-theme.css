@@ -2,41 +2,39 @@
     --sidebar-width: 280px;
     --topbar-height: 70px;
 
-    /* Warna utama — hijau hutan & tanah */
-    --primary-color: #4a6741;
-    --primary-dark: #3d5a3e;
-    --primary-light: #7a9e6a;
-    --secondary-color: #8a6e3a;
-    --success-color: #5a8a3a;
-    --warning-color: #c8a050;
-    --danger-color: #c05a3a;
+    /* Warna utama — Biru Soft */
+    --primary-color: #5c9ce6;
+    --primary-dark: #4380c7;
+    --primary-light: #9bc2f0;
+    --secondary-color: #8c9baf;
+    --success-color: #4db874;
+    --warning-color: #f0ad4e;
+    --danger-color: #e65c5c;
 
-    /* Bootstrap overrides — palet alam */
-    --bs-primary: #4a6741;
-    --bs-primary-rgb: 74, 103, 65;
-    --bs-secondary: #8a6e3a;
-    --bs-secondary-rgb: 138, 110, 58;
-    --bs-success: #5a8a3a;
-    --bs-success-rgb: 90, 138, 58;
-    --bs-warning: #c8a050;
-    --bs-warning-rgb: 200, 160, 80;
-    --bs-danger: #c05a3a;
-    --bs-danger-rgb: 192, 90, 58;
-    --bs-info: #4a7a8a;
-    --bs-info-rgb: 74, 122, 138;
+    /* Bootstrap overrides — palet biru soft */
+    --bs-primary: #5c9ce6;
+    --bs-primary-rgb: 92, 156, 230;
+    --bs-secondary: #8c9baf;
+    --bs-secondary-rgb: 140, 155, 175;
+    --bs-success: #4db874;
+    --bs-success-rgb: 77, 184, 116;
+    --bs-warning: #f0ad4e;
+    --bs-warning-rgb: 240, 173, 78;
+    --bs-danger: #e65c5c;
+    --bs-danger-rgb: 230, 92, 92;
+    --bs-info: #46b8da;
+    --bs-info-rgb: 70, 184, 218;
 
-    /* Light theme — pasir & daun kering */
-    --bg-primary: #f5f0e8;
-    --bg-secondary: #ede8d8;
-    --bg-tertiary: #f9f6ee;
-    --text-primary: #2d2a1e;
-    --text-secondary: #7a6e52;
-    --text-muted: #a09070;
-    --border-color: #c8b99a;
-    --border-light: #ddd4bc;
-    --input-bg: #f9f6ee;
-    --hover-bg: #ede8d8;
-    --card-shadow: 0 1px 3px rgba(74, 60, 30, 0.10), 0 1px 2px rgba(74, 60, 30, 0.14);
+    /* Light theme — Bersih & elegan */
+    --bg-primary: #f4f7fb;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f8fafc;
+    --text-primary: #2d3748;
+    --text-secondary: #718096;
+    --text-muted: #a0aec0;
+    --border-color: #e2e8f0;
+    --border-light: #edf2f7;
+    --input-bg: #ffffff;
+    --hover-bg: #edf2f7;
+    --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
 }
-
-

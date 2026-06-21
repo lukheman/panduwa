@@ -22,19 +22,19 @@
 
     <style>
         :root {
-            --primary-color: #4a6741;
-            --primary-dark: #3d5a3e;
-            --primary-light: #7a9e6a;
-            --secondary-color: #8a6e3a;
-            --success-color: #5a8a3a;
-            --warning-color: #c8a050;
-            --danger-color: #c05a3a;
-            --text-primary: #2d2a1e;
-            --text-secondary: #7a6e52;
-            --text-muted: #a09070;
-            --border-color: #c8b99a;
-            --bg-light: #f5f0e8;
-            --bg-white: #f9f6ee;
+            --primary-color: #5c9ce6;
+            --primary-dark: #4380c7;
+            --primary-light: #9bc2f0;
+            --secondary-color: #8c9baf;
+            --success-color: #4db874;
+            --warning-color: #f0ad4e;
+            --danger-color: #e65c5c;
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+            --text-muted: #a0aec0;
+            --border-color: #e2e8f0;
+            --bg-light: #f4f7fb;
+            --bg-white: #ffffff;
         }
 
         * {
@@ -711,7 +711,7 @@
     {{ $styles ?? '' }}
 </head>
 
-<body>
+<body class="d-flex flex-column min-vh-100">
     {{-- Navbar (shared across all pages) --}}
     <nav class="site-navbar">
         <div class="site-navbar-container">
@@ -733,12 +733,12 @@
 
     @if($type === 'auth')
         {{-- Auth Pages: gradient section with animated shapes --}}
-        <section class="auth-section">
+        <section class="auth-section flex-grow-1">
             {{ $slot }}
         </section>
     @else
         {{-- Guest Pages: main content + footer --}}
-        <main>
+        <main class="flex-grow-1">
             {{ $slot }}
         </main>
 
