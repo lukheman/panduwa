@@ -15,8 +15,8 @@
             <x-layout.modern-card class="border-start border-4 border-success h-100">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <p class="text-muted mb-1 fw-semibold text-uppercase small">Total Pemasukan Bulan Ini</p>
-                        <h3 class="fw-bold text-body mb-0">{{ $this->formatRupiah($totalBulanIni) }}</h3>
+                        <p class="text-muted mb-1 fw-semibold text-uppercase small">Total Pemasukan Tahun Ini</p>
+                        <h3 class="fw-bold text-body mb-0">{{ $this->formatRupiah($totalTahunIni) }}</h3>
                     </div>
                     <div class="bg-success bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
                         <i class="fas fa-calendar-alt text-success fs-4"></i>

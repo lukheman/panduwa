@@ -59,13 +59,13 @@ class PemasukanManagement extends Component
     public function openEditModal(int $id): void
     {
         $pemasukan = Pemasukan::findOrFail($id);
-        
+
         $this->editingPemasukanId = $id;
         $this->sumber_dana = $pemasukan->sumber_dana;
         $this->jumlah = (string) $pemasukan->jumlah;
         $this->tanggal = $pemasukan->tanggal;
         $this->keterangan = $pemasukan->keterangan ?? '';
-        
+
         $this->showModal = true;
     }
 
@@ -144,9 +144,9 @@ class PemasukanManagement extends Component
     public function render()
     {
         $query = Pemasukan::query();
-        
+
         $totalPemasukan = (clone $query)->sum('jumlah');
-        $totalBulanIni = (clone $query)->whereMonth('tanggal', date('m'))->whereYear('tanggal', date('Y'))->sum('jumlah');
+        $totalTahunIni = (clone $query)->whereYear('tanggal', date('Y'))->sum('jumlah');
         $totalPengeluaran = \App\Models\Pengeluaran::sum('jumlah');
         $sisaAnggaran = $totalPemasukan - $totalPengeluaran;
 
@@ -161,7 +161,7 @@ class PemasukanManagement extends Component
         return view('livewire.admin.pemasukan-management', [
             'pemasukans' => $pemasukans,
             'totalPemasukan' => $totalPemasukan,
-            'totalBulanIni' => $totalBulanIni,
+            'totalTahunIni' => $totalTahunIni,
             'sisaAnggaran' => $sisaAnggaran,
         ]);
     }
