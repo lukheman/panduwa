@@ -1,7 +1,7 @@
 <div>
     <x-layout.page-header title="Sisa Anggaran" subtitle="Laporan Sisa Anggaran Desa & Realisasi Kegiatan">
         <x-slot:actions>
-            <x-ui.button variant="primary" wire:click="downloadPdf" wire:loading.attr="disabled">
+            <x-ui.button variant="danger" wire:click="downloadPdf" wire:loading.attr="disabled">
                 <span wire:loading.remove wire:target="downloadPdf">
                     <i class="fas fa-file-pdf me-2"></i> Download PDF
                 </span>
@@ -58,7 +58,7 @@
     {{-- Detail Anggaran Kegiatan --}}
     <x-layout.modern-card class="mb-4">
         <h5 class="fw-semibold text-body mb-4"><i class="fas fa-chart-pie text-primary me-2"></i>Realisasi Anggaran per Kegiatan</h5>
-        
+
         <div class="table-responsive">
             <table class="table table-modern align-middle">
                 <thead>
@@ -86,11 +86,11 @@
                                     <span class="small fw-semibold">{{ $kegiatan->persentase }}%</span>
                                 </div>
                                 <div class="progress progress-modern">
-                                    <div class="progress-bar progress-bar-modern {{ $kegiatan->persentase >= 100 ? 'bg-danger' : ($kegiatan->persentase >= 75 ? 'bg-warning' : 'bg-success') }}" 
-                                         role="progressbar" 
-                                         style="width: {{ min($kegiatan->persentase, 100) }}%" 
-                                         aria-valuenow="{{ $kegiatan->persentase }}" 
-                                         aria-valuemin="0" 
+                                    <div class="progress-bar progress-bar-modern {{ $kegiatan->persentase >= 100 ? 'bg-danger' : ($kegiatan->persentase >= 75 ? 'bg-warning' : 'bg-success') }}"
+                                         role="progressbar"
+                                         style="width: {{ min($kegiatan->persentase, 100) }}%"
+                                         aria-valuenow="{{ $kegiatan->persentase }}"
+                                         aria-valuemin="0"
                                          aria-valuemax="100"></div>
                                 </div>
                             </td>
