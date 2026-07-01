@@ -9,8 +9,7 @@ class GuestController extends Controller
 {
     public function index()
     {
-        $kegiatans = Kegiatan::withSum('pengeluarans', 'jumlah')
-            ->orderBy('created_at', 'desc')
+        $kegiatans = Kegiatan::orderBy('created_at', 'desc')
             ->take(6)
             ->get();
 
@@ -18,7 +17,7 @@ class GuestController extends Controller
         $totalPengeluaran = \App\Models\Pengeluaran::sum('jumlah');
         $sisaAnggaran = $totalPemasukan - $totalPengeluaran;
 
-        $pengeluarans = \App\Models\Pengeluaran::with(['kategori', 'inventaris'])
+        $pengeluarans = \App\Models\Pengeluaran::with(['inventaris'])
             ->orderBy('tanggal', 'desc')
             ->orderBy('id', 'desc')
             ->take(6)
@@ -35,15 +34,14 @@ class GuestController extends Controller
 
     public function berita()
     {
-        $kegiatans = Kegiatan::withSum('pengeluarans', 'jumlah')
-            ->orderBy('created_at', 'desc')
+        $kegiatans = Kegiatan::orderBy('created_at', 'desc')
             ->get();
 
         $totalPemasukan = \App\Models\Pemasukan::sum('jumlah');
         $totalPengeluaran = \App\Models\Pengeluaran::sum('jumlah');
         $sisaAnggaran = $totalPemasukan - $totalPengeluaran;
 
-        $pengeluarans = \App\Models\Pengeluaran::with(['kategori', 'inventaris'])
+        $pengeluarans = \App\Models\Pengeluaran::with(['inventaris'])
             ->orderBy('tanggal', 'desc')
             ->orderBy('id', 'desc')
             ->get();

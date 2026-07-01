@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Laporan Realisasi Dana Desa</title>
+    <title>Laporan Inventaris Desa</title>
     <style>
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -71,12 +71,21 @@
             clear: both;
             display: table;
         }
+        .summary-box {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+        .summary-box td {
+            padding: 5px;
+        }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>LAPORAN REALISASI ANGGARAN DANA DESA</h1>
+        <h1>LAPORAN INVENTARIS DESA</h1>
         <p>PEMERINTAH DESA WAINDAWULA</p>
         <p>KECAMATAN SIOMPU KABUPATEN BUTON SELATAN</p>
     </div>
@@ -84,7 +93,7 @@
     <div class="info">
         <table border="0">
             <tr>
-                <td width="150"><strong>Tahun Anggaran</strong></td>
+                <td width="150"><strong>Tahun</strong></td>
                 <td width="10">:</td>
                 <td>{{ $tahun }}</td>
             </tr>
@@ -96,48 +105,51 @@
         </table>
     </div>
 
+    <div class="summary-box">
+        <table border="0" width="100%">
+            <tr>
+                <td width="25%"><strong>Total Aset</strong>: Rp {{ number_format($totalAset, 0, ',', '.') }}</td>
+                <td width="25%"><strong>Baik</strong>: {{ $baik }}</td>
+                <td width="25%"><strong>Rusak Ringan</strong>: {{ $rusakRingan }}</td>
+                <td width="25%"><strong>Rusak Berat</strong>: {{ $rusakBerat }}</td>
+            </tr>
+        </table>
+    </div>
+
     <table class="data-table">
         <thead>
             <tr>
                 <th width="5%">No</th>
-                <th width="35%">Nama Kegiatan</th>
-                <th width="15%">Anggaran</th>
-                <th width="15%">Realisasi</th>
-                <th width="15%">Sisa</th>
-                <th width="15%">Persentase</th>
+                <th width="15%">Kode Barang</th>
+                <th width="25%">Nama Barang</th>
+                <th width="20%">Lokasi</th>
+                <th width="15%">Tgl Perolehan</th>
+                <th width="10%">Kondisi</th>
+                <th width="10%">Nilai (Rp)</th>
             </tr>
         </thead>
         <tbody>
             @php $no = 1; @endphp
-            @forelse($kegiatans as $kegiatan)
+            @forelse($inventaris as $item)
                 <tr>
                     <td class="text-center">{{ $no++ }}</td>
-                    <td>
-                        {{ $kegiatan->nama_kegiatan }}<br>
-                    </td>
-                    <td class="text-right">Rp {{ number_format($kegiatan->anggaran, 0, ',', '.') }}</td>
-                    <td class="text-right">Rp {{ number_format($kegiatan->realisasi, 0, ',', '.') }}</td>
-                    <td class="text-right">Rp {{ number_format($kegiatan->sisa, 0, ',', '.') }}</td>
-                    <td class="text-center">{{ $kegiatan->persentase }}%</td>
+                    <td class="text-center">{{ $item->kode_barang }}</td>
+                    <td>{{ $item->nama_barang }}</td>
+                    <td>{{ $item->lokasi }}</td>
+                    <td class="text-center">{{ \Carbon\Carbon::parse($item->tanggal_perolehan)->format('d-m-Y') }}</td>
+                    <td class="text-center">{{ ucfirst($item->kondisi) }}</td>
+                    <td class="text-right">{{ number_format($item->nilai_aset, 0, ',', '.') }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" class="text-center">Tidak ada data kegiatan pada tahun {{ $tahun }}.</td>
+                    <td colspan="7" class="text-center">Tidak ada data inventaris.</td>
                 </tr>
             @endforelse
         </tbody>
         <tfoot>
             <tr>
-                <th colspan="2" class="text-right">TOTAL KESELURUHAN</th>
-                <th class="text-right">Rp {{ number_format($totalAnggaran, 0, ',', '.') }}</th>
-                <th class="text-right">Rp {{ number_format($totalRealisasi, 0, ',', '.') }}</th>
-                <th class="text-right">Rp {{ number_format($totalSisa, 0, ',', '.') }}</th>
-                <th class="text-center">
-                    @php
-                        $totPer = $totalAnggaran > 0 ? round(($totalRealisasi / $totalAnggaran) * 100, 1) : 0;
-                    @endphp
-                    {{ $totPer }}%
-                </th>
+                <th colspan="6" class="text-right">TOTAL NILAI ASET</th>
+                <th class="text-right">{{ number_format($totalAset, 0, ',', '.') }}</th>
             </tr>
         </tfoot>
     </table>

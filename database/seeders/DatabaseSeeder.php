@@ -42,7 +42,6 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call([
-            KategoriTransaksiSeeder::class,
             KegiatanSeeder::class,
             PemasukanSeeder::class,
             PengeluaranSeeder::class,

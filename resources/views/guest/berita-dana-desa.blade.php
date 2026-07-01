@@ -95,24 +95,10 @@
                                 </div>
                                 <h5 class="card-title fw-bold mb-3">{{ $kegiatan->nama_kegiatan }}</h5>
 
-                                <div class="mb-3">
                                     <div class="d-flex justify-content-between small mb-1">
                                         <span class="text-muted">Anggaran:</span>
-                                        <span class="fw-semibold text-body">{{ $formatRupiah($kegiatan->anggaran) }}</span>
+                                        <span class="fw-semibold text-primary">{{ $formatRupiah($kegiatan->anggaran) }}</span>
                                     </div>
-                                    <div class="d-flex justify-content-between small mb-2">
-                                        <span class="text-muted">Realisasi Dana:</span>
-                                        <span class="fw-semibold text-danger">{{ $formatRupiah($kegiatan->pengeluarans_sum_jumlah ?? 0) }}</span>
-                                    </div>
-
-                                    @php
-                                        $realisasi = $kegiatan->pengeluarans_sum_jumlah ?? 0;
-                                        $persen = $kegiatan->anggaran > 0 ? min(100, round(($realisasi / $kegiatan->anggaran) * 100)) : 0;
-                                    @endphp
-                                    <div class="progress" style="height: 6px;">
-                                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ $persen }}%" aria-valuenow="{{ $persen }}" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                </div>
 
                                 <p class="card-text text-secondary small mb-0">
                                     <i class="fas fa-map-marker-alt text-danger me-1"></i> {{ $kegiatan->lokasi ?? 'Desa Waindawula' }}
@@ -139,7 +125,7 @@
                         <thead class="table-light">
                             <tr>
                                 <th class="py-3 px-4">Tanggal</th>
-                                <th class="py-3">Kategori</th>
+
                                 <th class="py-3">Keterangan / Item</th>
                                 <th class="py-3 text-end px-4">Nominal (Rp)</th>
                             </tr>
@@ -150,11 +136,7 @@
                                     <td class="px-4 text-muted" style="width: 140px;">
                                         {{ \Carbon\Carbon::parse($pengeluaran->tanggal)->format('d M Y') }}
                                     </td>
-                                    <td>
-                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border">
-                                            {{ $pengeluaran->kategori->nama_kategori ?? 'Umum' }}
-                                        </span>
-                                    </td>
+
                                     <td>
                                         <div class="fw-semibold text-dark">{{ $pengeluaran->keterangan ?? 'Pembayaran/Pengeluaran Operasional' }}</div>
                                         @if($pengeluaran->inventaris)
@@ -172,7 +154,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="text-center py-4 text-muted">Belum ada catatan pengeluaran terkini.</td>
+                                    <td colspan="3" class="text-center py-4 text-muted">Belum ada catatan pengeluaran terkini.</td>
                                 </tr>
                             @endforelse
                         </tbody>

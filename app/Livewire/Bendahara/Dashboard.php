@@ -40,7 +40,7 @@ class Dashboard extends Component
                 ];
             });
 
-        $recentPengeluaran = Pengeluaran::with('kategori')
+        $recentPengeluaran = Pengeluaran::query()
             ->orderBy('tanggal', 'desc')
             ->orderBy('id', 'desc')
             ->take(5)
@@ -51,7 +51,7 @@ class Dashboard extends Component
                     'tipe' => 'pengeluaran',
                     'tanggal' => $item->tanggal,
                     'jumlah' => $item->jumlah,
-                    'kategori' => $item->kategori->nama_kategori ?? 'Pengeluaran',
+                    'kategori' => 'Pengeluaran',
                     'keterangan' => $item->keterangan,
                     'icon' => 'fas fa-arrow-up text-danger',
                 ];

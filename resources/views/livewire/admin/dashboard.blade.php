@@ -14,10 +14,7 @@
             <x-layout.stat-card icon="fas fa-users" label="Total Pengguna" value="{{ number_format($totalUsers) }}"
                 trend-value="Keseluruhan" trend-direction="up" variant="primary" />
         </div>
-        <div class="col-md-6 col-lg-3">
-            <x-layout.stat-card icon="fas fa-tags" label="Kategori Transaksi" value="{{ number_format($totalKategori) }}"
-                trend-value="Aktif" trend-direction="up" variant="info" />
-        </div>
+
         <div class="col-md-6 col-lg-3">
             <x-layout.stat-card icon="fas fa-briefcase" label="Total Kegiatan" value="{{ number_format($totalKegiatan) }}"
                 trend-value="Pelaksanaan" trend-direction="up" variant="success" />

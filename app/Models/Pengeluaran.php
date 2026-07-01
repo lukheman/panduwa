@@ -12,17 +12,13 @@ class Pengeluaran extends Model
     use HasFactory;
 
     protected $fillable = [
-        'id_kategori_transaksi',
+
         'jumlah',
         'tanggal',
         'keterangan',
         'id_kegiatan',
     ];
 
-    public function kategori()
-    {
-        return $this->belongsTo(KategoriTransaksi::class, 'id_kategori_transaksi');
-    }
 
     public function kegiatan()
     {

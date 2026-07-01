@@ -1,5 +1,5 @@
 <div>
-    <x-layout.page-header title="Manajemen Pengeluaran" subtitle="Catat dan kelola semua pengeluaran keuangan desa">
+    <x-layout.page-header title="Kelola Pengeluaran" subtitle="Catat dan kelola semua pengeluaran keuangan desa">
         <x-slot:actions>
             <x-ui.button variant="danger" icon="fas fa-minus" wire:click="openCreateModal">
                 Catat Pengeluaran
@@ -58,7 +58,7 @@
             <div style="max-width: 300px; width: 100%;">
                 <x-form.input
                     wire:model.live.debounce.300ms="search"
-                    placeholder="Cari keterangan atau kategori..."
+                    placeholder="Cari keterangan..."
                     icon="fas fa-search"
                     class="mb-0"
                 />
@@ -70,9 +70,8 @@
                 <thead>
                     <tr>
                         <th>Tanggal</th>
-                        <th>Kategori</th>
+
                         <th>Jumlah (Rp)</th>
-                        <th>Terkait Kegiatan</th>
                         <th>Keterangan</th>
                         <th style="width: 120px;">Aksi</th>
                     </tr>
@@ -81,24 +80,8 @@
                     @forelse ($pengeluarans as $pengeluaran)
                         <tr wire:key="pengeluaran-{{ $pengeluaran->id }}">
                             <td class="text-secondary">{{ \Carbon\Carbon::parse($pengeluaran->tanggal)->format('d M Y') }}</td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 35px; height: 35px;">
-                                        <i class="fas fa-arrow-up"></i>
-                                    </div>
-                                    <span class="fw-semibold text-body">{{ $pengeluaran->kategori->nama_kategori ?? 'Tidak Ada' }}</span>
-                                </div>
-                            </td>
+
                             <td class="text-danger fw-bold">{{ $this->formatRupiah($pengeluaran->jumlah) }}</td>
-                            <td>
-                                @if($pengeluaran->kegiatan)
-                                    <x-ui.badge variant="info" icon="fas fa-tasks">
-                                        {{ Str::limit($pengeluaran->kegiatan->nama_kegiatan, 20) }}
-                                    </x-ui.badge>
-                                @else
-                                    <span class="text-muted small">-</span>
-                                @endif
-                            </td>
                             <td class="text-muted">{{ Str::limit($pengeluaran->keterangan ?? '-', 40) }}</td>
                             <td>
                                 <div class="d-flex gap-1">
@@ -110,7 +93,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="text-center py-5">
+                            <td colspan="5" class="text-center py-5">
                                 <x-ui.empty-state
                                     icon="fas fa-receipt"
                                     title="Belum ada data pengeluaran"
@@ -159,45 +142,9 @@
                             @error('jumlah') <span class="text-danger small">{{ $message }}</span> @enderror
                         </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Kategori Transaksi <span class="text-danger">*</span></label>
-                        <select class="form-control" wire:model="id_kategori_transaksi" required>
-                            <option value="">Pilih Kategori...</option>
-                            @foreach($kategoris as $kategori)
-                                <option value="{{ $kategori->id }}">{{ $kategori->nama_kategori }}</option>
-                            @endforeach
-                        </select>
-                        @error('id_kategori_transaksi') <span class="text-danger small">{{ $message }}</span> @enderror
-                    </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Terkait Kegiatan (Opsional)</label>
-                        <select class="form-control" wire:model.live="id_kegiatan">
-                            <option value="">-- Tidak Terkait Kegiatan --</option>
-                            @foreach($kegiatans as $kegiatan)
-                                <option value="{{ $kegiatan->id }}">{{ $kegiatan->nama_kegiatan }}</option>
-                            @endforeach
-                        </select>
-                        <div class="form-text text-muted small mb-2">Pilih jika pengeluaran ini memotong anggaran suatu kegiatan.</div>
-                        @error('id_kegiatan') <span class="text-danger small">{{ $message }}</span> @enderror
 
-                        @if($selectedKegiatanInfo)
-                            <div class="p-3 bg-light rounded mt-2 border">
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span class="small text-muted">Anggaran Total:</span>
-                                    <span class="small fw-semibold text-primary">{{ $this->formatRupiah($selectedKegiatanInfo['anggaran']) }}</span>
-                                </div>
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span class="small text-muted">Telah Terpakai:</span>
-                                    <span class="small fw-semibold text-danger">{{ $this->formatRupiah($selectedKegiatanInfo['realisasi']) }}</span>
-                                </div>
-                                <div class="d-flex justify-content-between mt-2 pt-2 border-top">
-                                    <span class="small fw-bold">Sisa Anggaran:</span>
-                                    <span class="small fw-bold {{ $selectedKegiatanInfo['sisa'] < 0 ? 'text-danger' : 'text-success' }}">{{ $this->formatRupiah($selectedKegiatanInfo['sisa']) }}</span>
-                                </div>
-                            </div>
-                        @endif
-                    </div>
+
 
                     <x-form.input
                         id="keterangan"
@@ -207,60 +154,7 @@
                         error="{{ $errors->first('keterangan') }}"
                     />
 
-                    <div class="mb-4 mt-4 pt-3 border-top">
-                        <div class="form-check form-switch mb-3">
-                            <input class="form-check-input" type="checkbox" id="isInventarisSwitch" wire:model.live="is_inventaris">
-                            <label class="form-check-label fw-semibold" for="isInventarisSwitch">
-                                <i class="fas fa-box-open text-primary me-1"></i> Simpan juga sebagai Inventaris Aset Desa
-                            </label>
-                            <div class="form-text text-muted small mt-1">Aktifkan ini jika pengeluaran adalah untuk pembelian barang fisik/aset desa. Data akan langsung terinput ke tabel inventaris.</div>
-                        </div>
 
-                        @if($is_inventaris)
-                            <div class="p-3 bg-light rounded border border-primary border-opacity-25">
-                                <h6 class="fw-bold mb-3 text-primary"><i class="fas fa-boxes me-2"></i>Detail Aset Inventaris</h6>
-                                
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <x-form.input
-                                            id="inventaris_kode"
-                                            label="Kode Barang *"
-                                            wire:model="inventaris_kode"
-                                            placeholder="Misal: INV-001"
-                                            error="{{ $errors->first('inventaris_kode') }}"
-                                        />
-                                    </div>
-                                    <div class="col-md-6">
-                                        <x-form.input
-                                            id="inventaris_nama"
-                                            label="Nama Barang *"
-                                            wire:model="inventaris_nama"
-                                            placeholder="Misal: Laptop Asus"
-                                            error="{{ $errors->first('inventaris_nama') }}"
-                                        />
-                                    </div>
-                                    <div class="col-md-6">
-                                        <x-form.input
-                                            id="inventaris_lokasi"
-                                            label="Lokasi Aset *"
-                                            wire:model="inventaris_lokasi"
-                                            placeholder="Misal: Ruang Kepala Desa"
-                                            error="{{ $errors->first('inventaris_lokasi') }}"
-                                        />
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">Kondisi <span class="text-danger">*</span></label>
-                                        <select class="form-control" wire:model="inventaris_kondisi" required>
-                                            <option value="baik">Baik</option>
-                                            <option value="rusak ringan">Rusak Ringan</option>
-                                            <option value="rusak berat">Rusak Berat</option>
-                                        </select>
-                                        @error('inventaris_kondisi') <span class="text-danger small">{{ $message }}</span> @enderror
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-                    </div>
 
                     <div class="d-flex justify-content-end gap-2 mt-4">
                         <x-ui.button type="button" variant="secondary" wire:click="closeModal">
@@ -290,10 +184,7 @@
                             <td class="text-muted" style="width: 140px;">Tanggal Transaksi</td>
                             <td>: <span class="fw-semibold">{{ \Carbon\Carbon::parse($viewingPengeluaran->tanggal)->format('d F Y') }}</span></td>
                         </tr>
-                        <tr>
-                            <td class="text-muted">Kategori</td>
-                            <td>: <span class="fw-semibold">{{ $viewingPengeluaran->kategori->nama_kategori ?? 'Tidak Ada' }}</span></td>
-                        </tr>
+
                         <tr>
                             <td class="text-muted">Jumlah</td>
                             <td>: <span class="fw-bold text-danger">{{ $this->formatRupiah($viewingPengeluaran->jumlah) }}</span></td>
@@ -314,37 +205,7 @@
                         </tr>
                     </table>
 
-                    @if($viewingPengeluaran && $viewingPengeluaran->inventaris)
-                        <div class="mt-3 p-3 bg-light rounded border">
-                            <h6 class="fw-bold mb-2 text-primary border-bottom pb-2"><i class="fas fa-box me-2"></i>Data Inventaris Terkait</h6>
-                            <table class="table table-borderless table-sm mb-0">
-                                <tr>
-                                    <td class="text-muted" style="width: 140px;">Kode Barang</td>
-                                    <td>: <span class="fw-bold text-dark">{{ $viewingPengeluaran->inventaris->kode_barang }}</span></td>
-                                </tr>
-                                <tr>
-                                    <td class="text-muted">Nama Barang</td>
-                                    <td>: <span class="fw-semibold">{{ $viewingPengeluaran->inventaris->nama_barang }}</span></td>
-                                </tr>
-                                <tr>
-                                    <td class="text-muted">Lokasi</td>
-                                    <td>: <span>{{ $viewingPengeluaran->inventaris->lokasi }}</span></td>
-                                </tr>
-                                <tr>
-                                    <td class="text-muted">Kondisi</td>
-                                    <td>: 
-                                        @if($viewingPengeluaran->inventaris->kondisi === 'baik')
-                                            <span class="badge bg-success badge-modern"><i class="fas fa-check-circle me-1"></i>Baik</span>
-                                        @elseif($viewingPengeluaran->inventaris->kondisi === 'rusak ringan')
-                                            <span class="badge bg-warning badge-modern text-dark"><i class="fas fa-exclamation-circle me-1"></i>Rusak Ringan</span>
-                                        @else
-                                            <span class="badge bg-danger badge-modern"><i class="fas fa-times-circle me-1"></i>Rusak Berat</span>
-                                        @endif
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
-                    @endif
+
                 </div>
                 <div class="d-flex justify-content-end mt-2">
                     <x-ui.button type="button" variant="secondary" wire:click="closeViewModal">Tutup</x-ui.button>

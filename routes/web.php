@@ -14,14 +14,14 @@ use App\Livewire\Admin\UserManagement;
 
 
 // Admin Keuangan & Manajemen
-use App\Livewire\Admin\KategoriTransaksiManagement;
+
 use App\Livewire\Admin\PemasukanManagement;
 use App\Livewire\Admin\PengeluaranManagement;
 use App\Livewire\Admin\KegiatanManagement;
 use App\Livewire\Admin\InventarisManagement;
 
-use App\Livewire\Admin\SisaAnggaran;
-use App\Livewire\Admin\LaporanRealisasi;
+use App\Livewire\Admin\PenggunaanDanaDesa;
+use App\Livewire\Admin\LaporanInventaris;
 
 /*
 |--------------------------------------------------------------------------
@@ -58,12 +58,12 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     Route::get('/profile', Profile::class)->name('admin.profile');
 
     // Keuangan & Kegiatan
-    Route::get('/kategori-transaksi', KategoriTransaksiManagement::class)->name('admin.kategori');
+
     Route::get('/pemasukan', PemasukanManagement::class)->name('admin.pemasukan');
     Route::get('/pengeluaran', PengeluaranManagement::class)->name('admin.pengeluaran');
-    Route::get('/sisa-anggaran', SisaAnggaran::class)->name('admin.sisa-anggaran');
+    Route::get('/penggunaan-dana-desa', PenggunaanDanaDesa::class)->name('admin.penggunaan-dana-desa');
+    Route::get('/laporan-inventaris', LaporanInventaris::class)->name('admin.laporan-inventaris');
     Route::get('/kegiatan', KegiatanManagement::class)->name('admin.kegiatan');
-    Route::get('/laporan-realisasi', LaporanRealisasi::class)->name('admin.laporan-realisasi');
 
     // Aset & Inventaris
     Route::get('/inventaris', InventarisManagement::class)->name('admin.inventaris');
@@ -82,8 +82,7 @@ Route::prefix('bendahara')->middleware('auth:bendahara')->group(function () {
     // Keuangan & Kegiatan
     Route::get('/pemasukan', PemasukanManagement::class)->name('bendahara.pemasukan');
     Route::get('/pengeluaran', PengeluaranManagement::class)->name('bendahara.pengeluaran');
-    Route::get('/sisa-anggaran', SisaAnggaran::class)->name('bendahara.sisa-anggaran');
-    Route::get('/laporan-realisasi', LaporanRealisasi::class)->name('bendahara.laporan-realisasi');
+    Route::get('/penggunaan-dana-desa', PenggunaanDanaDesa::class)->name('bendahara.penggunaan-dana-desa');
     Route::get('/kegiatan', KegiatanManagement::class)->name('bendahara.kegiatan');
 
 
@@ -95,8 +94,8 @@ Route::prefix('kepala-desa')->middleware('auth:kepala_desa')->group(function () 
     Route::get('/profile', \App\Livewire\KepalaDesa\Profile::class)->name('kepala_desa.profile');
     
     // Keuangan & Laporan
-    Route::get('/sisa-anggaran', SisaAnggaran::class)->name('kepala_desa.sisa-anggaran');
-    Route::get('/laporan-realisasi', LaporanRealisasi::class)->name('kepala_desa.laporan-realisasi');
+    Route::get('/penggunaan-dana-desa', PenggunaanDanaDesa::class)->name('kepala_desa.penggunaan-dana-desa');
+    Route::get('/laporan-inventaris', LaporanInventaris::class)->name('kepala_desa.laporan-inventaris');
 });
 
 // Kaur Umum-only Routes
@@ -106,4 +105,5 @@ Route::prefix('kaur-umum')->middleware('auth:kaur_umum')->group(function () {
     
     // Aset & Inventaris
     Route::get('/inventaris', InventarisManagement::class)->name('kaur_umum.inventaris');
+    Route::get('/laporan-inventaris', LaporanInventaris::class)->name('kaur_umum.laporan-inventaris');
 });

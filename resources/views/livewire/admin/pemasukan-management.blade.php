@@ -1,5 +1,5 @@
 <div>
-    <x-layout.page-header title="Manajemen Pemasukan" subtitle="Catat dan kelola semua dana pemasukan desa">
+    <x-layout.page-header title="Kelola Pemasukan" subtitle="Catat dan kelola semua dana pemasukan desa">
         <x-slot:actions>
             <x-ui.button variant="primary" icon="fas fa-plus" wire:click="openCreateModal">
                 Catat Pemasukan

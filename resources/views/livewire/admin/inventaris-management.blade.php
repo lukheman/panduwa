@@ -1,5 +1,5 @@
 <div>
-    <x-layout.page-header title="Manajemen Inventaris" subtitle="Buku Induk Aset dan Barang Inventaris Desa">
+    <x-layout.page-header title="Kelola Inventaris" subtitle="Buku Induk Aset dan Barang Inventaris Desa">
         <x-slot:actions>
             <x-ui.button variant="primary" icon="fas fa-plus" wire:click="openCreateModal">
                 Tambah Inventaris

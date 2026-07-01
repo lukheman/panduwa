@@ -10,7 +10,7 @@ use Livewire\WithPagination;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Storage;
 
-#[Title('Manajemen Kegiatan')]
+#[Title('Kelola Kegiatan')]
 class KegiatanManagement extends Component
 {
     use WithPagination;
@@ -60,9 +60,7 @@ class KegiatanManagement extends Component
     public function openDetailModal(int $id): void
     {
         $this->detailKegiatanId = $id;
-        $this->detailKegiatan = Kegiatan::with('pengeluarans.kategori')
-            ->withSum('pengeluarans', 'jumlah')
-            ->findOrFail($id);
+        $this->detailKegiatan = Kegiatan::findOrFail($id);
         $this->showDetailModal = true;
     }
 
@@ -76,7 +74,7 @@ class KegiatanManagement extends Component
     public function openEditModal(int $id): void
     {
         $kegiatan = Kegiatan::findOrFail($id);
-        
+
         $this->editingKegiatanId = $id;
         $this->nama_kegiatan = $kegiatan->nama_kegiatan;
         $this->lokasi = $kegiatan->lokasi;
@@ -84,7 +82,7 @@ class KegiatanManagement extends Component
         $this->status = $kegiatan->status->value;
         $this->existing_foto_progres = $kegiatan->foto_progres;
         $this->foto_progres = null;
-        
+
         $this->showModal = true;
     }
 
@@ -96,13 +94,13 @@ class KegiatanManagement extends Component
         $totalPemasukan = \App\Models\Pemasukan::sum('jumlah');
         $totalPengeluaranNonKegiatan = \App\Models\Pengeluaran::whereNull('id_kegiatan')->sum('jumlah');
         $totalAnggaranKegiatanLain = \App\Models\Kegiatan::query();
-        
+
         if ($this->editingKegiatanId) {
             $totalAnggaranKegiatanLain->where('id', '!=', $this->editingKegiatanId);
         }
-        
+
         $totalAnggaranKegiatanLain = $totalAnggaranKegiatanLain->sum('anggaran');
-        
+
         $sisaAnggaranTersedia = $totalPemasukan - $totalPengeluaranNonKegiatan - $totalAnggaranKegiatanLain;
 
         $allowedToSave = false;
@@ -120,7 +118,7 @@ class KegiatanManagement extends Component
         }
 
         $path = $this->existing_foto_progres;
-        
+
         if ($this->foto_progres) {
             if ($path) {
                 Storage::disk('public')->delete($path);
@@ -141,8 +139,16 @@ class KegiatanManagement extends Component
             $kegiatan->update($data);
             session()->flash('success', 'Data kegiatan berhasil diperbarui.');
         } else {
-            Kegiatan::create($data);
-            session()->flash('success', 'Data kegiatan berhasil ditambahkan.');
+            $kegiatan = Kegiatan::create($data);
+            
+            \App\Models\Pengeluaran::create([
+                'jumlah' => $kegiatan->anggaran,
+                'tanggal' => date('Y-m-d'),
+                'keterangan' => 'Alokasi Dana Kegiatan: ' . $kegiatan->nama_kegiatan,
+                'id_kegiatan' => $kegiatan->id,
+            ]);
+
+            session()->flash('success', 'Data kegiatan berhasil ditambahkan dan alokasi dana telah dicatat sebagai pengeluaran.');
         }
 
         $this->closeModal();
@@ -207,7 +213,7 @@ class KegiatanManagement extends Component
         }
         return 'warning';
     }
-    
+
     public function getStatusIcon($status)
     {
         if ($status instanceof \App\Enums\StatusKegiatan) {
@@ -219,7 +225,6 @@ class KegiatanManagement extends Component
     public function render()
     {
         $kegiatans = Kegiatan::query()
-            ->withSum('pengeluarans', 'jumlah')
             ->when($this->search, function ($query) {
                 $query->where('nama_kegiatan', 'like', '%' . $this->search . '%')
                     ->orWhere('lokasi', 'like', '%' . $this->search . '%');

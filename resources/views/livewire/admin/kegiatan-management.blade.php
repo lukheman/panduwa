@@ -1,5 +1,5 @@
 <div>
-    <x-layout.page-header title="Manajemen Kegiatan" subtitle="Kelola seluruh program dan kegiatan desa">
+    <x-layout.page-header title="Kelola Kegiatan" subtitle="Kelola seluruh program dan kegiatan desa">
         <x-slot:actions>
             <x-ui.button variant="primary" icon="fas fa-plus" wire:click="openCreateModal">
                 Tambah Kegiatan
@@ -56,27 +56,10 @@
                             <span class="text-truncate">{{ $kegiatan->lokasi }}</span>
                         </div>
 
-                        {{-- Financial Progress --}}
-                        @php
-                            $realisasi = $kegiatan->pengeluarans_sum_jumlah ?? 0;
-                            $persentase = $kegiatan->anggaran > 0 ? min(100, round(($realisasi / $kegiatan->anggaran) * 100)) : 0;
-                            $isOverBudget = $realisasi > $kegiatan->anggaran;
-                        @endphp
                         <div class="mt-auto">
                             <div class="d-flex justify-content-between mb-1">
                                 <small class="text-muted fw-semibold">Anggaran:</small>
                                 <small class="text-primary fw-bold">{{ $this->formatRupiah($kegiatan->anggaran) }}</small>
-                            </div>
-                            <div class="d-flex justify-content-between mb-1">
-                                <small class="text-muted fw-semibold">Realisasi:</small>
-                                <small class="{{ $isOverBudget ? 'text-danger fw-bold' : 'text-success fw-bold' }}">{{ $this->formatRupiah($realisasi) }}</small>
-                            </div>
-
-                            <div class="d-flex align-items-center gap-2 mt-2">
-                                <div class="progress progress-modern flex-grow-1" style="height: 6px;">
-                                    <div class="progress-bar progress-bar-modern {{ $isOverBudget ? 'bg-danger' : 'bg-success' }}" role="progressbar" style="width: {{ $persentase }}%;" aria-valuenow="{{ $persentase }}" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                                <small class="{{ $isOverBudget ? 'text-danger fw-bold' : 'text-muted fw-bold' }}">{{ $persentase }}%</small>
                             </div>
                         </div>
                     </div>
@@ -228,7 +211,7 @@
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <h4 class="fw-bold mb-0">{{ $detailKegiatan->nama_kegiatan }}</h4>
                             <x-ui.badge :variant="$this->getStatusBadgeVariant($detailKegiatan->status)" :icon="$this->getStatusIcon($detailKegiatan->status)">
-                                {{ ucfirst($detailKegiatan->status) }}
+                                {{ ucfirst($detailKegiatan->status->getLabel()) }}
                             </x-ui.badge>
                         </div>
                         <p class="text-muted"><i class="fas fa-map-marker-alt text-danger me-2"></i>{{ $detailKegiatan->lokasi }}</p>
@@ -244,72 +227,14 @@
                     </div>
 
                     <div class="p-3 border rounded shadow-sm">
-                        <h6 class="fw-bold border-bottom pb-2 mb-3">Ringkasan Keuangan</h6>
-                        @php
-                            $realisasi = $detailKegiatan->pengeluarans_sum_jumlah ?? 0;
-                            $sisa = $detailKegiatan->anggaran - $realisasi;
-                            $persentase = $detailKegiatan->anggaran > 0 ? min(100, round(($realisasi / $detailKegiatan->anggaran) * 100)) : 0;
-                            $isOverBudget = $realisasi > $detailKegiatan->anggaran;
-                        @endphp
-
+                        <h6 class="fw-bold border-bottom pb-2 mb-3">Informasi Anggaran</h6>
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted">Total Anggaran:</span>
                             <span class="fw-bold text-primary">{{ $this->formatRupiah($detailKegiatan->anggaran) }}</span>
                         </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted">Realisasi / Terpakai:</span>
-                            <span class="fw-bold {{ $isOverBudget ? 'text-danger' : 'text-success' }}">{{ $this->formatRupiah($realisasi) }}</span>
-                        </div>
-                        <div class="d-flex justify-content-between mb-3 pt-2 border-top">
-                            <span class="fw-semibold">Sisa Anggaran:</span>
-                            <span class="fw-bold {{ $sisa < 0 ? 'text-danger' : 'text-body' }}">{{ $this->formatRupiah($sisa) }}</span>
-                        </div>
-
-                        <div class="mt-3">
-                            <div class="d-flex justify-content-between mb-1">
-                                <small class="fw-semibold">Persentase Penggunaan</small>
-                                <small class="fw-bold {{ $isOverBudget ? 'text-danger' : 'text-success' }}">{{ $persentase }}%</small>
-                            </div>
-                            <div class="progress progress-modern" style="height: 8px;">
-                                <div class="progress-bar progress-bar-modern {{ $isOverBudget ? 'bg-danger' : 'bg-success' }}" role="progressbar" style="width: {{ $persentase }}%;" aria-valuenow="{{ $persentase }}" aria-valuemin="0" aria-valuemax="100"></div>
-                            </div>
-                            @if($isOverBudget)
-                                <small class="text-danger d-block mt-2"><i class="fas fa-exclamation-triangle me-1"></i> Pengeluaran melebihi anggaran!</small>
-                            @endif
-                        </div>
                     </div>
 
-                    <div class="p-3 border rounded shadow-sm mt-4">
-                        <h6 class="fw-bold border-bottom pb-2 mb-3">Rincian Pemakaian Dana</h6>
-                        @if($detailKegiatan->pengeluarans && $detailKegiatan->pengeluarans->count() > 0)
-                            <x-layout.table class="table-sm border-bottom mb-0">
-                                <x-slot:head>
-                                    <tr class="table-light">
-                                        <th>Tanggal</th>
-                                        <th>Keterangan</th>
-                                        <th class="text-end">Jumlah</th>
-                                    </tr>
-                                </x-slot:head>
-                                @foreach($detailKegiatan->pengeluarans as $pengeluaran)
-                                    <tr>
-                                        <td class="text-nowrap">{{ \Carbon\Carbon::parse($pengeluaran->tanggal)->format('d M Y') }}</td>
-                                        <td>
-                                            <div class="fw-semibold">{{ $pengeluaran->kategori->nama_kategori ?? 'Lainnya' }}</div>
-                                            <small class="text-muted">{{ $pengeluaran->keterangan ?? '-' }}</small>
-                                        </td>
-                                        <td class="text-end fw-bold text-danger">-{{ $this->formatRupiah($pengeluaran->jumlah) }}</td>
-                                    </tr>
-                                @endforeach
-                            </x-layout.table>
-                        @else
-                            <x-ui.empty-state
-                                icon="fas fa-receipt"
-                                title="Belum Ada Transaksi"
-                                description="Belum ada rincian pemakaian dana untuk kegiatan ini."
-                                size="sm"
-                            />
-                        @endif
-                    </div>
+
 
                     <div class="d-flex justify-content-end mt-4">
                         <x-ui.button type="button" variant="secondary" wire:click="closeDetailModal">

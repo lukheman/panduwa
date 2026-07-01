@@ -537,7 +537,7 @@
         @php
             $guard = Auth::guard('admin')->check() ? 'admin' :
                      (Auth::guard('bendahara')->check() ? 'bendahara' :
-                     (Auth::guard('kepala_desa')->check() ? 'kepala_desa' : 
+                     (Auth::guard('kepala_desa')->check() ? 'kepala_desa' :
                      (Auth::guard('kaur_umum')->check() ? 'kaur_umum' : 'admin')));
             $routePrefix = $guard . '.';
         @endphp
@@ -548,15 +548,15 @@
 
         @if(Auth::guard('admin')->check())
         <x-layout.sidebar-section title="Master Data">
-            <x-layout.sidebar-link href="{{ route('admin.kategori') }}" icon="fas fa-tags" :active="request()->routeIs('admin.kategori')">Kategori Transaksi</x-layout.sidebar-link>
-            <x-layout.sidebar-link href="{{ route('admin.users') }}" icon="fas fa-users" :active="request()->routeIs('admin.users')">Pengguna</x-layout.sidebar-link>
+
+            <x-layout.sidebar-link href="{{ route('admin.users') }}" icon="fas fa-users" :active="request()->routeIs('admin.users')">Kelola Pengguna</x-layout.sidebar-link>
         </x-layout.sidebar-section>
         @endif
 
         @if(Route::has($routePrefix . 'pemasukan'))
         <x-layout.sidebar-section title="Keuangan">
-            <x-layout.sidebar-link href="{{ route($routePrefix . 'pemasukan') }}" icon="fas fa-wallet" :active="request()->routeIs($routePrefix . 'pemasukan')">Pemasukan</x-layout.sidebar-link>
-            <x-layout.sidebar-link href="{{ route($routePrefix . 'pengeluaran') }}" icon="fas fa-hand-holding-usd" :active="request()->routeIs($routePrefix . 'pengeluaran')">Pengeluaran</x-layout.sidebar-link>
+            <x-layout.sidebar-link href="{{ route($routePrefix . 'pemasukan') }}" icon="fas fa-wallet" :active="request()->routeIs($routePrefix . 'pemasukan')">Kelola Anggaran</x-layout.sidebar-link>
+            <x-layout.sidebar-link href="{{ route($routePrefix . 'pengeluaran') }}" icon="fas fa-hand-holding-usd" :active="request()->routeIs($routePrefix . 'pengeluaran')">Kelola Pengeluaran</x-layout.sidebar-link>
         </x-layout.sidebar-section>
         @endif
 
@@ -564,22 +564,22 @@
         @if(Route::has($routePrefix . 'kegiatan') || Route::has($routePrefix . 'inventaris'))
         <x-layout.sidebar-section title="Operasional & Aset">
             @if(Route::has($routePrefix . 'kegiatan'))
-            <x-layout.sidebar-link href="{{ route($routePrefix . 'kegiatan') }}" icon="fas fa-tasks" :active="request()->routeIs($routePrefix . 'kegiatan')">Kegiatan</x-layout.sidebar-link>
+            <x-layout.sidebar-link href="{{ route($routePrefix . 'kegiatan') }}" icon="fas fa-tasks" :active="request()->routeIs($routePrefix . 'kegiatan')">Kelola Kegiatan</x-layout.sidebar-link>
             @endif
             @if(Route::has($routePrefix . 'inventaris'))
-            <x-layout.sidebar-link href="{{ route($routePrefix . 'inventaris') }}" icon="fas fa-boxes" :active="request()->routeIs($routePrefix . 'inventaris')">Inventaris</x-layout.sidebar-link>
+            <x-layout.sidebar-link href="{{ route($routePrefix . 'inventaris') }}" icon="fas fa-boxes" :active="request()->routeIs($routePrefix . 'inventaris')">Kelola Inventaris</x-layout.sidebar-link>
             @endif
 
         </x-layout.sidebar-section>
         @endif
 
-        @if(Route::has($routePrefix . 'sisa-anggaran') || Route::has($routePrefix . 'laporan-realisasi'))
+        @if(Route::has($routePrefix . 'penggunaan-dana-desa') || Route::has($routePrefix . 'laporan-inventaris'))
         <x-layout.sidebar-section title="Laporan">
-            @if(Route::has($routePrefix . 'sisa-anggaran'))
-            <x-layout.sidebar-link href="{{ route($routePrefix . 'sisa-anggaran') }}" icon="fas fa-chart-pie" :active="request()->routeIs($routePrefix . 'sisa-anggaran')">Laporan Sisa Anggaran</x-layout.sidebar-link>
+            @if(Route::has($routePrefix . 'penggunaan-dana-desa'))
+            <x-layout.sidebar-link href="{{ route($routePrefix . 'penggunaan-dana-desa') }}" icon="fas fa-chart-pie" :active="request()->routeIs($routePrefix . 'penggunaan-dana-desa')">Laporan Penggunaan Dana Desa</x-layout.sidebar-link>
             @endif
-            @if(Route::has($routePrefix . 'laporan-realisasi'))
-            <x-layout.sidebar-link href="{{ route($routePrefix . 'laporan-realisasi') }}" icon="fas fa-file-pdf" :active="request()->routeIs($routePrefix . 'laporan-realisasi')">Laporan Realisasi</x-layout.sidebar-link>
+            @if(Route::has($routePrefix . 'laporan-inventaris'))
+            <x-layout.sidebar-link href="{{ route($routePrefix . 'laporan-inventaris') }}" icon="fas fa-file-invoice" :active="request()->routeIs($routePrefix . 'laporan-inventaris')">Laporan Inventaris</x-layout.sidebar-link>
             @endif
         </x-layout.sidebar-section>
         @endif
@@ -661,25 +661,27 @@
             });
             @endif
 
-            @if(Route::has($routePrefix . 'sisa-anggaran'))
+            @if(Route::has($routePrefix . 'penggunaan-dana-desa'))
             routes.push({
-                id: 'sisa-anggaran',
-                title: 'Laporan Sisa Anggaran',
+                id: 'penggunaan-dana-desa',
+                title: 'Laporan Penggunaan Dana Desa',
                 icon: '<i class="fas fa-chart-pie"></i>',
                 section: 'Laporan',
-                handler: () => { window.location.href = "{{ route($routePrefix . 'sisa-anggaran') }}"; }
+                handler: () => { window.location.href = "{{ route($routePrefix . 'penggunaan-dana-desa') }}"; }
+            });
+            @endif
+            @if(Route::has($routePrefix . 'laporan-inventaris'))
+            routes.push({
+                id: 'laporan-inventaris',
+                title: 'Laporan Inventaris Desa',
+                icon: '<i class="fas fa-file-invoice"></i>',
+                section: 'Laporan',
+                handler: () => { window.location.href = "{{ route($routePrefix . 'laporan-inventaris') }}"; }
             });
             @endif
 
-            @if(Route::has($routePrefix . 'laporan-realisasi'))
-            routes.push({
-                id: 'laporan-realisasi',
-                title: 'Laporan Realisasi',
-                icon: '<i class="fas fa-file-pdf"></i>',
-                section: 'Laporan',
-                handler: () => { window.location.href = "{{ route($routePrefix . 'laporan-realisasi') }}"; }
-            });
-            @endif
+
+
 
             @if(Route::has($routePrefix . 'kegiatan'))
             routes.push({
@@ -703,15 +705,7 @@
 
 
 
-            @if(Auth::guard('admin')->check() && Route::has('admin.kategori'))
-            routes.push({
-                id: 'kategori',
-                title: 'Kategori Transaksi',
-                icon: '<i class="fas fa-tags"></i>',
-                section: 'Master Data',
-                handler: () => { window.location.href = "{{ route('admin.kategori') }}"; }
-            });
-            @endif
+
 
             @if(Auth::guard('admin')->check() && Route::has('admin.users'))
             routes.push({

@@ -13,7 +13,7 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-#[Title('Manajemen Pengguna')]
+#[Title('Kelola Pengguna')]
 class UserManagement extends Component
 {
     use WithPagination;
@@ -99,7 +99,7 @@ class UserManagement extends Component
     {
         $modelClass = $this->getModelClass();
         $user = $modelClass::findOrFail($userId);
-        
+
         $this->editingUserId = $userId;
         $this->nama = $user->nama;
         $this->email = $user->email;

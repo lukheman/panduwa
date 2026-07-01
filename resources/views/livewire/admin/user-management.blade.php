@@ -1,6 +1,6 @@
 <div>
     {{-- Page Header --}}
-    <x-layout.page-header title="Manajemen Pengguna" subtitle="Kelola seluruh pengguna di dalam sistem">
+    <x-layout.page-header title="Kelola Pengguna" subtitle="Kelola seluruh pengguna di dalam sistem">
         <x-slot:actions>
             <x-ui.button variant="primary" icon="fas fa-plus" wire:click="openCreateModal">
                 Tambah Pengguna

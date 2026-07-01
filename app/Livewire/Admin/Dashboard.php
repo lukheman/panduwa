@@ -7,7 +7,7 @@ use Livewire\Component;
 use App\Models\Admin;
 use App\Models\Bendahara;
 use App\Models\KepalaDesa;
-use App\Models\KategoriTransaksi;
+
 use App\Models\Kegiatan;
 use App\Models\Inventaris;
 use App\Models\Pemasukan;
@@ -19,7 +19,7 @@ class Dashboard extends Component
     public function render()
     {
         $totalUsers = Admin::count() + Bendahara::count() + KepalaDesa::count();
-        $totalKategori = KategoriTransaksi::count();
+
         $totalKegiatan = Kegiatan::count();
         $totalInventaris = Inventaris::count();
         
@@ -46,7 +46,7 @@ class Dashboard extends Component
 
         return view('livewire.admin.dashboard', [
             'totalUsers' => $totalUsers,
-            'totalKategori' => $totalKategori,
+
             'totalKegiatan' => $totalKegiatan,
             'totalInventaris' => $totalInventaris,
             'totalPemasukan' => $totalPemasukan,

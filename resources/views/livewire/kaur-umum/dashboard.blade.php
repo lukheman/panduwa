@@ -56,7 +56,7 @@
             <x-layout.modern-card class="h-100">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h5 class="fw-semibold mb-0"><i class="fas fa-tasks text-primary me-2"></i>Status Program & Kegiatan</h5>
-                    <x-ui.button href="{{ route('kepala_desa.sisa-anggaran') }}">Lihat Detail Realisasi</x-ui.button>
+                    <x-ui.button href="{{ route('kepala_desa.penggunaan-dana-desa') }}">Lihat Detail Realisasi</x-ui.button>
                 </div>
 
                 <div class="row g-3 mb-4">

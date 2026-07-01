@@ -9,7 +9,7 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-#[Title('Manajemen Inventaris')]
+#[Title('Kelola Inventaris')]
 class InventarisManagement extends Component
 {
     use WithPagination;
@@ -73,7 +73,7 @@ class InventarisManagement extends Component
     public function openEditModal(int $id): void
     {
         $inventaris = Inventaris::findOrFail($id);
-        
+
         $this->editingInventarisId = $id;
         $this->kode_barang = $inventaris->kode_barang;
         $this->nama_barang = $inventaris->nama_barang;
@@ -81,7 +81,7 @@ class InventarisManagement extends Component
         $this->tanggal_perolehan = $inventaris->tanggal_perolehan;
         $this->nilai_aset = (string) $inventaris->nilai_aset;
         $this->kondisi = $inventaris->kondisi;
-        
+
         $this->showModal = true;
     }
 
@@ -158,7 +158,7 @@ class InventarisManagement extends Component
     {
         return 'Rp ' . number_format($angka, 0, ',', '.');
     }
-    
+
     public function getKondisiBadgeVariant($kondisi)
     {
         $kondisi = strtolower($kondisi);

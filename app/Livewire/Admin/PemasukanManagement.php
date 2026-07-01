@@ -8,7 +8,7 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-#[Title('Manajemen Pemasukan')]
+#[Title('Kelola Pemasukan')]
 class PemasukanManagement extends Component
 {
     use WithPagination;
