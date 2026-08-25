@@ -120,11 +120,11 @@
         <thead>
             <tr>
                 <th width="5%">No</th>
-                <th width="15%">Kode Barang</th>
-                <th width="25%">Nama Barang</th>
-                <th width="15%">Tgl Perolehan</th>
-                <th width="10%">Kondisi</th>
-                <th width="10%">Nilai (Rp)</th>
+                <th width="18%">Kode Barang</th>
+                <th width="32%">Nama Barang</th>
+                <th width="17%">Tgl Perolehan</th>
+                <th width="13%">Kondisi</th>
+                <th width="15%">Nilai (Rp)</th>
             </tr>
         </thead>
         <tbody>
@@ -140,13 +140,13 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7" class="text-center">Tidak ada data inventaris.</td>
+                    <td colspan="6" class="text-center">Tidak ada data inventaris.</td>
                 </tr>
             @endforelse
         </tbody>
         <tfoot>
             <tr>
-                <th colspan="6" class="text-right">TOTAL NILAI ASET</th>
+                <th colspan="5" class="text-right">TOTAL NILAI ASET</th>
                 <th class="text-right">{{ number_format($totalAset, 0, ',', '.') }}</th>
             </tr>
         </tfoot>
