@@ -19,7 +19,6 @@ class Pengeluaran extends Model
         'id_kegiatan',
     ];
 
-
     public function kegiatan()
     {
         return $this->belongsTo(Kegiatan::class, 'id_kegiatan');

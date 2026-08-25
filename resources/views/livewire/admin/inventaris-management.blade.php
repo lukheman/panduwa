@@ -58,7 +58,7 @@
             <div style="max-width: 350px; width: 100%;">
                 <x-form.input
                     wire:model.live.debounce.300ms="search"
-                    placeholder="Cari kode, nama barang, atau lokasi..."
+                    placeholder="Cari kode atau nama barang..."
                     icon="fas fa-search"
                     class="mb-0"
                 />
@@ -70,7 +70,6 @@
                 <thead>
                     <tr>
                         <th>Kode & Barang</th>
-                        <th>Lokasi</th>
                         <th>Nilai Aset (Rp)</th>
                         <th>Kondisi</th>
                         <th style="width: 120px;">Aksi</th>
@@ -83,11 +82,10 @@
                                 <div class="fw-semibold text-body">{{ $inventaris->nama_barang }}</div>
                                 <small class="text-muted font-monospace"><i class="fas fa-barcode me-1"></i>{{ $inventaris->kode_barang }}</small>
                             </td>
-                            <td class="text-secondary"><i class="fas fa-map-marker-alt text-primary me-2"></i>{{ $inventaris->lokasi }}</td>
                             <td class="text-success fw-bold">{{ $this->formatRupiah($inventaris->nilai_aset) }}</td>
                             <td>
                                 <x-ui.badge :variant="$this->getKondisiBadgeVariant($inventaris->kondisi)">
-                                    {{ $inventaris->kondisi }}
+                                    {{ $inventaris->kondisi->getLabel() }}
                                 </x-ui.badge>
                             </td>
                             <td>
@@ -100,7 +98,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="text-center py-5">
+                            <td colspan="5" class="text-center py-5">
                                 <x-ui.empty-state
                                     icon="fas fa-boxes"
                                     title="Belum ada data inventaris"
@@ -160,27 +158,14 @@
                         error="{{ $errors->first('nama_barang') }}"
                     />
 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <x-form.input
-                                id="lokasi"
-                                label="Lokasi Penempatan"
-                                wire:model="lokasi"
-                                placeholder="Contoh: Ruang Kepala Desa"
-                                required="true"
-                                error="{{ $errors->first('lokasi') }}"
-                            />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Kondisi <span class="text-danger">*</span></label>
-                            <select class="form-control" wire:model="kondisi" required>
-                                <option value="Baik">Baik</option>
-                                <option value="Rusak Ringan">Rusak Ringan</option>
-                                <option value="Rusak Berat">Rusak Berat</option>
-                                <option value="Hilang">Hilang</option>
-                            </select>
-                            @error('kondisi') <span class="text-danger small">{{ $message }}</span> @enderror
-                        </div>
+                    <div class="mb-3">
+                        <label class="form-label">Kondisi <span class="text-danger">*</span></label>
+                        <select class="form-control" wire:model="kondisi" required>
+                            @foreach (\App\Enums\KondisiInventaris::cases() as $kondisi)
+                                <option value="{{ $kondisi->value }}">{{ $kondisi->getLabel() }}</option>
+                            @endforeach
+                        </select>
+                        @error('kondisi') <span class="text-danger small">{{ $message }}</span> @enderror
                     </div>
 
                     <div class="mb-3">
@@ -225,16 +210,12 @@
                             <td>: <span class="font-monospace text-primary">{{ $viewingInventaris->kode_barang }}</span></td>
                         </tr>
                         <tr>
-                            <td class="text-muted">Lokasi</td>
-                            <td>: {{ $viewingInventaris->lokasi }}</td>
-                        </tr>
-                        <tr>
                             <td class="text-muted">Tanggal Perolehan</td>
                             <td>: {{ \Carbon\Carbon::parse($viewingInventaris->tanggal_perolehan)->format('d F Y') }}</td>
                         </tr>
                         <tr>
                             <td class="text-muted">Kondisi</td>
-                            <td>: <x-ui.badge :variant="$this->getKondisiBadgeVariant($viewingInventaris->kondisi)">{{ $viewingInventaris->kondisi }}</x-ui.badge></td>
+                            <td>: <x-ui.badge :variant="$this->getKondisiBadgeVariant($viewingInventaris->kondisi)">{{ $viewingInventaris->kondisi->getLabel() }}</x-ui.badge></td>
                         </tr>
                         <tr>
                             <td class="text-muted">Nilai Aset</td>

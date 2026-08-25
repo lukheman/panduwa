@@ -2,8 +2,9 @@
 
 namespace App\Livewire\Admin;
 
+use App\Enums\KondisiInventaris;
 use App\Models\Inventaris;
-use App\Models\Pengeluaran;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -18,32 +19,38 @@ class InventarisManagement extends Component
     public string $search = '';
 
     public string $kode_barang = '';
+
     public string $nama_barang = '';
-    public string $lokasi = '';
+
     public string $tanggal_perolehan = '';
+
     public string $nilai_aset = '';
-    public string $kondisi = 'Baik';
+
+    public string $kondisi = KondisiInventaris::BAIK->value;
 
     public ?int $editingInventarisId = null;
+
     public bool $showModal = false;
+
     public bool $showDeleteModal = false;
+
     public ?int $deletingInventarisId = null;
 
     public ?Inventaris $viewingInventaris = null;
+
     public bool $showViewModal = false;
 
     protected function rules(): array
     {
         $rules = [
             'nama_barang' => ['required', 'string', 'max:255'],
-            'lokasi' => ['required', 'string', 'max:255'],
             'tanggal_perolehan' => ['required', 'date'],
             'nilai_aset' => ['required', 'numeric', 'min:0', 'max:9999999999999'],
-            'kondisi' => ['required', 'string', 'max:255'],
+            'kondisi' => ['required', Rule::enum(KondisiInventaris::class)],
         ];
 
         if ($this->editingInventarisId) {
-            $rules['kode_barang'] = ['required', 'string', 'max:255', 'unique:inventaris,kode_barang,' . $this->editingInventarisId];
+            $rules['kode_barang'] = ['required', 'string', 'max:255', 'unique:inventaris,kode_barang,'.$this->editingInventarisId];
         } else {
             $rules['kode_barang'] = ['required', 'string', 'max:255', 'unique:inventaris,kode_barang'];
         }
@@ -65,7 +72,7 @@ class InventarisManagement extends Component
     {
         $this->resetForm();
         // Generate automatic Kode Barang template based on timestamp or something similar
-        $this->kode_barang = 'INV-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -4));
+        $this->kode_barang = 'INV-'.date('Ymd').'-'.strtoupper(substr(uniqid(), -4));
         $this->editingInventarisId = null;
         $this->showModal = true;
     }
@@ -77,10 +84,9 @@ class InventarisManagement extends Component
         $this->editingInventarisId = $id;
         $this->kode_barang = $inventaris->kode_barang;
         $this->nama_barang = $inventaris->nama_barang;
-        $this->lokasi = $inventaris->lokasi;
         $this->tanggal_perolehan = $inventaris->tanggal_perolehan;
         $this->nilai_aset = (string) $inventaris->nilai_aset;
-        $this->kondisi = $inventaris->kondisi;
+        $this->kondisi = $inventaris->kondisi->value;
 
         $this->showModal = true;
     }
@@ -147,25 +153,24 @@ class InventarisManagement extends Component
     {
         $this->kode_barang = '';
         $this->nama_barang = '';
-        $this->lokasi = '';
         $this->tanggal_perolehan = date('Y-m-d');
         $this->nilai_aset = '';
-        $this->kondisi = 'Baik';
+        $this->kondisi = KondisiInventaris::BAIK->value;
         $this->editingInventarisId = null;
     }
 
     public function formatRupiah($angka)
     {
-        return 'Rp ' . number_format($angka, 0, ',', '.');
+        return 'Rp '.number_format($angka, 0, ',', '.');
     }
 
     public function getKondisiBadgeVariant($kondisi)
     {
-        $kondisi = strtolower($kondisi);
-        if (str_contains($kondisi, 'baik')) return 'success';
-        if (str_contains($kondisi, 'ringan')) return 'warning';
-        if (str_contains($kondisi, 'berat') || str_contains($kondisi, 'rusak')) return 'danger';
-        return 'secondary';
+        if ($kondisi instanceof KondisiInventaris) {
+            return $kondisi->getColor();
+        }
+
+        return KondisiInventaris::tryFrom(strtolower((string) $kondisi))?->getColor() ?? 'secondary';
     }
 
     public function render()
@@ -174,13 +179,12 @@ class InventarisManagement extends Component
 
         $totalAset = (clone $query)->count();
         $totalNilaiAset = (clone $query)->sum('nilai_aset');
-        $asetKondisiBaik = (clone $query)->where('kondisi', 'Baik')->count();
+        $asetKondisiBaik = (clone $query)->where('kondisi', KondisiInventaris::BAIK)->count();
 
         $inventarises = $query->when($this->search, function ($q) {
-                $q->where('nama_barang', 'like', '%' . $this->search . '%')
-                    ->orWhere('kode_barang', 'like', '%' . $this->search . '%')
-                    ->orWhere('lokasi', 'like', '%' . $this->search . '%');
-            })
+            $q->where('nama_barang', 'like', '%'.$this->search.'%')
+                ->orWhere('kode_barang', 'like', '%'.$this->search.'%');
+        })
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 

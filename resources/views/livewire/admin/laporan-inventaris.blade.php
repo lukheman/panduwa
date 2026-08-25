@@ -66,8 +66,7 @@
                     <tr>
                         <th>Kode Barang</th>
                         <th>Nama Barang</th>
-                        <th>Lokasi</th>
-                        <th>Tanggal Perolehan</th>
+                            <th>Tanggal Perolehan</th>
                         <th>Kondisi</th>
                         <th class="text-end">Nilai Aset (Rp)</th>
                     </tr>
@@ -77,12 +76,11 @@
                         <tr>
                             <td><span class="badge bg-secondary">{{ $item->kode_barang }}</span></td>
                             <td class="fw-semibold text-body">{{ $item->nama_barang }}</td>
-                            <td>{{ $item->lokasi }}</td>
                             <td>{{ \Carbon\Carbon::parse($item->tanggal_perolehan)->format('d M Y') }}</td>
                             <td>
-                                @if($item->kondisi == 'baik')
+                                @if($item->kondisi === \App\Enums\KondisiInventaris::BAIK)
                                     <span class="badge bg-success">Baik</span>
-                                @elseif($item->kondisi == 'rusak ringan')
+                                @elseif($item->kondisi === \App\Enums\KondisiInventaris::RUSAK_RINGAN)
                                     <span class="badge bg-warning">Rusak Ringan</span>
                                 @else
                                     <span class="badge bg-danger">Rusak Berat</span>

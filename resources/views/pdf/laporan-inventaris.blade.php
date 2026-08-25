@@ -122,7 +122,6 @@
                 <th width="5%">No</th>
                 <th width="15%">Kode Barang</th>
                 <th width="25%">Nama Barang</th>
-                <th width="20%">Lokasi</th>
                 <th width="15%">Tgl Perolehan</th>
                 <th width="10%">Kondisi</th>
                 <th width="10%">Nilai (Rp)</th>
@@ -135,9 +134,8 @@
                     <td class="text-center">{{ $no++ }}</td>
                     <td class="text-center">{{ $item->kode_barang }}</td>
                     <td>{{ $item->nama_barang }}</td>
-                    <td>{{ $item->lokasi }}</td>
                     <td class="text-center">{{ \Carbon\Carbon::parse($item->tanggal_perolehan)->format('d-m-Y') }}</td>
-                    <td class="text-center">{{ ucfirst($item->kondisi) }}</td>
+                    <td class="text-center">{{ $item->kondisi->getLabel() }}</td>
                     <td class="text-right">{{ number_format($item->nilai_aset, 0, ',', '.') }}</td>
                 </tr>
             @empty

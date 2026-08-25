@@ -65,7 +65,7 @@
                     <tr>
                         <th>Tanggal</th>
                         <th>Keterangan</th>
-                        <th>Terkait Kegiatan</th>
+                        <th>Relasi</th>
                         <th class="text-end">Jumlah (Rp)</th>
                     </tr>
                 </thead>
@@ -79,11 +79,17 @@
                                 {{ $pengeluaran->keterangan ?: '-' }}
                             </td>
                             <td>
-                                @if($pengeluaran->kegiatan)
-                                    <span class="badge bg-primary badge-modern">{{ $pengeluaran->kegiatan->nama_kegiatan }}</span>
-                                @else
-                                    <span class="text-muted small">-</span>
-                                @endif
+                                <div class="d-flex flex-column gap-1">
+                                    @if($pengeluaran->kegiatan)
+                                        <span class="badge bg-primary badge-modern">Kegiatan: {{ $pengeluaran->kegiatan->nama_kegiatan }}</span>
+                                    @endif
+                                    @if($pengeluaran->inventaris)
+                                        <span class="badge bg-info badge-modern">Inventaris: {{ $pengeluaran->inventaris->nama_barang }}</span>
+                                    @endif
+                                    @if(!$pengeluaran->kegiatan && !$pengeluaran->inventaris)
+                                        <span class="text-muted small">-</span>
+                                    @endif
+                                </div>
                             </td>
                             <td class="text-end text-danger fw-medium">
                                 {{ $this->formatRupiah($pengeluaran->jumlah) }}

@@ -102,7 +102,7 @@
                 <th width="5%">No</th>
                 <th width="15%">Tanggal</th>
                 <th width="35%">Keterangan</th>
-                <th width="20%">Kegiatan</th>
+                <th width="20%">Relasi</th>
                 <th width="25%">Jumlah</th>
             </tr>
         </thead>
@@ -113,7 +113,12 @@
                     <td class="text-center">{{ $no++ }}</td>
                     <td class="text-center">{{ \Carbon\Carbon::parse($pengeluaran->tanggal)->format('d-m-Y') }}</td>
                     <td>{{ $pengeluaran->keterangan ?: '-' }}</td>
-                    <td>{{ $pengeluaran->kegiatan ? $pengeluaran->kegiatan->nama_kegiatan : '-' }}</td>
+                    <td>
+                        {{ $pengeluaran->kegiatan?->nama_kegiatan ?? '-' }}
+                        @if ($pengeluaran->inventaris)
+                            <br><small>Inventaris: {{ $pengeluaran->inventaris->nama_barang }}</small>
+                        @endif
+                    </td>
                     <td class="text-right">Rp {{ number_format($pengeluaran->jumlah, 0, ',', '.') }}</td>
                 </tr>
             @empty
