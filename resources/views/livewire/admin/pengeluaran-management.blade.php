@@ -187,6 +187,20 @@
                         </div>
                     </div>
 
+                    <div class="alert alert-light border small mt-3 mb-0">
+                        <div class="d-flex align-items-start gap-2">
+                            <i class="fas fa-info-circle text-primary mt-1"></i>
+                            <div>
+                                <strong class="d-block mb-1">Petunjuk pencatatan</strong>
+                                <ul class="mb-0 ps-3">
+    <li>Aktifkan <b>Catat sebagai Inventaris</b> apabila pengeluaran menghasilkan barang yang menjadi aset desa, seperti bangku, laptop, atau printer.</li>
+<li>Pilih <b>kegiatan</b> apabila pengeluaran terkait dengan kegiatan atau anggaran tertentu. Pilihan ini bersifat opsional.</li>
+
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
                     @if ($catatSebagaiInventaris)
                         <div class="border rounded-3 bg-light p-3 mt-3">
                             <div class="d-flex align-items-start gap-2 mb-3">
