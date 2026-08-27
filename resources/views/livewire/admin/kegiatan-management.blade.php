@@ -154,7 +154,7 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label">Status Kegiatan <span class="text-danger">*</span></label>
-                                <select class="form-control" wire:model="status" required>
+                                <select class="form-control" wire:model.live="status" required>
                                     <option value="perencanaan">Perencanaan</option>
                                     <option value="berjalan">Berjalan</option>
                                     <option value="selesai">Selesai</option>
@@ -174,7 +174,7 @@
                             </div>
                         </div>
 
-                        @if($editingKegiatanId)
+                        @if($editingKegiatanId && in_array($this->status, ['berjalan', 'selesai']))
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label class="form-label">Realisasi Anggaran (Rp)</label>
