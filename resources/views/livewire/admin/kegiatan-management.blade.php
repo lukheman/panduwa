@@ -1,5 +1,5 @@
 <div>
-    <x-layout.page-header title="Kelola Kegiatan" subtitle="Kelola seluruh program dan kegiatan desa">
+    <x-layout.page-header title="Perencanaan Kegiatan" subtitle="Kelola seluruh program dan kegiatan desa">
         <x-slot:actions>
             <x-ui.button variant="primary" icon="fas fa-plus" wire:click="openCreateModal">
                 Tambah Kegiatan
@@ -51,15 +51,20 @@
                     <div class="p-4 flex-grow-1 d-flex flex-column">
                         <h5 class="fw-bold mb-2 text-body">{{ $kegiatan->nama_kegiatan }}</h5>
 
-                        <div class="d-flex align-items-center text-muted small mb-4 pb-3 border-bottom">
+                        <div class="d-flex align-items-center text-muted small mb-2 pb-2 border-bottom">
                             <i class="fas fa-map-marker-alt text-danger me-2"></i>
                             <span class="text-truncate">{{ $kegiatan->lokasi }}</span>
                         </div>
 
+                        <div class="d-flex align-items-center text-muted small mb-4 pb-3 border-bottom">
+                            <i class="fas fa-layer-group text-info me-2"></i>
+                            <span class="text-truncate">{{ $kegiatan->kelompok?->getLabel() ?? '-' }}</span>
+                        </div>
+
                         <div class="mt-auto">
                             <div class="d-flex justify-content-between mb-1">
-                                <small class="text-muted fw-semibold">Anggaran:</small>
-                                <small class="text-primary fw-bold">{{ $this->formatRupiah($kegiatan->anggaran) }}</small>
+                                <small class="text-muted fw-semibold">Rencana Anggaran:</small>
+                                <small class="text-success fw-bold">{{ $this->formatRupiah($kegiatan->rencana_anggaran) }}</small>
                             </div>
                         </div>
                     </div>
@@ -99,7 +104,7 @@
     {{-- Modal Create/Edit --}}
     @if ($showModal)
         <div class="modal-backdrop-custom" wire:click.self="closeModal">
-            <div class="modal-content-custom" wire:click.stop style="max-height: 90vh; overflow-y: auto;">
+            <div class="modal-content-custom" wire:click.stop style="max-width: 900px; max-height: 90vh; overflow-y: auto;">
                 <div class="modal-header-custom">
                     <h5 class="modal-title-custom">
                         {{ $editingKegiatanId ? 'Edit Kegiatan' : 'Tambah Kegiatan Baru' }}
@@ -110,63 +115,102 @@
                 </div>
 
                 <form wire:submit="save">
-                    <x-form.input
-                        id="nama_kegiatan"
-                        label="Nama Kegiatan"
-                        wire:model="nama_kegiatan"
-                        placeholder="Contoh: Pembangunan Jalan Desa"
-                        required="true"
-                        error="{{ $errors->first('nama_kegiatan') }}"
-                    />
-
-                    <x-form.input
-                        id="lokasi"
-                        label="Lokasi Pelaksanaan"
-                        wire:model="lokasi"
-                        placeholder="Contoh: Dusun Mawar RT 01"
-                        required="true"
-                        error="{{ $errors->first('lokasi') }}"
-                    />
-
-                    <div class="mb-3">
-                        <label class="form-label">Anggaran (Rp) <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <span class="input-group-text">Rp</span>
-                            <input type="number" class="form-control" wire:model="anggaran" min="0" placeholder="0" required>
-                        </div>
-                        @error('anggaran') <span class="text-danger small">{{ $message }}</span> @enderror
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Status Kegiatan <span class="text-danger">*</span></label>
-                        <select class="form-control" wire:model="status" required>
-                            <option value="perencanaan">Perencanaan</option>
-                            <option value="berjalan">Berjalan</option>
-                            <option value="selesai">Selesai</option>
-                        </select>
-                        @error('status') <span class="text-danger small">{{ $message }}</span> @enderror
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Foto Progres (Opsional)</label>
-                        <input type="file" class="form-control" wire:model="foto_progres" accept="image/*">
-                        @error('foto_progres') <span class="text-danger small">{{ $message }}</span> @enderror
-
-                        <div wire:loading wire:target="foto_progres" class="mt-2 text-primary small">
-                            <i class="fas fa-spinner fa-spin me-1"></i> Mengunggah gambar...
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <x-form.input
+                                id="nama_kegiatan"
+                                label="Nama Kegiatan"
+                                wire:model="nama_kegiatan"
+                                placeholder="Contoh: Pembangunan Jalan Desa"
+                                required="true"
+                                error="{{ $errors->first('nama_kegiatan') }}"
+                            />
                         </div>
 
-                        @if ($foto_progres)
-                            <div class="mt-3">
-                                <p class="small text-muted mb-1">Preview Gambar Baru:</p>
-                                <img src="{{ $foto_progres->temporaryUrl() }}" class="rounded" style="max-width: 100%; height: 120px; object-fit: cover; border: 1px solid var(--border-color);">
+                        <div class="col-md-6">
+                            <x-form.input
+                                id="lokasi"
+                                label="Lokasi Pelaksanaan"
+                                wire:model="lokasi"
+                                placeholder="Contoh: Dusun Mawar RT 01"
+                                required="true"
+                                error="{{ $errors->first('lokasi') }}"
+                            />
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Kelompok Kegiatan <span class="text-danger">*</span></label>
+                                <select class="form-control" wire:model="kelompok" required>
+                                    <option value="">-- Pilih Kelompok --</option>
+                                    @foreach(\App\Enums\KelompokKegiatan::cases() as $item)
+                                        <option value="{{ $item->value }}">{{ $item->getLabel() }}</option>
+                                    @endforeach
+                                </select>
+                                @error('kelompok') <span class="text-danger small">{{ $message }}</span> @enderror
                             </div>
-                        @elseif ($existing_foto_progres)
-                            <div class="mt-3">
-                                <p class="small text-muted mb-1">Foto Saat Ini:</p>
-                                <img src="{{ asset('storage/' . $existing_foto_progres) }}" class="rounded" style="max-width: 100%; height: 120px; object-fit: cover; border: 1px solid var(--border-color);">
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Status Kegiatan <span class="text-danger">*</span></label>
+                                <select class="form-control" wire:model="status" required>
+                                    <option value="perencanaan">Perencanaan</option>
+                                    <option value="berjalan">Berjalan</option>
+                                    <option value="selesai">Selesai</option>
+                                </select>
+                                @error('status') <span class="text-danger small">{{ $message }}</span> @enderror
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Rencana Anggaran (Rp) <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">Rp</span>
+                                    <input type="number" class="form-control" wire:model="rencana_anggaran" min="0" placeholder="0" required>
+                                </div>
+                                @error('rencana_anggaran') <span class="text-danger small">{{ $message }}</span> @enderror
+                            </div>
+                        </div>
+
+                        @if($editingKegiatanId)
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Realisasi Anggaran (Rp)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">Rp</span>
+                                        <input type="number" class="form-control" wire:model="realisasi_anggaran" min="0" placeholder="0">
+                                    </div>
+                                    @error('realisasi_anggaran') <span class="text-danger small">{{ $message }}</span> @enderror
+                                    <small class="text-muted"><i class="fas fa-info-circle me-1"></i>Mengisi realisasi anggaran akan otomatis dicatat sebagai pengeluaran.</small>
+                                </div>
                             </div>
                         @endif
+
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label class="form-label">Foto Progres (Opsional)</label>
+                                <input type="file" class="form-control" wire:model="foto_progres" accept="image/*">
+                                @error('foto_progres') <span class="text-danger small">{{ $message }}</span> @enderror
+
+                                <div wire:loading wire:target="foto_progres" class="mt-2 text-primary small">
+                                    <i class="fas fa-spinner fa-spin me-1"></i> Mengunggah gambar...
+                                </div>
+
+                                @if ($foto_progres)
+                                    <div class="mt-3">
+                                        <p class="small text-muted mb-1">Preview Gambar Baru:</p>
+                                        <img src="{{ $foto_progres->temporaryUrl() }}" class="rounded" style="max-width: 100%; height: 120px; object-fit: cover; border: 1px solid var(--border-color);">
+                                    </div>
+                                @elseif ($existing_foto_progres)
+                                    <div class="mt-3">
+                                        <p class="small text-muted mb-1">Foto Saat Ini:</p>
+                                        <img src="{{ asset('storage/' . $existing_foto_progres) }}" class="rounded" style="max-width: 100%; height: 120px; object-fit: cover; border: 1px solid var(--border-color);">
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
                     </div>
 
                     <div class="d-flex justify-content-end gap-2 mt-4">
@@ -215,6 +259,7 @@
                             </x-ui.badge>
                         </div>
                         <p class="text-muted"><i class="fas fa-map-marker-alt text-danger me-2"></i>{{ $detailKegiatan->lokasi }}</p>
+                        <p class="text-muted"><i class="fas fa-layer-group text-info me-2"></i>{{ $detailKegiatan->kelompok?->getLabel() ?? '-' }}</p>
                     </div>
 
                     <div class="row g-3 mb-4">
@@ -229,8 +274,8 @@
                     <div class="p-3 border rounded shadow-sm">
                         <h6 class="fw-bold border-bottom pb-2 mb-3">Informasi Anggaran</h6>
                         <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted">Total Anggaran:</span>
-                            <span class="fw-bold text-primary">{{ $this->formatRupiah($detailKegiatan->anggaran) }}</span>
+                            <span class="text-muted">Rencana Anggaran:</span>
+                            <span class="fw-bold text-success">{{ $this->formatRupiah($detailKegiatan->rencana_anggaran) }}</span>
                         </div>
                     </div>
 

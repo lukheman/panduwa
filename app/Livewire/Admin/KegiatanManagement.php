@@ -2,36 +2,56 @@
 
 namespace App\Livewire\Admin;
 
+use App\Enums\KelompokKegiatan;
+use App\Enums\StatusKegiatan;
 use App\Models\Kegiatan;
+use App\Models\Pemasukan;
+use App\Models\Pengeluaran;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
-use Livewire\WithPagination;
 use Livewire\WithFileUploads;
-use Illuminate\Support\Facades\Storage;
+use Livewire\WithPagination;
 
-#[Title('Kelola Kegiatan')]
+#[Title('Perencanaan Kegiatan')]
 class KegiatanManagement extends Component
 {
-    use WithPagination;
     use WithFileUploads;
+    use WithPagination;
 
     #[Url(as: 'q')]
     public string $search = '';
 
     public string $nama_kegiatan = '';
+
     public string $lokasi = '';
-    public string $anggaran = '';
+
+    public string $kelompok = '';
+
+    public string $rencana_anggaran = '';
+
+    public string $realisasi_anggaran = '';
+
     public string $status = 'perencanaan';
+
     public $foto_progres;
+
     public ?string $existing_foto_progres = null;
 
     public ?int $editingKegiatanId = null;
+
     public bool $showModal = false;
+
     public bool $showDeleteModal = false;
+
     public bool $showDetailModal = false;
+
     public ?int $deletingKegiatanId = null;
+
     public ?int $detailKegiatanId = null;
+
     public $detailKegiatan = null;
 
     protected function rules(): array
@@ -39,8 +59,10 @@ class KegiatanManagement extends Component
         return [
             'nama_kegiatan' => ['required', 'string', 'max:255'],
             'lokasi' => ['required', 'string', 'max:255'],
-            'anggaran' => ['required', 'numeric', 'min:0', 'max:9999999999999'],
-            'status' => ['required', \Illuminate\Validation\Rule::enum(\App\Enums\StatusKegiatan::class)],
+            'kelompok' => ['required', Rule::enum(KelompokKegiatan::class)],
+            'rencana_anggaran' => ['required', 'numeric', 'min:0', 'max:9999999999999'],
+            'realisasi_anggaran' => ['nullable', 'numeric', 'min:0', 'max:9999999999999'],
+            'status' => ['required', Rule::enum(StatusKegiatan::class)],
             'foto_progres' => ['nullable', 'image', 'max:2048'], // 2MB Max
         ];
     }
@@ -78,7 +100,9 @@ class KegiatanManagement extends Component
         $this->editingKegiatanId = $id;
         $this->nama_kegiatan = $kegiatan->nama_kegiatan;
         $this->lokasi = $kegiatan->lokasi;
-        $this->anggaran = (string) $kegiatan->anggaran;
+        $this->kelompok = $kegiatan->kelompok->value;
+        $this->rencana_anggaran = (string) $kegiatan->rencana_anggaran;
+        $this->realisasi_anggaran = (string) ($kegiatan->realisasi_anggaran ?? '');
         $this->status = $kegiatan->status->value;
         $this->existing_foto_progres = $kegiatan->foto_progres;
         $this->foto_progres = null;
@@ -91,29 +115,30 @@ class KegiatanManagement extends Component
         $this->validate();
 
         // Cek sisa anggaran yang bisa dialokasikan
-        $totalPemasukan = \App\Models\Pemasukan::sum('jumlah');
-        $totalPengeluaranNonKegiatan = \App\Models\Pengeluaran::whereNull('id_kegiatan')->sum('jumlah');
-        $totalAnggaranKegiatanLain = \App\Models\Kegiatan::query();
+        $totalPemasukan = Pemasukan::sum('jumlah');
+        $totalPengeluaranNonKegiatan = Pengeluaran::whereNull('id_kegiatan')->sum('jumlah');
+        $totalAnggaranKegiatanLain = Kegiatan::query();
 
         if ($this->editingKegiatanId) {
             $totalAnggaranKegiatanLain->where('id', '!=', $this->editingKegiatanId);
         }
 
-        $totalAnggaranKegiatanLain = $totalAnggaranKegiatanLain->sum('anggaran');
+        $totalAnggaranKegiatanLain = $totalAnggaranKegiatanLain->sum('rencana_anggaran');
 
         $sisaAnggaranTersedia = $totalPemasukan - $totalPengeluaranNonKegiatan - $totalAnggaranKegiatanLain;
 
         $allowedToSave = false;
 
         if ($this->editingKegiatanId) {
-            $oldAnggaran = \App\Models\Kegiatan::where('id', $this->editingKegiatanId)->value('anggaran');
-            if ($this->anggaran <= $oldAnggaran) {
+            $oldAnggaran = Kegiatan::where('id', $this->editingKegiatanId)->value('rencana_anggaran');
+            if ($this->rencana_anggaran <= $oldAnggaran) {
                 $allowedToSave = true;
             }
         }
 
-        if (!$allowedToSave && $this->anggaran > $sisaAnggaranTersedia) {
-            $this->addError('anggaran', 'Sisa anggaran desa yang belum dialokasikan hanya ' . $this->formatRupiah($sisaAnggaranTersedia) . '. Anda tidak dapat mengeset anggaran melebihi batas ini.');
+        if (! $allowedToSave && $this->rencana_anggaran > $sisaAnggaranTersedia) {
+            $this->addError('rencana_anggaran', 'Sisa anggaran desa yang belum dialokasikan hanya '.$this->formatRupiah($sisaAnggaranTersedia).'. Anda tidak dapat mengeset anggaran melebihi batas ini.');
+
             return;
         }
 
@@ -129,7 +154,9 @@ class KegiatanManagement extends Component
         $data = [
             'nama_kegiatan' => $this->nama_kegiatan,
             'lokasi' => $this->lokasi,
-            'anggaran' => $this->anggaran,
+            'kelompok' => $this->kelompok,
+            'rencana_anggaran' => $this->rencana_anggaran,
+            'realisasi_anggaran' => $this->realisasi_anggaran ?: null,
             'status' => $this->status,
             'foto_progres' => $path,
         ];
@@ -137,14 +164,35 @@ class KegiatanManagement extends Component
         if ($this->editingKegiatanId) {
             $kegiatan = Kegiatan::findOrFail($this->editingKegiatanId);
             $kegiatan->update($data);
-            session()->flash('success', 'Data kegiatan berhasil diperbarui.');
+
+            if ($this->realisasi_anggaran) {
+                $keterangan = 'Realisasi Anggaran Kegiatan: '.$kegiatan->nama_kegiatan;
+                $pengeluaran = Pengeluaran::where('id_kegiatan', $kegiatan->id)
+                    ->where('keterangan', $keterangan)
+                    ->first();
+
+                if ($pengeluaran) {
+                    $pengeluaran->update(['jumlah' => $this->realisasi_anggaran]);
+                } else {
+                    Pengeluaran::create([
+                        'jumlah' => $this->realisasi_anggaran,
+                        'tanggal' => date('Y-m-d'),
+                        'keterangan' => $keterangan,
+                        'id_kegiatan' => $kegiatan->id,
+                    ]);
+                }
+
+                session()->flash('success', 'Data kegiatan berhasil diperbarui dan realisasi anggaran sebesar '.$this->formatRupiah($this->realisasi_anggaran).' telah dicatat sebagai pengeluaran.');
+            } else {
+                session()->flash('success', 'Data kegiatan berhasil diperbarui.');
+            }
         } else {
             $kegiatan = Kegiatan::create($data);
-            
-            \App\Models\Pengeluaran::create([
-                'jumlah' => $kegiatan->anggaran,
+
+            Pengeluaran::create([
+                'jumlah' => $kegiatan->rencana_anggaran,
                 'tanggal' => date('Y-m-d'),
-                'keterangan' => 'Alokasi Dana Kegiatan: ' . $kegiatan->nama_kegiatan,
+                'keterangan' => 'Alokasi Dana Kegiatan: '.$kegiatan->nama_kegiatan,
                 'id_kegiatan' => $kegiatan->id,
             ]);
 
@@ -194,7 +242,9 @@ class KegiatanManagement extends Component
     {
         $this->nama_kegiatan = '';
         $this->lokasi = '';
-        $this->anggaran = '';
+        $this->kelompok = '';
+        $this->rencana_anggaran = '';
+        $this->realisasi_anggaran = '';
         $this->status = 'perencanaan';
         $this->foto_progres = null;
         $this->existing_foto_progres = null;
@@ -203,22 +253,24 @@ class KegiatanManagement extends Component
 
     public function formatRupiah($angka)
     {
-        return 'Rp ' . number_format($angka, 0, ',', '.');
+        return 'Rp '.number_format($angka, 0, ',', '.');
     }
 
     public function getStatusBadgeVariant($status)
     {
-        if ($status instanceof \App\Enums\StatusKegiatan) {
+        if ($status instanceof StatusKegiatan) {
             return $status->getColor();
         }
+
         return 'warning';
     }
 
     public function getStatusIcon($status)
     {
-        if ($status instanceof \App\Enums\StatusKegiatan) {
+        if ($status instanceof StatusKegiatan) {
             return $status->getIcon();
         }
+
         return 'fas fa-calendar-alt';
     }
 
@@ -226,8 +278,8 @@ class KegiatanManagement extends Component
     {
         $kegiatans = Kegiatan::query()
             ->when($this->search, function ($query) {
-                $query->where('nama_kegiatan', 'like', '%' . $this->search . '%')
-                    ->orWhere('lokasi', 'like', '%' . $this->search . '%');
+                $query->where('nama_kegiatan', 'like', '%'.$this->search.'%')
+                    ->orWhere('lokasi', 'like', '%'.$this->search.'%');
             })
             ->orderBy('created_at', 'desc')
             ->paginate(10);

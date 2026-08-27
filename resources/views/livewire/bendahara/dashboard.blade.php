@@ -149,7 +149,7 @@
                 <div class="mt-auto">
                     <p class="mb-3 opacity-75 small">Pastikan pencatatan pengeluaran kegiatan dilakukan secara rutin dan real-time untuk mempermudah laporan ke Kepala Desa.</p>
                     <a href="{{ route('bendahara.kegiatan') }}" class="btn btn-light w-100 text-primary fw-bold border-0 shadow-sm" wire:navigate>
-                        Kelola Kegiatan <i class="fas fa-arrow-right ms-2"></i>
+                        Perencanaan Kegiatan <i class="fas fa-arrow-right ms-2"></i>
                     </a>
                 </div>
             </x-layout.modern-card>

@@ -14,7 +14,6 @@ return new class extends Migration
             $table->decimal('jumlah', 15, 2);
             $table->date('tanggal');
             $table->text('keterangan')->nullable();
-            $table->foreignId('id_bendahara')->constrained('bendahara')->onDelete('cascade');
             $table->timestamps();
         });
     }

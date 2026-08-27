@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Kegiatan;
+use Illuminate\Database\Seeder;
 
 class KegiatanSeeder extends Seeder
 {
@@ -12,14 +12,16 @@ class KegiatanSeeder extends Seeder
         Kegiatan::create([
             'nama_kegiatan' => 'Pembangunan Posyandu Mekar',
             'lokasi' => 'Dusun 1, RT 02/RW 01',
-            'anggaran' => 50000000.00,
+            'kelompok' => 'bidang_pembangunan_desa',
+            'rencana_anggaran' => 50000000.00,
             'status' => 'berjalan',
         ]);
 
         Kegiatan::create([
             'nama_kegiatan' => 'Pelatihan Pertanian Organik',
             'lokasi' => 'Balai Desa',
-            'anggaran' => 15000000.00,
+            'kelompok' => 'bidang_pemberdayaan_masyarakat',
+            'rencana_anggaran' => 15000000.00,
             'status' => 'selesai',
         ]);
     }

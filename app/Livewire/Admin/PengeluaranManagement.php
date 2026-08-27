@@ -103,9 +103,9 @@ class PengeluaranManagement extends Component
                     }
                 }
 
-                $sisa = $kegiatan->anggaran - $realisasi;
+                $sisa = $kegiatan->rencana_anggaran - $realisasi;
                 $this->selectedKegiatanInfo = [
-                    'anggaran' => $kegiatan->anggaran,
+                    'anggaran' => $kegiatan->rencana_anggaran,
                     'realisasi' => $realisasi,
                     'sisa' => $sisa,
                 ];
@@ -186,7 +186,7 @@ class PengeluaranManagement extends Component
                     $realisasi -= $current->jumlah;
                 }
 
-                $sisaKegiatan = $kegiatan->anggaran - $realisasi;
+                $sisaKegiatan = $kegiatan->rencana_anggaran - $realisasi;
 
                 if ($validated['jumlah'] > $sisaKegiatan) {
                     $this->addError('jumlah', 'Sisa Anggaran untuk Kegiatan ini ('.$this->formatRupiah($sisaKegiatan).') tidak mencukupi.');

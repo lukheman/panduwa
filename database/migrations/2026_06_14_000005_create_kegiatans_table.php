@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\KelompokKegiatan;
+use App\Enums\StatusKegiatan;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,10 +14,11 @@ return new class extends Migration
             $table->id();
             $table->string('nama_kegiatan');
             $table->string('lokasi');
-            $table->decimal('anggaran', 15, 2);
-            $table->enum('status', \App\Enums\StatusKegiatan::values())->default(\App\Enums\StatusKegiatan::PERENCANAAN->value);
+            $table->enum('kelompok', KelompokKegiatan::values());
+            $table->decimal('rencana_anggaran', 15, 2);
+            $table->decimal('realisasi_anggaran', 15, 2)->nullable();
+            $table->enum('status', StatusKegiatan::values())->default(StatusKegiatan::PERENCANAAN->value);
             $table->string('foto_progres')->nullable();
-            $table->foreignId('id_bendahara')->constrained('bendahara')->onDelete('cascade');
             $table->timestamps();
         });
     }

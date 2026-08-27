@@ -14,7 +14,6 @@ return new class extends Migration
             $table->date('tanggal');
             $table->text('keterangan')->nullable();
             $table->foreignId('id_kegiatan')->nullable()->constrained('kegiatan')->onDelete('set null');
-            $table->foreignId('id_bendahara')->constrained('bendahara')->onDelete('cascade');
             $table->timestamps();
         });
     }

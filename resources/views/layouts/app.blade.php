@@ -564,7 +564,7 @@
         @if(Route::has($routePrefix . 'kegiatan') || Route::has($routePrefix . 'inventaris'))
         <x-layout.sidebar-section title="Operasional & Aset">
             @if(Route::has($routePrefix . 'kegiatan'))
-            <x-layout.sidebar-link href="{{ route($routePrefix . 'kegiatan') }}" icon="fas fa-tasks" :active="request()->routeIs($routePrefix . 'kegiatan')">Kelola Kegiatan</x-layout.sidebar-link>
+            <x-layout.sidebar-link href="{{ route($routePrefix . 'kegiatan') }}" icon="fas fa-tasks" :active="request()->routeIs($routePrefix . 'kegiatan')">Perencanaan Kegiatan</x-layout.sidebar-link>
             @endif
             @if(Route::has($routePrefix . 'inventaris'))
             <x-layout.sidebar-link href="{{ route($routePrefix . 'inventaris') }}" icon="fas fa-boxes" :active="request()->routeIs($routePrefix . 'inventaris')">Kelola Inventaris</x-layout.sidebar-link>

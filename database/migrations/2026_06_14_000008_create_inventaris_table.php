@@ -17,7 +17,6 @@ return new class extends Migration
             $table->decimal('nilai_aset', 15, 2);
             $table->enum('kondisi', KondisiInventaris::values())->default(KondisiInventaris::BAIK->value);
             $table->foreignId('id_pengeluaran')->nullable()->constrained('pengeluaran')->onDelete('set null');
-            $table->foreignId('id_bendahara')->constrained('bendahara')->onDelete('cascade');
             $table->timestamps();
         });
     }

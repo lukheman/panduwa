@@ -96,8 +96,8 @@
                                 <h5 class="card-title fw-bold mb-3">{{ $kegiatan->nama_kegiatan }}</h5>
 
                                     <div class="d-flex justify-content-between small mb-1">
-                                        <span class="text-muted">Anggaran:</span>
-                                        <span class="fw-semibold text-primary">{{ $formatRupiah($kegiatan->anggaran) }}</span>
+                                        <span class="text-muted">Rencana Anggaran:</span>
+                                        <span class="fw-semibold text-primary">{{ $formatRupiah($kegiatan->rencana_anggaran) }}</span>
                                     </div>
 
                                 <p class="card-text text-secondary small mb-0">

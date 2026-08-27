@@ -85,7 +85,7 @@
                         <thead>
                             <tr>
                                 <th>Kegiatan Terbaru</th>
-                                <th>Anggaran</th>
+                                <th>Rencana Anggaran</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
@@ -96,7 +96,7 @@
                                         <div class="fw-semibold text-body">{{ $k->nama_kegiatan }}</div>
                                         <small class="text-muted">{{ \Carbon\Carbon::parse($k->tanggal_mulai)->format('d M Y') }}</small>
                                     </td>
-                                    <td class="fw-medium text-primary">{{ $this->formatRupiah($k->anggaran) }}</td>
+                                    <td class="fw-medium text-primary">{{ $this->formatRupiah($k->rencana_anggaran) }}</td>
                                     <td>
                                         @if($k->status === 'selesai')
                                             <x-ui.badge variant="success">Selesai</x-ui.badge>

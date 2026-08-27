@@ -2,9 +2,10 @@
 
 namespace App\Livewire\Bendahara;
 
+use App\Enums\StatusKegiatan;
+use App\Models\Kegiatan;
 use App\Models\Pemasukan;
 use App\Models\Pengeluaran;
-use App\Models\Kegiatan;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
@@ -19,9 +20,9 @@ class Dashboard extends Component
         $saldoKas = $totalPemasukan - $totalPengeluaran;
 
         // 2. Statistik Kegiatan
-        $kegiatanAktif = Kegiatan::whereIn('status', [\App\Enums\StatusKegiatan::PERENCANAAN, \App\Enums\StatusKegiatan::BERJALAN])->count();
-        $totalAnggaranKegiatan = Kegiatan::sum('anggaran');
-        
+        $kegiatanAktif = Kegiatan::whereIn('status', [StatusKegiatan::PERENCANAAN, StatusKegiatan::BERJALAN])->count();
+        $totalAnggaranKegiatan = Kegiatan::sum('rencana_anggaran');
+
         // 3. Aktivitas Keuangan Terbaru (Gabungan 5 Pemasukan & Pengeluaran Terakhir)
         $recentPemasukan = Pemasukan::query()
             ->orderBy('tanggal', 'desc')
@@ -73,6 +74,6 @@ class Dashboard extends Component
 
     public function formatRupiah($angka)
     {
-        return 'Rp ' . number_format($angka, 0, ',', '.');
+        return 'Rp '.number_format($angka, 0, ',', '.');
     }
 }
