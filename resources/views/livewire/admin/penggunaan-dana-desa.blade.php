@@ -1,5 +1,5 @@
 <div>
-    <x-layout.page-header title="Sisa Anggaran" subtitle="Laporan Penggunaan Dana Desa Desa & Realisasi Kegiatan">
+    <x-layout.page-header title="Laporan Realisasi Anggaran" subtitle="Laporan Realisasi Anggaran & Realisasi Kegiatan">
         <x-slot:actions>
             <x-ui.button variant="danger" wire:click="downloadPdf" wire:loading.attr="disabled">
                 <span wire:loading.remove wire:target="downloadPdf">

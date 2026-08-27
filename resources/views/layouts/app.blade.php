@@ -576,7 +576,7 @@
         @if(Route::has($routePrefix . 'penggunaan-dana-desa') || Route::has($routePrefix . 'laporan-inventaris'))
         <x-layout.sidebar-section title="Laporan">
             @if(Route::has($routePrefix . 'penggunaan-dana-desa'))
-            <x-layout.sidebar-link href="{{ route($routePrefix . 'penggunaan-dana-desa') }}" icon="fas fa-chart-pie" :active="request()->routeIs($routePrefix . 'penggunaan-dana-desa')">Laporan Penggunaan Dana Desa</x-layout.sidebar-link>
+            <x-layout.sidebar-link href="{{ route($routePrefix . 'penggunaan-dana-desa') }}" icon="fas fa-chart-pie" :active="request()->routeIs($routePrefix . 'penggunaan-dana-desa')">Laporan Realisasi Anggaran</x-layout.sidebar-link>
             @endif
             @if(Route::has($routePrefix . 'laporan-inventaris'))
             <x-layout.sidebar-link href="{{ route($routePrefix . 'laporan-inventaris') }}" icon="fas fa-file-invoice" :active="request()->routeIs($routePrefix . 'laporan-inventaris')">Laporan Inventaris</x-layout.sidebar-link>
@@ -664,7 +664,7 @@
             @if(Route::has($routePrefix . 'penggunaan-dana-desa'))
             routes.push({
                 id: 'penggunaan-dana-desa',
-                title: 'Laporan Penggunaan Dana Desa',
+                title: 'Laporan Realisasi Anggaran',
                 icon: '<i class="fas fa-chart-pie"></i>',
                 section: 'Laporan',
                 handler: () => { window.location.href = "{{ route($routePrefix . 'penggunaan-dana-desa') }}"; }

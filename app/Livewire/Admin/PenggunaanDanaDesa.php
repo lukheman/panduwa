@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Models\Kegiatan;
 use App\Models\Pemasukan;
 use App\Models\Pengeluaran;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -9,7 +10,7 @@ use Carbon\Carbon;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
-#[Title('Laporan Penggunaan Dana Desa')]
+#[Title('Laporan Realisasi Anggaran')]
 class PenggunaanDanaDesa extends Component
 {
     public function formatRupiah($angka)
@@ -19,20 +20,29 @@ class PenggunaanDanaDesa extends Component
 
     public function downloadPdf()
     {
-        $pengeluarans = Pengeluaran::with(['kegiatan', 'inventaris'])->orderBy('tanggal', 'desc')->get();
+        $tahun = date('Y');
 
-        $totalPengeluaran = $pengeluarans->sum('jumlah');
+        $totalPemasukan = Pemasukan::sum('jumlah');
+
+        $kegiatans = Kegiatan::with('pengeluarans')
+            ->get()
+            ->groupBy('kelompok');
+
+        $totalRencana = Kegiatan::sum('rencana_anggaran');
+        $totalRealisasi = Kegiatan::sum('realisasi_anggaran');
 
         $pdf = Pdf::loadView('pdf.laporan-penggunaan-dana-desa', [
-            'tahun' => date('Y'),
+            'tahun' => $tahun,
             'tanggalCetak' => Carbon::now()->translatedFormat('d F Y'),
-            'pengeluarans' => $pengeluarans,
-            'totalPengeluaran' => $totalPengeluaran,
+            'totalPemasukan' => $totalPemasukan,
+            'kegiatans' => $kegiatans,
+            'totalRencana' => $totalRencana,
+            'totalRealisasi' => $totalRealisasi,
         ]);
 
         return response()->streamDownload(function () use ($pdf) {
             echo $pdf->output();
-        }, 'Laporan_Penggunaan_Dana_Desa_'.date('Ymd_His').'.pdf');
+        }, 'Laporan_Realisasi_Anggaran_'.date('Ymd_His').'.pdf');
     }
 
     public function render()
