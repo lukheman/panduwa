@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\KelompokKegiatan;
+use App\Enums\StatusKegiatan;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -14,13 +16,16 @@ class Kegiatan extends Model
     protected $fillable = [
         'nama_kegiatan',
         'lokasi',
-        'anggaran',
+        'kelompok',
+        'rencana_anggaran',
+        'realisasi_anggaran',
         'status',
         'foto_progres',
     ];
 
     protected $casts = [
-        'status' => \App\Enums\StatusKegiatan::class,
+        'kelompok' => KelompokKegiatan::class,
+        'status' => StatusKegiatan::class,
     ];
 
     public function pengeluarans()
