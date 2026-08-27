@@ -168,17 +168,7 @@
                     />
 
                     <div class="row g-3 mt-1">
-                        <div class="col-md-6">
-                            <label class="form-label">Terkait Kegiatan <span class="text-muted">(Opsional)</span></label>
-                            <select class="form-control" wire:model.live="id_kegiatan">
-                                <option value="">Tidak terkait kegiatan</option>
-                                @foreach ($kegiatans as $kegiatan)
-                                    <option value="{{ $kegiatan->id }}">{{ $kegiatan->nama_kegiatan }}</option>
-                                @endforeach
-                            </select>
-                            @error('id_kegiatan') <span class="text-danger small">{{ $message }}</span> @enderror
-                        </div>
-                        <div class="col-md-6 d-flex align-items-end">
+                        <div class="col-md-12 d-flex align-items-end">
                             <div class="form-check form-switch mb-2">
                                 <input class="form-check-input" type="checkbox" role="switch" id="catatSebagaiInventaris" wire:model.live="catatSebagaiInventaris">
                                 <label class="form-check-label fw-semibold" for="catatSebagaiInventaris">Catat sebagai inventaris</label>
@@ -193,9 +183,7 @@
                             <div>
                                 <strong class="d-block mb-1">Petunjuk pencatatan</strong>
                                 <ul class="mb-0 ps-3">
-    <li>Aktifkan <b>Catat sebagai Inventaris</b> apabila pengeluaran menghasilkan barang yang menjadi aset desa, seperti bangku, laptop, atau printer.</li>
-<li>Pilih <b>kegiatan</b> apabila pengeluaran terkait dengan kegiatan atau anggaran tertentu. Pilihan ini bersifat opsional.</li>
-
+                                    <li>Aktifkan <b>Catat sebagai Inventaris</b> apabila pengeluaran menghasilkan barang yang menjadi aset desa, seperti bangku, laptop, atau printer.</li>
                                 </ul>
                             </div>
                         </div>
