@@ -85,8 +85,7 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th width="8%">NOMOR REK.</th>
-                <th width="42%">URAIAN</th>
+                <th width="50%">URAIAN</th>
                 <th width="17%">ANGGARAN<br>Rp.</th>
                 <th width="17%">REALISASI<br>Rp.</th>
                 <th width="16%">SISA<br>Rp.</th>
@@ -96,13 +95,11 @@
                 <th class="text-center">2</th>
                 <th class="text-center">3</th>
                 <th class="text-center">4</th>
-                <th class="text-center">5</th>
             </tr>
         </thead>
         <tbody>
             {{-- Pemasukan --}}
             <tr class="row-sub-header">
-                <td class="text-center">1</td>
                 <td class="bold">TOTAL PEMASUKAN (PENDAPATAN DESA)</td>
                 <td class="text-right bold" colspan="2">{{ number_format($totalPemasukan, 0, ',', '.') }}</td>
                 <td></td>
@@ -110,7 +107,6 @@
 
             {{-- BELANJA DESA Header --}}
             <tr class="row-header">
-                <td></td>
                 <td class="bold">BELANJA DESA (REALISASI ANGGARAN)</td>
                 <td></td>
                 <td></td>
@@ -118,7 +114,6 @@
             </tr>
 
             {{-- Loop per Bidang -> Sub-Bidang -> Kegiatan --}}
-            @php $noBidang = 1; @endphp
             @foreach($bidangs as $bidang)
                 @php
                     $kegiatanBidang = $bidang->subBidangs->flatMap->kegiatans;
@@ -129,7 +124,6 @@
 
                 {{-- Header Bidang --}}
                 <tr class="row-header">
-                    <td class="text-center">{{ $noBidang }}</td>
                     <td class="bold">{{ strtoupper($bidang->kode.' - '.$bidang->nama) }}</td>
                     <td class="text-right bold">{{ number_format($totalAnggaranBidang, 0, ',', '.') }}</td>
                     <td class="text-right bold">{{ number_format($totalRealisasiBidang, 0, ',', '.') }}</td>
@@ -144,7 +138,6 @@
                         $sisaSub = $totalAnggaranSub - $totalRealisasiSub;
                     @endphp
                     <tr class="row-sub-header">
-                        <td class="text-center">{{ $noBidang }}.{{ $loop->iteration }}</td>
                         <td class="bold">{{ $sub->kode.' - '.$sub->nama }}</td>
                         <td class="text-right bold">{{ number_format($totalAnggaranSub, 0, ',', '.') }}</td>
                         <td class="text-right bold">{{ number_format($totalRealisasiSub, 0, ',', '.') }}</td>
@@ -158,7 +151,6 @@
                             $sisa = $kegiatan->rencana_anggaran - $realisasi;
                         @endphp
                         <tr>
-                            <td class="text-center">{{ $noBidang }}.{{ $loop->parent->iteration }}.{{ $loop->iteration }}</td>
                             <td>{{ $kegiatan->nama_kegiatan }}</td>
                             <td class="text-right">{{ number_format($kegiatan->rencana_anggaran, 0, ',', '.') }}</td>
                             <td class="text-right">{{ number_format($realisasi, 0, ',', '.') }}</td>
@@ -166,13 +158,10 @@
                         </tr>
                     @endforeach
                 @endforeach
-
-                @php $noBidang++; @endphp
             @endforeach
 
             {{-- JUMLAH BELANJA DESA --}}
             <tr class="row-header">
-                <td></td>
                 <td class="bold">JUMLAH BELANJA DESA</td>
                 <td class="text-right bold">{{ number_format($totalRencana, 0, ',', '.') }}</td>
                 <td class="text-right bold">{{ number_format($totalRealisasi, 0, ',', '.') }}</td>
@@ -181,7 +170,6 @@
 
             {{-- SISA ANGGARAN --}}
             <tr class="row-sub-header">
-                <td></td>
                 <td class="bold">SISA ANGGARAN (PEMASUKAN - BELANJA)</td>
                 <td class="text-right bold" colspan="2">{{ number_format($totalPemasukan - $totalRealisasi, 0, ',', '.') }}</td>
                 <td></td>
