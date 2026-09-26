@@ -561,8 +561,11 @@
         @endif
 
 
-        @if(Route::has($routePrefix . 'kegiatan') || Route::has($routePrefix . 'inventaris'))
+        @if(Route::has($routePrefix . 'kegiatan') || Route::has($routePrefix . 'inventaris') || Route::has($routePrefix . 'bidang-kegiatan'))
         <x-layout.sidebar-section title="Operasional & Aset">
+            @if(Route::has($routePrefix . 'bidang-kegiatan'))
+            <x-layout.sidebar-link href="{{ route($routePrefix . 'bidang-kegiatan') }}" icon="fas fa-layer-group" :active="request()->routeIs($routePrefix . 'bidang-kegiatan')">Bidang & Sub-Bidang</x-layout.sidebar-link>
+            @endif
             @if(Route::has($routePrefix . 'kegiatan'))
             <x-layout.sidebar-link href="{{ route($routePrefix . 'kegiatan') }}" icon="fas fa-tasks" :active="request()->routeIs($routePrefix . 'kegiatan')">Perencanaan Kegiatan</x-layout.sidebar-link>
             @endif
@@ -690,6 +693,16 @@
                 icon: '<i class="fas fa-tasks"></i>',
                 section: 'Operasional & Aset',
                 handler: () => { window.location.href = "{{ route($routePrefix . 'kegiatan') }}"; }
+            });
+            @endif
+
+            @if(Route::has($routePrefix . 'bidang-kegiatan'))
+            routes.push({
+                id: 'bidang-kegiatan',
+                title: 'Bidang & Sub-Bidang',
+                icon: '<i class="fas fa-layer-group"></i>',
+                section: 'Operasional & Aset',
+                handler: () => { window.location.href = "{{ route($routePrefix . 'bidang-kegiatan') }}"; }
             });
             @endif
 

@@ -82,6 +82,9 @@
                                 <div class="d-flex flex-column gap-1">
                                     @if($pengeluaran->kegiatan)
                                         <span class="badge bg-primary badge-modern">Kegiatan: {{ $pengeluaran->kegiatan->nama_kegiatan }}</span>
+                                        @if($pengeluaran->kegiatan->subBidang)
+                                            <span class="badge bg-secondary badge-modern">{{ $pengeluaran->kegiatan->subBidang->bidang?->kode }} | {{ $pengeluaran->kegiatan->subBidang->kode }} - {{ $pengeluaran->kegiatan->subBidang->nama }}</span>
+                                        @endif
                                     @endif
                                     @if($pengeluaran->inventaris)
                                         <span class="badge bg-info badge-modern">Inventaris: {{ $pengeluaran->inventaris->nama_barang }}</span>

@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use App\Enums\KelompokKegiatan;
 use App\Enums\StatusKegiatan;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Kegiatan extends Model
 {
@@ -16,7 +16,7 @@ class Kegiatan extends Model
     protected $fillable = [
         'nama_kegiatan',
         'lokasi',
-        'kelompok',
+        'sub_bidang_kegiatan_id',
         'rencana_anggaran',
         'realisasi_anggaran',
         'status',
@@ -24,9 +24,13 @@ class Kegiatan extends Model
     ];
 
     protected $casts = [
-        'kelompok' => KelompokKegiatan::class,
         'status' => StatusKegiatan::class,
     ];
+
+    public function subBidang(): BelongsTo
+    {
+        return $this->belongsTo(SubBidangKegiatan::class, 'sub_bidang_kegiatan_id');
+    }
 
     public function pengeluarans()
     {

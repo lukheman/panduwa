@@ -1,27 +1,23 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-
-// Guest & Auth
-use App\Http\Controllers\GuestController;
-use App\Http\Controllers\Auth\LoginController;
-
-// Admin Core
 use App\Http\Controllers\Admin\LogoutController;
+// Guest & Auth
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\GuestController;
+// Admin Core
+use App\Livewire\Admin\BidangKegiatanManagement;
 use App\Livewire\Admin\Dashboard;
-use App\Livewire\Admin\Profile;
-use App\Livewire\Admin\UserManagement;
-
-
+use App\Livewire\Admin\InventarisManagement;
+use App\Livewire\Admin\KegiatanManagement;
 // Admin Keuangan & Manajemen
 
+use App\Livewire\Admin\LaporanInventaris;
 use App\Livewire\Admin\PemasukanManagement;
 use App\Livewire\Admin\PengeluaranManagement;
-use App\Livewire\Admin\KegiatanManagement;
-use App\Livewire\Admin\InventarisManagement;
-
 use App\Livewire\Admin\PenggunaanDanaDesa;
-use App\Livewire\Admin\LaporanInventaris;
+use App\Livewire\Admin\Profile;
+use App\Livewire\Admin\UserManagement;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -64,10 +60,10 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     Route::get('/penggunaan-dana-desa', PenggunaanDanaDesa::class)->name('admin.penggunaan-dana-desa');
     Route::get('/laporan-inventaris', LaporanInventaris::class)->name('admin.laporan-inventaris');
     Route::get('/kegiatan', KegiatanManagement::class)->name('admin.kegiatan');
+    Route::get('/bidang-kegiatan', BidangKegiatanManagement::class)->name('admin.bidang-kegiatan');
 
     // Aset & Inventaris
     Route::get('/inventaris', InventarisManagement::class)->name('admin.inventaris');
-
 
     // Pengaturan & Sistem
     Route::get('/users', UserManagement::class)->name('admin.users');
@@ -76,23 +72,23 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
 
 // Bendahara-only Routes
 Route::prefix('bendahara')->middleware('auth:bendahara')->group(function () {
-    Route::get('/dashboard', \App\Livewire\Bendahara\Dashboard::class)->name('bendahara.dashboard');
-    Route::get('/profile', \App\Livewire\Bendahara\Profile::class)->name('bendahara.profile');
+    Route::get('/dashboard', App\Livewire\Bendahara\Dashboard::class)->name('bendahara.dashboard');
+    Route::get('/profile', App\Livewire\Bendahara\Profile::class)->name('bendahara.profile');
 
     // Keuangan & Kegiatan
     Route::get('/pemasukan', PemasukanManagement::class)->name('bendahara.pemasukan');
     Route::get('/pengeluaran', PengeluaranManagement::class)->name('bendahara.pengeluaran');
     Route::get('/penggunaan-dana-desa', PenggunaanDanaDesa::class)->name('bendahara.penggunaan-dana-desa');
     Route::get('/kegiatan', KegiatanManagement::class)->name('bendahara.kegiatan');
-
+    Route::get('/bidang-kegiatan', BidangKegiatanManagement::class)->name('bendahara.bidang-kegiatan');
 
 });
 
 // Kepala Desa-only Routes
 Route::prefix('kepala-desa')->middleware('auth:kepala_desa')->group(function () {
-    Route::get('/dashboard', \App\Livewire\KepalaDesa\Dashboard::class)->name('kepala_desa.dashboard');
-    Route::get('/profile', \App\Livewire\KepalaDesa\Profile::class)->name('kepala_desa.profile');
-    
+    Route::get('/dashboard', App\Livewire\KepalaDesa\Dashboard::class)->name('kepala_desa.dashboard');
+    Route::get('/profile', App\Livewire\KepalaDesa\Profile::class)->name('kepala_desa.profile');
+
     // Keuangan & Laporan
     Route::get('/penggunaan-dana-desa', PenggunaanDanaDesa::class)->name('kepala_desa.penggunaan-dana-desa');
     Route::get('/laporan-inventaris', LaporanInventaris::class)->name('kepala_desa.laporan-inventaris');
@@ -100,9 +96,9 @@ Route::prefix('kepala-desa')->middleware('auth:kepala_desa')->group(function () 
 
 // Kaur Umum-only Routes
 Route::prefix('kaur-umum')->middleware('auth:kaur_umum')->group(function () {
-    Route::get('/dashboard', \App\Livewire\KaurUmum\Dashboard::class)->name('kaur_umum.dashboard');
-    Route::get('/profile', \App\Livewire\KaurUmum\Profile::class)->name('kaur_umum.profile');
-    
+    Route::get('/dashboard', App\Livewire\KaurUmum\Dashboard::class)->name('kaur_umum.dashboard');
+    Route::get('/profile', App\Livewire\KaurUmum\Profile::class)->name('kaur_umum.profile');
+
     // Aset & Inventaris
     Route::get('/inventaris', InventarisManagement::class)->name('kaur_umum.inventaris');
     Route::get('/laporan-inventaris', LaporanInventaris::class)->name('kaur_umum.laporan-inventaris');

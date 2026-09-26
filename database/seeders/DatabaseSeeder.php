@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Admin;
-use Illuminate\Support\Facades\Hash;
 use App\Models\Bendahara;
-use App\Models\KepalaDesa;
 use App\Models\KaurUmum;
+use App\Models\KepalaDesa;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -42,6 +42,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call([
+            BidangSubBidangSeeder::class,
             KegiatanSeeder::class,
             PemasukanSeeder::class,
             PengeluaranSeeder::class,

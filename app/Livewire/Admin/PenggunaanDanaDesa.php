@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Models\BidangKegiatan;
 use App\Models\Kegiatan;
 use App\Models\Pemasukan;
 use App\Models\Pengeluaran;
@@ -24,9 +25,9 @@ class PenggunaanDanaDesa extends Component
 
         $totalPemasukan = Pemasukan::sum('jumlah');
 
-        $kegiatans = Kegiatan::with('pengeluarans')
-            ->get()
-            ->groupBy('kelompok');
+        $bidangs = BidangKegiatan::with(['subBidangs.kegiatans'])
+            ->orderBy('kode')
+            ->get();
 
         $totalRencana = Kegiatan::sum('rencana_anggaran');
         $totalRealisasi = Kegiatan::sum('realisasi_anggaran');
@@ -35,7 +36,7 @@ class PenggunaanDanaDesa extends Component
             'tahun' => $tahun,
             'tanggalCetak' => Carbon::now()->translatedFormat('d F Y'),
             'totalPemasukan' => $totalPemasukan,
-            'kegiatans' => $kegiatans,
+            'bidangs' => $bidangs,
             'totalRencana' => $totalRencana,
             'totalRealisasi' => $totalRealisasi,
         ]);
@@ -47,13 +48,11 @@ class PenggunaanDanaDesa extends Component
 
     public function render()
     {
-        // 1. Kas Desa (Total Pemasukan - Total Pengeluaran)
         $totalPemasukan = Pemasukan::sum('jumlah');
         $totalPengeluaran = Pengeluaran::sum('jumlah');
         $saldoKas = $totalPemasukan - $totalPengeluaran;
 
-        // 2. Data Pengeluaran
-        $pengeluarans = Pengeluaran::with(['kegiatan', 'inventaris'])->orderBy('tanggal', 'desc')->get();
+        $pengeluarans = Pengeluaran::with(['kegiatan.subBidang.bidang', 'inventaris'])->orderBy('tanggal', 'desc')->get();
 
         return view('livewire.admin.penggunaan-dana-desa', [
             'totalPemasukan' => $totalPemasukan,

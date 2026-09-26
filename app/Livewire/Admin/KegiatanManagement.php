@@ -2,11 +2,12 @@
 
 namespace App\Livewire\Admin;
 
-use App\Enums\KelompokKegiatan;
 use App\Enums\StatusKegiatan;
+use App\Models\BidangKegiatan;
 use App\Models\Kegiatan;
 use App\Models\Pemasukan;
 use App\Models\Pengeluaran;
+use App\Models\SubBidangKegiatan;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Title;
@@ -24,11 +25,16 @@ class KegiatanManagement extends Component
     #[Url(as: 'q')]
     public string $search = '';
 
+    #[Url(as: 'bidang')]
+    public string $filterBidang = '';
+
     public string $nama_kegiatan = '';
 
     public string $lokasi = '';
 
-    public string $kelompok = '';
+    public string $bidang_kegiatan_id = '';
+
+    public string $sub_bidang_kegiatan_id = '';
 
     public string $rencana_anggaran = '';
 
@@ -59,17 +65,39 @@ class KegiatanManagement extends Component
         return [
             'nama_kegiatan' => ['required', 'string', 'max:255'],
             'lokasi' => ['required', 'string', 'max:255'],
-            'kelompok' => ['required', Rule::enum(KelompokKegiatan::class)],
+            'bidang_kegiatan_id' => ['required', 'exists:bidang_kegiatan,id'],
+            'sub_bidang_kegiatan_id' => ['required', 'exists:sub_bidang_kegiatan,id'],
             'rencana_anggaran' => ['required', 'numeric', 'min:0', 'max:9999999999999'],
             'realisasi_anggaran' => ['nullable', 'numeric', 'min:0', 'max:9999999999999'],
             'status' => ['required', Rule::enum(StatusKegiatan::class)],
-            'foto_progres' => ['nullable', 'image', 'max:2048'], // 2MB Max
+            'foto_progres' => ['nullable', 'image', 'max:2048'],
         ];
     }
 
     public function updatedSearch(): void
     {
         $this->resetPage();
+    }
+
+    public function updatedFilterBidang(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedBidangKegiatanId(): void
+    {
+        $this->sub_bidang_kegiatan_id = '';
+    }
+
+    public function getSubBidangOptionsProperty()
+    {
+        if (! $this->bidang_kegiatan_id) {
+            return collect();
+        }
+
+        return SubBidangKegiatan::where('bidang_kegiatan_id', $this->bidang_kegiatan_id)
+            ->orderBy('kode')
+            ->get();
     }
 
     public function openCreateModal(): void
@@ -82,7 +110,7 @@ class KegiatanManagement extends Component
     public function openDetailModal(int $id): void
     {
         $this->detailKegiatanId = $id;
-        $this->detailKegiatan = Kegiatan::findOrFail($id);
+        $this->detailKegiatan = Kegiatan::with('subBidang.bidang')->findOrFail($id);
         $this->showDetailModal = true;
     }
 
@@ -95,12 +123,13 @@ class KegiatanManagement extends Component
 
     public function openEditModal(int $id): void
     {
-        $kegiatan = Kegiatan::findOrFail($id);
+        $kegiatan = Kegiatan::with('subBidang.bidang')->findOrFail($id);
 
         $this->editingKegiatanId = $id;
         $this->nama_kegiatan = $kegiatan->nama_kegiatan;
         $this->lokasi = $kegiatan->lokasi;
-        $this->kelompok = $kegiatan->kelompok->value;
+        $this->bidang_kegiatan_id = (string) ($kegiatan->subBidang?->bidang_kegiatan_id ?? '');
+        $this->sub_bidang_kegiatan_id = (string) ($kegiatan->sub_bidang_kegiatan_id ?? '');
         $this->rencana_anggaran = (string) $kegiatan->rencana_anggaran;
         $this->realisasi_anggaran = (string) ($kegiatan->realisasi_anggaran ?? '');
         $this->status = $kegiatan->status->value;
@@ -114,7 +143,13 @@ class KegiatanManagement extends Component
     {
         $this->validate();
 
-        // Cek sisa anggaran yang bisa dialokasikan
+        $sub = SubBidangKegiatan::findOrFail($this->sub_bidang_kegiatan_id);
+        if ((string) $sub->bidang_kegiatan_id !== (string) $this->bidang_kegiatan_id) {
+            $this->addError('sub_bidang_kegiatan_id', 'Sub-bidang tidak termasuk dalam bidang yang dipilih.');
+
+            return;
+        }
+
         $totalPemasukan = Pemasukan::sum('jumlah');
         $totalPengeluaranNonKegiatan = Pengeluaran::whereNull('id_kegiatan')->sum('jumlah');
         $totalAnggaranKegiatanLain = Kegiatan::query();
@@ -154,7 +189,7 @@ class KegiatanManagement extends Component
         $data = [
             'nama_kegiatan' => $this->nama_kegiatan,
             'lokasi' => $this->lokasi,
-            'kelompok' => $this->kelompok,
+            'sub_bidang_kegiatan_id' => $this->sub_bidang_kegiatan_id,
             'rencana_anggaran' => $this->rencana_anggaran,
             'realisasi_anggaran' => $this->realisasi_anggaran ?: null,
             'status' => $this->status,
@@ -242,7 +277,8 @@ class KegiatanManagement extends Component
     {
         $this->nama_kegiatan = '';
         $this->lokasi = '';
-        $this->kelompok = '';
+        $this->bidang_kegiatan_id = '';
+        $this->sub_bidang_kegiatan_id = '';
         $this->rencana_anggaran = '';
         $this->realisasi_anggaran = '';
         $this->status = 'perencanaan';
@@ -277,15 +313,34 @@ class KegiatanManagement extends Component
     public function render()
     {
         $kegiatans = Kegiatan::query()
+            ->with('subBidang.bidang')
             ->when($this->search, function ($query) {
-                $query->where('nama_kegiatan', 'like', '%'.$this->search.'%')
-                    ->orWhere('lokasi', 'like', '%'.$this->search.'%');
+                $query->where(function ($q) {
+                    $q->where('nama_kegiatan', 'like', '%'.$this->search.'%')
+                        ->orWhere('lokasi', 'like', '%'.$this->search.'%')
+                        ->orWhereHas('subBidang', function ($sq) {
+                            $sq->where('nama', 'like', '%'.$this->search.'%')
+                                ->orWhere('kode', 'like', '%'.$this->search.'%');
+                        })
+                        ->orWhereHas('subBidang.bidang', function ($bq) {
+                            $bq->where('nama', 'like', '%'.$this->search.'%')
+                                ->orWhere('kode', 'like', '%'.$this->search.'%');
+                        });
+                });
+            })
+            ->when($this->filterBidang, function ($query) {
+                $query->whereHas('subBidang', function ($q) {
+                    $q->where('bidang_kegiatan_id', $this->filterBidang);
+                });
             })
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
+        $bidangs = BidangKegiatan::orderBy('kode')->get();
+
         return view('livewire.admin.kegiatan-management', [
             'kegiatans' => $kegiatans,
+            'bidangs' => $bidangs,
         ]);
     }
 }

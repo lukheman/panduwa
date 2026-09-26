@@ -117,43 +117,57 @@
                 <td></td>
             </tr>
 
-            {{-- Loop per Kelompok --}}
-            @php $noKelompok = 1; @endphp
-            @foreach(\App\Enums\KelompokKegiatan::cases() as $kelompok)
+            {{-- Loop per Bidang -> Sub-Bidang -> Kegiatan --}}
+            @php $noBidang = 1; @endphp
+            @foreach($bidangs as $bidang)
                 @php
-                    $kegiatanKelompok = $kegiatans->get($kelompok->value ?? $kelompok->value) ?? collect();
-                    $totalAnggaranKelompok = $kegiatanKelompok->sum('rencana_anggaran');
-                    $totalRealisasiKelompok = $kegiatanKelompok->sum('realisasi_anggaran');
-                    $sisaKelompok = $totalAnggaranKelompok - $totalRealisasiKelompok;
+                    $kegiatanBidang = $bidang->subBidangs->flatMap->kegiatans;
+                    $totalAnggaranBidang = $kegiatanBidang->sum('rencana_anggaran');
+                    $totalRealisasiBidang = $kegiatanBidang->sum('realisasi_anggaran');
+                    $sisaBidang = $totalAnggaranBidang - $totalRealisasiBidang;
                 @endphp
 
-                {{-- Header Kelompok --}}
+                {{-- Header Bidang --}}
                 <tr class="row-header">
-                    <td class="text-center">{{ $noKelompok }}</td>
-                    <td class="bold">{{ strtoupper($kelompok->getLabel()) }}</td>
-                    <td class="text-right bold">{{ number_format($totalAnggaranKelompok, 0, ',', '.') }}</td>
-                    <td class="text-right bold">{{ number_format($totalRealisasiKelompok, 0, ',', '.') }}</td>
-                    <td class="text-right bold">{{ number_format($sisaKelompok, 0, ',', '.') }}</td>
+                    <td class="text-center">{{ $noBidang }}</td>
+                    <td class="bold">{{ strtoupper($bidang->kode.' - '.$bidang->nama) }}</td>
+                    <td class="text-right bold">{{ number_format($totalAnggaranBidang, 0, ',', '.') }}</td>
+                    <td class="text-right bold">{{ number_format($totalRealisasiBidang, 0, ',', '.') }}</td>
+                    <td class="text-right bold">{{ number_format($sisaBidang, 0, ',', '.') }}</td>
                 </tr>
 
-                {{-- Loop Kegiatan dalam Kelompok --}}
-                @php $noKegiatan = 1; @endphp
-                @foreach($kegiatanKelompok as $kegiatan)
+                {{-- Loop Sub-Bidang dalam Bidang --}}
+                @foreach($bidang->subBidangs as $sub)
                     @php
-                        $realisasi = $kegiatan->realisasi_anggaran ?? 0;
-                        $sisa = $kegiatan->rencana_anggaran - $realisasi;
+                        $totalAnggaranSub = $sub->kegiatans->sum('rencana_anggaran');
+                        $totalRealisasiSub = $sub->kegiatans->sum('realisasi_anggaran');
+                        $sisaSub = $totalAnggaranSub - $totalRealisasiSub;
                     @endphp
-                    <tr>
-                        <td class="text-center">{{ $noKelompok }}.{{ $noKegiatan }}</td>
-                        <td>{{ $kegiatan->nama_kegiatan }}</td>
-                        <td class="text-right">{{ number_format($kegiatan->rencana_anggaran, 0, ',', '.') }}</td>
-                        <td class="text-right">{{ number_format($realisasi, 0, ',', '.') }}</td>
-                        <td class="text-right">{{ number_format($sisa, 0, ',', '.') }}</td>
+                    <tr class="row-sub-header">
+                        <td class="text-center">{{ $noBidang }}.{{ $loop->iteration }}</td>
+                        <td class="bold">{{ $sub->kode.' - '.$sub->nama }}</td>
+                        <td class="text-right bold">{{ number_format($totalAnggaranSub, 0, ',', '.') }}</td>
+                        <td class="text-right bold">{{ number_format($totalRealisasiSub, 0, ',', '.') }}</td>
+                        <td class="text-right bold">{{ number_format($sisaSub, 0, ',', '.') }}</td>
                     </tr>
-                    @php $noKegiatan++; @endphp
+
+                    {{-- Loop Kegiatan dalam Sub-Bidang --}}
+                    @foreach($sub->kegiatans as $kegiatan)
+                        @php
+                            $realisasi = $kegiatan->realisasi_anggaran ?? 0;
+                            $sisa = $kegiatan->rencana_anggaran - $realisasi;
+                        @endphp
+                        <tr>
+                            <td class="text-center">{{ $noBidang }}.{{ $loop->parent->iteration }}.{{ $loop->iteration }}</td>
+                            <td>{{ $kegiatan->nama_kegiatan }}</td>
+                            <td class="text-right">{{ number_format($kegiatan->rencana_anggaran, 0, ',', '.') }}</td>
+                            <td class="text-right">{{ number_format($realisasi, 0, ',', '.') }}</td>
+                            <td class="text-right">{{ number_format($sisa, 0, ',', '.') }}</td>
+                        </tr>
+                    @endforeach
                 @endforeach
 
-                @php $noKelompok++; @endphp
+                @php $noBidang++; @endphp
             @endforeach
 
             {{-- JUMLAH BELANJA DESA --}}

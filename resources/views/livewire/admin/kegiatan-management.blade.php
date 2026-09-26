@@ -9,15 +9,25 @@
 
     <x-ui.toast />
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <h5 class="mb-0 fw-semibold text-body">Daftar Kegiatan</h5>
-        <div style="max-width: 300px; width: 100%;">
-            <x-form.input
-                wire:model.live.debounce.300ms="search"
-                placeholder="Cari nama atau lokasi kegiatan..."
-                icon="fas fa-search"
-                class="mb-0"
-            />
+        <div class="d-flex gap-2 flex-wrap" style="max-width: 640px; width: 100%; justify-content: flex-end;">
+            <div style="max-width: 220px; width: 100%;">
+                <select class="form-control" wire:model.live="filterBidang">
+                    <option value="">Semua Bidang</option>
+                    @foreach($bidangs as $b)
+                        <option value="{{ $b->id }}">{{ $b->kode }} - {{ \Illuminate\Support\Str::limit($b->nama, 30) }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div style="max-width: 300px; width: 100%;">
+                <x-form.input
+                    wire:model.live.debounce.300ms="search"
+                    placeholder="Cari nama, lokasi, bidang..."
+                    icon="fas fa-search"
+                    class="mb-0"
+                />
+            </div>
         </div>
     </div>
 
@@ -56,9 +66,14 @@
                             <span class="text-truncate">{{ $kegiatan->lokasi }}</span>
                         </div>
 
-                        <div class="d-flex align-items-center text-muted small mb-4 pb-3 border-bottom">
+                        <div class="d-flex align-items-center text-muted small mb-2 pb-2 border-bottom">
                             <i class="fas fa-layer-group text-info me-2"></i>
-                            <span class="text-truncate">{{ $kegiatan->kelompok?->getLabel() ?? '-' }}</span>
+                            <span class="text-truncate">{{ $kegiatan->subBidang?->bidang?->nama ?? '-' }}</span>
+                        </div>
+
+                        <div class="d-flex align-items-center text-muted small mb-4 pb-3 border-bottom">
+                            <i class="fas fa-sitemap text-warning me-2"></i>
+                            <span class="text-truncate">{{ $kegiatan->subBidang ? $kegiatan->subBidang->kode.' - '.$kegiatan->subBidang->nama : '-' }}</span>
                         </div>
 
                         <div class="mt-auto">
@@ -140,14 +155,30 @@
 
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">Kelompok Kegiatan <span class="text-danger">*</span></label>
-                                <select class="form-control" wire:model="kelompok" required>
-                                    <option value="">-- Pilih Kelompok --</option>
-                                    @foreach(\App\Enums\KelompokKegiatan::cases() as $item)
-                                        <option value="{{ $item->value }}">{{ $item->getLabel() }}</option>
+                                <label class="form-label">Bidang Kegiatan <span class="text-danger">*</span></label>
+                                <select class="form-control" wire:model.live="bidang_kegiatan_id" required>
+                                    <option value="">-- Pilih Bidang --</option>
+                                    @foreach($bidangs as $b)
+                                        <option value="{{ $b->id }}">{{ $b->kode }} - {{ $b->nama }}</option>
                                     @endforeach
                                 </select>
-                                @error('kelompok') <span class="text-danger small">{{ $message }}</span> @enderror
+                                @error('bidang_kegiatan_id') <span class="text-danger small">{{ $message }}</span> @enderror
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Sub-Bidang <span class="text-danger">*</span></label>
+                                <select class="form-control" wire:model="sub_bidang_kegiatan_id" required {{ !$bidang_kegiatan_id ? 'disabled' : '' }}>
+                                    <option value="">-- Pilih Sub-Bidang --</option>
+                                    @foreach($this->subBidangOptions as $sub)
+                                        <option value="{{ $sub->id }}">{{ $sub->kode }} - {{ $sub->nama }}</option>
+                                    @endforeach
+                                </select>
+                                @error('sub_bidang_kegiatan_id') <span class="text-danger small">{{ $message }}</span> @enderror
+                                @if(!$bidang_kegiatan_id)
+                                    <small class="text-muted"><i class="fas fa-info-circle me-1"></i>Pilih bidang terlebih dahulu.</small>
+                                @endif
                             </div>
                         </div>
 
@@ -259,7 +290,8 @@
                             </x-ui.badge>
                         </div>
                         <p class="text-muted"><i class="fas fa-map-marker-alt text-danger me-2"></i>{{ $detailKegiatan->lokasi }}</p>
-                        <p class="text-muted"><i class="fas fa-layer-group text-info me-2"></i>{{ $detailKegiatan->kelompok?->getLabel() ?? '-' }}</p>
+                        <p class="text-muted mb-1"><i class="fas fa-layer-group text-info me-2"></i>{{ $detailKegiatan->subBidang?->bidang?->nama ?? '-' }}</p>
+                        <p class="text-muted"><i class="fas fa-sitemap text-warning me-2"></i>{{ $detailKegiatan->subBidang ? $detailKegiatan->subBidang->kode.' - '.$detailKegiatan->subBidang->nama : '-' }}</p>
                     </div>
 
                     <div class="row g-3 mb-4">
