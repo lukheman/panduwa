@@ -200,41 +200,75 @@ class KegiatanManagement extends Component
             $kegiatan = Kegiatan::findOrFail($this->editingKegiatanId);
             $kegiatan->update($data);
 
-            if ($this->realisasi_anggaran) {
-                $keterangan = 'Realisasi Anggaran Kegiatan: '.$kegiatan->nama_kegiatan;
-                $pengeluaran = Pengeluaran::where('id_kegiatan', $kegiatan->id)
-                    ->where('keterangan', $keterangan)
-                    ->first();
+            if ($this->status === StatusKegiatan::PERENCANAAN->value) {
+                $this->hapusOtomatisPengeluaran($kegiatan);
 
-                if ($pengeluaran) {
-                    $pengeluaran->update(['jumlah' => $this->realisasi_anggaran]);
+                session()->flash('success', 'Data kegiatan berhasil diperbarui. Status masih perencanaan sehingga belum dicatat sebagai pengeluaran.');
+            } elseif ($this->status === StatusKegiatan::BERJALAN->value) {
+                if ($this->realisasi_anggaran) {
+                    $this->syncOtomatisPengeluaran($kegiatan, $this->realisasi_anggaran);
+
+                    session()->flash('success', 'Data kegiatan berhasil diperbarui dan realisasi anggaran sebesar '.$this->formatRupiah($this->realisasi_anggaran).' telah dicatat sebagai pengeluaran.');
                 } else {
-                    Pengeluaran::create([
-                        'jumlah' => $this->realisasi_anggaran,
-                        'tanggal' => date('Y-m-d'),
-                        'keterangan' => $keterangan,
-                        'id_kegiatan' => $kegiatan->id,
-                    ]);
-                }
+                    $this->hapusOtomatisPengeluaran($kegiatan);
 
-                session()->flash('success', 'Data kegiatan berhasil diperbarui dan realisasi anggaran sebesar '.$this->formatRupiah($this->realisasi_anggaran).' telah dicatat sebagai pengeluaran.');
+                    session()->flash('success', 'Data kegiatan berhasil diperbarui. Belum ada realisasi sehingga belum dicatat sebagai pengeluaran.');
+                }
             } else {
-                session()->flash('success', 'Data kegiatan berhasil diperbarui.');
+                $nominal = $this->realisasi_anggaran ?: $kegiatan->rencana_anggaran;
+                $this->syncOtomatisPengeluaran($kegiatan, $nominal);
+
+                session()->flash('success', 'Data kegiatan berhasil diperbarui dan sebesar '.$this->formatRupiah($nominal).' telah dicatat sebagai pengeluaran (status selesai).');
             }
         } else {
             $kegiatan = Kegiatan::create($data);
 
-            Pengeluaran::create([
-                'jumlah' => $kegiatan->rencana_anggaran,
-                'tanggal' => date('Y-m-d'),
-                'keterangan' => 'Alokasi Dana Kegiatan: '.$kegiatan->nama_kegiatan,
-                'id_kegiatan' => $kegiatan->id,
-            ]);
+            $perluCatat = $this->status === StatusKegiatan::SELESAI->value
+                || ($this->status === StatusKegiatan::BERJALAN->value && $this->realisasi_anggaran);
 
-            session()->flash('success', 'Data kegiatan berhasil ditambahkan dan alokasi dana telah dicatat sebagai pengeluaran.');
+            if ($perluCatat) {
+                $nominal = $this->realisasi_anggaran ?: $kegiatan->rencana_anggaran;
+                $this->syncOtomatisPengeluaran($kegiatan, $nominal);
+
+                session()->flash('success', 'Data kegiatan berhasil ditambahkan dan sebesar '.$this->formatRupiah($nominal).' telah dicatat sebagai pengeluaran.');
+            } else {
+                session()->flash('success', 'Data kegiatan berhasil ditambahkan sebagai perencanaan. Belum dicatat sebagai pengeluaran.');
+            }
         }
 
         $this->closeModal();
+    }
+
+    protected function queryOtomatisPengeluaran(Kegiatan $kegiatan)
+    {
+        return Pengeluaran::where('id_kegiatan', $kegiatan->id)
+            ->where(function ($q) {
+                $q->where('keterangan', 'like', 'Alokasi Dana Kegiatan:%')
+                    ->orWhere('keterangan', 'like', 'Realisasi Anggaran Kegiatan:%');
+            });
+    }
+
+    protected function syncOtomatisPengeluaran(Kegiatan $kegiatan, $nominal): void
+    {
+        $pengeluaran = (clone $this->queryOtomatisPengeluaran($kegiatan))->first();
+
+        $payload = [
+            'jumlah' => $nominal,
+            'tanggal' => $pengeluaran?->tanggal ?? date('Y-m-d'),
+            'keterangan' => 'Realisasi Anggaran Kegiatan: '.$kegiatan->nama_kegiatan,
+            'id_kegiatan' => $kegiatan->id,
+        ];
+
+        if ($pengeluaran) {
+            $pengeluaran->update($payload);
+        } else {
+            Pengeluaran::create($payload);
+        }
+    }
+
+    protected function hapusOtomatisPengeluaran(Kegiatan $kegiatan): void
+    {
+        (clone $this->queryOtomatisPengeluaran($kegiatan))->delete();
     }
 
     public function closeModal(): void

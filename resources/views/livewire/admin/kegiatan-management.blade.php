@@ -205,7 +205,7 @@
                             </div>
                         </div>
 
-                        @if($editingKegiatanId && in_array($this->status, ['berjalan', 'selesai']))
+                        @if(in_array($this->status, ['berjalan', 'selesai']))
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label class="form-label">Realisasi Anggaran (Rp)</label>
@@ -214,8 +214,12 @@
                                         <input type="number" class="form-control" wire:model="realisasi_anggaran" min="0" placeholder="0">
                                     </div>
                                     @error('realisasi_anggaran') <span class="text-danger small">{{ $message }}</span> @enderror
-                                    <small class="text-muted"><i class="fas fa-info-circle me-1"></i>Mengisi realisasi anggaran akan otomatis dicatat sebagai pengeluaran.</small>
+                                    <small class="text-muted"><i class="fas fa-info-circle me-1"></i>Status perencanaan belum dicatat sebagai pengeluaran. Status selesai otomatis tercatat (pakai realisasi jika diisi, jika kosong pakai rencana).</small>
                                 </div>
+                            </div>
+                        @else
+                            <div class="col-md-6">
+                                <div class="alert alert-info small mb-0"><i class="fas fa-info-circle me-1"></i>Status perencanaan hanya mencatat rencana — belum masuk ke pengeluaran.</div>
                             </div>
                         @endif
 

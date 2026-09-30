@@ -316,7 +316,7 @@ class PengeluaranManagement extends Component
             ->orderBy('id', 'desc')
             ->paginate(10);
 
-        $kegiatans = Kegiatan::where('status', '!=', StatusKegiatan::SELESAI)->get();
+        $kegiatans = Kegiatan::where('status', '!=', StatusKegiatan::PERENCANAAN)->get();
 
         return view('livewire.admin.pengeluaran-management', [
             'pengeluarans' => $pengeluarans,
