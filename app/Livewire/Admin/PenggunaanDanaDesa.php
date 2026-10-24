@@ -2,10 +2,10 @@
 
 namespace App\Livewire\Admin;
 
-use App\Models\BidangKegiatan;
-use App\Models\Kegiatan;
 use App\Models\Pemasukan;
 use App\Models\Pengeluaran;
+use App\Models\SumberDana;
+use App\Services\LaporanRealisasiApbdesService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Livewire\Attributes\Title;
@@ -14,31 +14,31 @@ use Livewire\Component;
 #[Title('Laporan Realisasi Anggaran')]
 class PenggunaanDanaDesa extends Component
 {
+    public int $tahun;
+
+    public function mount(): void
+    {
+        $this->tahun = (int) date('Y');
+    }
+
     public function formatRupiah($angka)
     {
         return 'Rp '.number_format($angka, 0, ',', '.');
     }
 
-    public function downloadPdf()
+    public function downloadPdf(LaporanRealisasiApbdesService $service)
     {
-        $tahun = date('Y');
+        $tahun = $this->tahun;
 
-        $totalPemasukan = Pemasukan::sum('jumlah');
-
-        $bidangs = BidangKegiatan::with(['subBidangs.kegiatans'])
-            ->orderBy('kode')
-            ->get();
-
-        $totalRencana = Kegiatan::sum('rencana_anggaran');
-        $totalRealisasi = Kegiatan::sum('realisasi_anggaran');
-
-        $pdf = Pdf::loadView('pdf.laporan-penggunaan-dana-desa', [
+        $sampaiTanggal = $this->tahun.'-12-31';
+        $sumberDanaId = SumberDana::where('kode', 'DDS')->value('id');
+        $ringkasan = $service->build($this->tahun, $sampaiTanggal, $sumberDanaId);
+        $pdf = Pdf::loadView('pdf.laporan-realisasi-apbdes', [
             'tahun' => $tahun,
             'tanggalCetak' => Carbon::now()->translatedFormat('d F Y'),
-            'totalPemasukan' => $totalPemasukan,
-            'bidangs' => $bidangs,
-            'totalRencana' => $totalRencana,
-            'totalRealisasi' => $totalRealisasi,
+            'ringkasan' => $ringkasan,
+            'sampaiTanggal' => $sampaiTanggal,
+            'sumberDana' => SumberDana::find($sumberDanaId),
         ]);
 
         return response()->streamDownload(function () use ($pdf) {

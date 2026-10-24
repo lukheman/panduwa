@@ -3,6 +3,9 @@
 namespace App\Livewire\Admin;
 
 use App\Models\Pemasukan;
+use App\Models\Pengeluaran;
+use App\Models\RekeningAnggaran;
+use App\Models\SumberDana;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -17,16 +20,23 @@ class PemasukanManagement extends Component
     public string $search = '';
 
     public string $sumber_dana = '';
+
     public string $jumlah = '';
+
     public string $tanggal = '';
+
     public string $keterangan = '';
 
     public ?int $editingPemasukanId = null;
+
     public bool $showModal = false;
+
     public bool $showDeleteModal = false;
+
     public ?int $deletingPemasukanId = null;
 
     public ?Pemasukan $viewingPemasukan = null;
+
     public bool $showViewModal = false;
 
     protected function rules(): array
@@ -72,6 +82,9 @@ class PemasukanManagement extends Component
     public function save(): void
     {
         $validated = $this->validate();
+        $validated['sumber_dana_id'] = SumberDana::where('kode', 'DDS')->value('id');
+        $validated['rekening_anggaran_id'] = RekeningAnggaran::where('kode', '4.2.1')->value('id');
+        $validated['anggaran'] = $validated['jumlah'];
 
         if ($this->editingPemasukanId) {
             $pemasukan = Pemasukan::findOrFail($this->editingPemasukanId);
@@ -138,7 +151,7 @@ class PemasukanManagement extends Component
 
     public function formatRupiah($angka)
     {
-        return 'Rp ' . number_format($angka, 0, ',', '.');
+        return 'Rp '.number_format($angka, 0, ',', '.');
     }
 
     public function render()
@@ -147,13 +160,13 @@ class PemasukanManagement extends Component
 
         $totalPemasukan = (clone $query)->sum('jumlah');
         $totalTahunIni = (clone $query)->whereYear('tanggal', date('Y'))->sum('jumlah');
-        $totalPengeluaran = \App\Models\Pengeluaran::sum('jumlah');
+        $totalPengeluaran = Pengeluaran::sum('jumlah');
         $sisaAnggaran = $totalPemasukan - $totalPengeluaran;
 
         $pemasukans = $query->when($this->search, function ($q) {
-                $q->where('sumber_dana', 'like', '%' . $this->search . '%')
-                  ->orWhere('keterangan', 'like', '%' . $this->search . '%');
-            })
+            $q->where('sumber_dana', 'like', '%'.$this->search.'%')
+                ->orWhere('keterangan', 'like', '%'.$this->search.'%');
+        })
             ->orderBy('tanggal', 'desc')
             ->orderBy('id', 'desc')
             ->paginate(10);

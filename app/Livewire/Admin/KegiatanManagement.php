@@ -7,7 +7,9 @@ use App\Models\BidangKegiatan;
 use App\Models\Kegiatan;
 use App\Models\Pemasukan;
 use App\Models\Pengeluaran;
+use App\Models\RekeningAnggaran;
 use App\Models\SubBidangKegiatan;
+use App\Models\SumberDana;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Title;
@@ -194,6 +196,7 @@ class KegiatanManagement extends Component
             'realisasi_anggaran' => $this->realisasi_anggaran ?: null,
             'status' => $this->status,
             'foto_progres' => $path,
+            'sumber_dana_id' => SumberDana::where('kode', 'DDS')->value('id'),
         ];
 
         if ($this->editingKegiatanId) {
@@ -257,6 +260,8 @@ class KegiatanManagement extends Component
             'tanggal' => $pengeluaran?->tanggal ?? date('Y-m-d'),
             'keterangan' => 'Realisasi Anggaran Kegiatan: '.$kegiatan->nama_kegiatan,
             'id_kegiatan' => $kegiatan->id,
+            'sumber_dana_id' => $kegiatan->sumber_dana_id,
+            'rekening_anggaran_id' => RekeningAnggaran::where('kode', '5.2')->value('id'),
         ];
 
         if ($pengeluaran) {

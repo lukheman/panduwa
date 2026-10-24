@@ -8,6 +8,8 @@ use App\Models\Inventaris;
 use App\Models\Kegiatan;
 use App\Models\Pemasukan;
 use App\Models\Pengeluaran;
+use App\Models\RekeningAnggaran;
+use App\Models\SumberDana;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Title;
@@ -208,6 +210,10 @@ class PengeluaranManagement extends Component
                 'jumlah' => $validated['jumlah'],
                 'keterangan' => $validated['keterangan'],
                 'id_kegiatan' => $validated['id_kegiatan'],
+                'sumber_dana_id' => SumberDana::where('kode', 'DDS')->value('id'),
+                'rekening_anggaran_id' => $validated['id_kegiatan']
+                    ? RekeningAnggaran::where('kode', '5.2')->value('id')
+                    : RekeningAnggaran::where('kode', '5.9')->value('id'),
             ]);
             $pengeluaran->save();
 

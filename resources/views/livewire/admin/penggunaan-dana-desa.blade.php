@@ -12,6 +12,13 @@
         </x-slot:actions>
     </x-layout.page-header>
 
+    <x-layout.modern-card class="mb-4">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-4"><label class="form-label">Tahun Anggaran</label><input type="number" min="2000" max="2100" class="form-control" wire:model.live="tahun"></div>
+            <div class="col-md-8"><small class="text-muted">Laporan mencakup seluruh transaksi sampai 31 Desember tahun terpilih.</small></div>
+        </div>
+    </x-layout.modern-card>
+
     {{-- Ringkasan Kas Global --}}
     <div class="row g-4 mb-4">
         <div class="col-md-4">

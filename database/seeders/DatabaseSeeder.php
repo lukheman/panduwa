@@ -42,6 +42,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call([
+            ApbdesSeeder::class,
             BidangSubBidangSeeder::class,
             KegiatanSeeder::class,
             PemasukanSeeder::class,

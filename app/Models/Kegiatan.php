@@ -15,6 +15,8 @@ class Kegiatan extends Model
 
     protected $fillable = [
         'nama_kegiatan',
+        'kode_rekening',
+        'sumber_dana_id',
         'lokasi',
         'sub_bidang_kegiatan_id',
         'rencana_anggaran',
@@ -35,5 +37,15 @@ class Kegiatan extends Model
     public function pengeluarans()
     {
         return $this->hasMany(Pengeluaran::class, 'id_kegiatan');
+    }
+
+    public function sumberDana(): BelongsTo
+    {
+        return $this->belongsTo(SumberDana::class);
+    }
+
+    public function belanjaDetails()
+    {
+        return $this->hasMany(KegiatanBelanja::class);
     }
 }
