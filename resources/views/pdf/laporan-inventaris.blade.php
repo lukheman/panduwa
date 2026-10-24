@@ -5,48 +5,35 @@
     <style>
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            font-size: 12px;
+            font-size: 11px;
             color: #333;
         }
         .header {
             text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #333;
-            padding-bottom: 15px;
+            margin-bottom: 12px;
         }
         .header h1 {
-            margin: 0 0 5px 0;
+            margin: 0;
             font-size: 18px;
             text-transform: uppercase;
         }
         .header p {
-            margin: 0;
-            font-size: 12px;
-            color: #666;
-        }
-        .info {
-            margin-bottom: 20px;
-        }
-        .info table {
-            width: 100%;
-        }
-        .info td {
-            padding: 3px 0;
+            display: none;
         }
         .data-table {
-            width: 100%;
+            width: 92%;
+            margin: 0 auto;
             border-collapse: collapse;
-            margin-bottom: 20px;
         }
         .data-table th, .data-table td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
+            border: 1px solid #555;
+            padding: 4px 6px;
         }
         .data-table th {
-            background-color: #f8f9fa;
+            background-color: #f1f1f1;
             font-weight: bold;
             text-align: center;
+            text-transform: uppercase;
         }
         .text-right {
             text-align: right !important;
@@ -54,112 +41,50 @@
         .text-center {
             text-align: center !important;
         }
-        .footer {
-            margin-top: 50px;
-            width: 100%;
-        }
-        .signature-box {
-            float: right;
-            width: 250px;
-            text-align: center;
-        }
-        .signature-space {
-            height: 80px;
-        }
-        .clearfix::after {
-            content: "";
-            clear: both;
-            display: table;
-        }
-        .summary-box {
-            margin-bottom: 20px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            background-color: #f9f9f9;
-        }
-        .summary-box td {
-            padding: 5px;
-        }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>LAPORAN INVENTARIS DESA</h1>
-        <p>PEMERINTAH DESA WAINDAWULA</p>
-        <p>KECAMATAN SIOMPU KABUPATEN BUTON SELATAN</p>
-    </div>
-
-    <div class="info">
-        <table border="0">
-            <tr>
-                <td width="150"><strong>Tahun</strong></td>
-                <td width="10">:</td>
-                <td>{{ $tahun }}</td>
-            </tr>
-            <tr>
-                <td><strong>Tanggal Cetak</strong></td>
-                <td>:</td>
-                <td>{{ $tanggalCetak }}</td>
-            </tr>
-        </table>
-    </div>
-
-    <div class="summary-box">
-        <table border="0" width="100%">
-            <tr>
-                <td width="25%"><strong>Total Aset</strong>: Rp {{ number_format($totalAset, 0, ',', '.') }}</td>
-                <td width="25%"><strong>Baik</strong>: {{ $baik }}</td>
-                <td width="25%"><strong>Rusak Ringan</strong>: {{ $rusakRingan }}</td>
-                <td width="25%"><strong>Rusak Berat</strong>: {{ $rusakBerat }}</td>
-            </tr>
-        </table>
+        <h1>DAFTAR ASET {{ $tahun }}</h1>
     </div>
 
     <table class="data-table">
         <thead>
             <tr>
-                <th width="5%">No</th>
-                <th width="18%">Kode Barang</th>
-                <th width="32%">Nama Barang</th>
-                <th width="17%">Tgl Perolehan</th>
-                <th width="13%">Kondisi</th>
-                <th width="15%">Nilai (Rp)</th>
+                <th width="12%">No</th>
+                <th width="52%">Nama</th>
+                <th width="16%">Jumlah</th>
+                <th width="20%">Sumber Dana</th>
             </tr>
         </thead>
         <tbody>
-            @php $no = 1; @endphp
-            @forelse($inventaris as $item)
+            @php
+                $daftarAset = $inventaris
+                    ->groupBy(fn ($item) => mb_strtoupper(trim($item->nama_barang)))
+                    ->map(function ($items, $nama) {
+                        return [
+                            'nama' => $nama,
+                            'jumlah' => $items->count(),
+                            'sumber_dana' => '-',
+                        ];
+                    })
+                    ->values();
+            @endphp
+            @forelse($daftarAset as $index => $aset)
                 <tr>
-                    <td class="text-center">{{ $no++ }}</td>
-                    <td class="text-center">{{ $item->kode_barang }}</td>
-                    <td>{{ $item->nama_barang }}</td>
-                    <td class="text-center">{{ \Carbon\Carbon::parse($item->tanggal_perolehan)->format('d-m-Y') }}</td>
-                    <td class="text-center">{{ $item->kondisi->getLabel() }}</td>
-                    <td class="text-right">{{ number_format($item->nilai_aset, 0, ',', '.') }}</td>
+                    <td class="text-center">{{ $index + 1 }}</td>
+                    <td>{{ $aset['nama'] }}</td>
+                    <td class="text-center">{{ $aset['jumlah'] }}</td>
+                    <td class="text-center">{{ $aset['sumber_dana'] }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" class="text-center">Tidak ada data inventaris.</td>
+                    <td colspan="4" class="text-center">Tidak ada data inventaris.</td>
                 </tr>
             @endforelse
         </tbody>
-        <tfoot>
-            <tr>
-                <th colspan="5" class="text-right">TOTAL NILAI ASET</th>
-                <th class="text-right">{{ number_format($totalAset, 0, ',', '.') }}</th>
-            </tr>
-        </tfoot>
     </table>
-
-    <div class="footer clearfix">
-        <div class="signature-box">
-            <p>Mengetahui,</p>
-            <p><strong>Kepala Desa</strong></p>
-            <div class="signature-space"></div>
-            <p>_______________________</p>
-        </div>
-    </div>
 
 </body>
 </html>
