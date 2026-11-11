@@ -22,8 +22,24 @@ class ApbdesSeeder extends Seeder
         }
 
         $records = [
-            ['kode' => '4', 'nama' => 'Pendapatan', 'jenis' => 'pendapatan'], ['kode' => '4.2', 'nama' => 'Pendapatan Transfer', 'jenis' => 'pendapatan', 'parent' => '4'], ['kode' => '4.2.1', 'nama' => 'Dana Desa', 'jenis' => 'pendapatan', 'parent' => '4.2'],
-            ['kode' => '5', 'nama' => 'Belanja', 'jenis' => 'belanja'], ['kode' => '5.1', 'nama' => 'Belanja Pegawai', 'jenis' => 'belanja', 'parent' => '5'], ['kode' => '5.2', 'nama' => 'Belanja Barang dan Jasa', 'jenis' => 'belanja', 'parent' => '5'], ['kode' => '5.2.2', 'nama' => 'Belanja Jasa Honorarium', 'jenis' => 'belanja', 'parent' => '5.2'], ['kode' => '5.2.2.03', 'nama' => 'Honorarium/Insentif Pelayanan Desa', 'jenis' => 'belanja', 'parent' => '5.2.2'],
+            ['kode' => '4', 'nama' => 'Pendapatan', 'jenis' => 'pendapatan'],
+            ['kode' => '4.1', 'nama' => 'Pendapatan Asli Desa', 'jenis' => 'pendapatan', 'parent' => '4'],
+            ['kode' => '4.1.1', 'nama' => 'Hasil Usaha Desa', 'jenis' => 'pendapatan', 'parent' => '4.1'],
+            ['kode' => '4.1.2', 'nama' => 'Hasil Aset Desa', 'jenis' => 'pendapatan', 'parent' => '4.1'],
+            ['kode' => '4.1.3', 'nama' => 'Swadaya, Partisipasi dan Gotong Royong', 'jenis' => 'pendapatan', 'parent' => '4.1'],
+            ['kode' => '4.1.4', 'nama' => 'Lain-lain Pendapatan Asli Desa', 'jenis' => 'pendapatan', 'parent' => '4.1'],
+            ['kode' => '4.2', 'nama' => 'Pendapatan Transfer', 'jenis' => 'pendapatan', 'parent' => '4'],
+            ['kode' => '4.2.1', 'nama' => 'Dana Desa', 'jenis' => 'pendapatan', 'parent' => '4.2'],
+            ['kode' => '4.2.2', 'nama' => 'Alokasi Dana Desa', 'jenis' => 'pendapatan', 'parent' => '4.2'],
+            ['kode' => '4.2.3', 'nama' => 'Dana Bagi Hasil', 'jenis' => 'pendapatan', 'parent' => '4.2'],
+            ['kode' => '4.2.4', 'nama' => 'Bantuan Keuangan', 'jenis' => 'pendapatan', 'parent' => '4.2'],
+            ['kode' => '4.3', 'nama' => 'Lain-lain Pendapatan Desa yang Sah', 'jenis' => 'pendapatan', 'parent' => '4'],
+            ['kode' => '4.3.1', 'nama' => 'Lain-lain Pendapatan Desa yang Sah', 'jenis' => 'pendapatan', 'parent' => '4.3'],
+            ['kode' => '5', 'nama' => 'Belanja', 'jenis' => 'belanja'],
+            ['kode' => '5.1', 'nama' => 'Belanja Pegawai', 'jenis' => 'belanja', 'parent' => '5'],
+            ['kode' => '5.2', 'nama' => 'Belanja Barang dan Jasa', 'jenis' => 'belanja', 'parent' => '5'],
+            ['kode' => '5.2.2', 'nama' => 'Belanja Jasa Honorarium', 'jenis' => 'belanja', 'parent' => '5.2'],
+            ['kode' => '5.2.2.03', 'nama' => 'Honorarium/Insentif Pelayanan Desa', 'jenis' => 'belanja', 'parent' => '5.2.2'],
             ['kode' => '6', 'nama' => 'Pembiayaan', 'jenis' => 'pembiayaan'], ['kode' => '6.1', 'nama' => 'Penerimaan Pembiayaan', 'jenis' => 'pembiayaan_penerimaan', 'parent' => '6'], ['kode' => '6.1.1', 'nama' => 'SILPA Tahun Sebelumnya', 'jenis' => 'pembiayaan_penerimaan', 'parent' => '6.1'], ['kode' => '6.2', 'nama' => 'Pengeluaran Pembiayaan', 'jenis' => 'pembiayaan_pengeluaran', 'parent' => '6'], ['kode' => '6.2.1', 'nama' => 'Pembentukan Dana Cadangan', 'jenis' => 'pembiayaan_pengeluaran', 'parent' => '6.2'], ['kode' => '6.2.2', 'nama' => 'Penyertaan Modal Desa', 'jenis' => 'pembiayaan_pengeluaran', 'parent' => '6.2'],
         ];
         foreach ($records as $record) {

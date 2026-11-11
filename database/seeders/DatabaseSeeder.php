@@ -42,12 +42,12 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call([
-            ApbdesSeeder::class,
-            BidangSubBidangSeeder::class,
-            KegiatanSeeder::class,
-            PemasukanSeeder::class,
-            PengeluaranSeeder::class,
-            InventarisSeeder::class,
+            /* ApbdesSeeder::class, */
+            /* BidangSubBidangSeeder::class, */
+            /* KegiatanSeeder::class, */
+            /* PemasukanSeeder::class, */
+            /* PengeluaranSeeder::class, */
+            /* InventarisSeeder::class, */
 
         ]);
     }

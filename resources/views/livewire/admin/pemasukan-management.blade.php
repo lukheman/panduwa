@@ -52,6 +52,51 @@
         </div>
     </div>
 
+    {{-- Rekap per Sumber Dana --}}
+    <x-layout.modern-card class="mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0 fw-semibold text-body">Rekap Pemasukan per Sumber Dana</h5>
+            <span class="badge bg-primary bg-opacity-10 text-primary">Tahun {{ date('Y') }}</span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-modern align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Sumber Dana</th>
+                        <th class="text-end">Tahun Ini (Rp)</th>
+                        <th class="text-end">Total Keseluruhan (Rp)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($rekapSumberDana as $rekap)
+                        <tr wire:key="rekap-{{ $rekap['kode'] }}">
+                            <td>
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary me-2">{{ $rekap['kode'] }}</span>
+                                <span class="fw-semibold text-body">{{ $rekap['nama'] }}</span>
+                            </td>
+                            <td class="text-end text-success fw-medium">{{ $this->formatRupiah($rekap['tahun_ini']) }}</td>
+                            <td class="text-end fw-semibold text-body">{{ $this->formatRupiah($rekap['total']) }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="3" class="text-center text-muted py-4">Data sumber dana belum tersedia.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+                @if ($rekapSumberDana->isNotEmpty())
+                    <tfoot class="bg-light">
+                        <tr>
+                            <th class="fw-bold text-end">TOTAL</th>
+                            <th class="text-end text-success fw-bold">{{ $this->formatRupiah($rekapSumberDana->sum('tahun_ini')) }}</th>
+                            <th class="text-end fw-bold">{{ $this->formatRupiah($rekapSumberDana->sum('total')) }}</th>
+                        </tr>
+                    </tfoot>
+                @endif
+            </table>
+        </div>
+    </x-layout.modern-card>
+
     <x-layout.modern-card>
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h5 class="mb-0 fw-semibold text-body">Riwayat Pemasukan</h5>
@@ -85,7 +130,7 @@
                                     <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 35px; height: 35px;">
                                         <i class="fas fa-arrow-down"></i>
                                     </div>
-                                    <span class="fw-semibold text-body">{{ $pemasukan->sumber_dana }}</span>
+                                    <span class="fw-semibold text-body">{{ $pemasukan->sumberDana?->nama ?? $pemasukan->sumber_dana }}</span>
                                 </div>
                             </td>
                             <td class="text-success fw-bold">{{ $this->formatRupiah($pemasukan->jumlah) }}</td>
@@ -100,7 +145,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="text-center py-5">
+                            <td colspan="5" class="text-center py-5">
                                 <x-ui.empty-state
                                     icon="fas fa-wallet"
                                     title="Belum ada data pemasukan"
@@ -139,13 +184,16 @@
                         @error('tanggal') <span class="text-danger small">{{ $message }}</span> @enderror
                     </div>
 
-                    <x-form.input
-                        id="sumber_dana"
+                    <x-form.select
+                        id="sumber_dana_id"
                         label="Sumber Dana"
-                        wire:model="sumber_dana"
-                        placeholder="Contoh: Dana Desa (APBN), Retribusi"
+                        wire:model="sumber_dana_id"
+                        :options="$sumberDanas->pluck('nama', 'id')->all()"
+                        :selected="$sumber_dana_id"
+                        placeholder="Pilih sumber dana..."
                         required="true"
-                        error="{{ $errors->first('sumber_dana') }}"
+                        hint="Pilih Dana Desa atau Alokasi Dana Desa agar anggaran tercatat terpisah."
+                        error="{{ $errors->first('sumber_dana_id') }}"
                     />
 
                     <div class="mb-3">
@@ -195,7 +243,7 @@
                         </tr>
                         <tr>
                             <td class="text-muted">Sumber Dana</td>
-                            <td>: <span class="fw-semibold">{{ $viewingPemasukan->sumber_dana }}</span></td>
+                            <td>: <span class="fw-semibold">{{ $viewingPemasukan->sumberDana?->nama ?? $viewingPemasukan->sumber_dana }}</span></td>
                         </tr>
                         <tr>
                             <td class="text-muted">Jumlah</td>

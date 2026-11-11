@@ -16,10 +16,18 @@ class PemasukanManagement extends Component
 {
     use WithPagination;
 
+    private const REKENING_PENDAPATAN = [
+        'PAD' => '4.1.1',
+        'DDS' => '4.2.1',
+        'ADD' => '4.2.2',
+        'DBH' => '4.2.3',
+        'LAINNYA' => '4.3.1',
+    ];
+
     #[Url(as: 'q')]
     public string $search = '';
 
-    public string $sumber_dana = '';
+    public ?int $sumber_dana_id = null;
 
     public string $jumlah = '';
 
@@ -42,7 +50,7 @@ class PemasukanManagement extends Component
     protected function rules(): array
     {
         return [
-            'sumber_dana' => ['required', 'string', 'max:255'],
+            'sumber_dana_id' => ['required', 'integer', 'exists:sumber_dana,id'],
             'jumlah' => ['required', 'numeric', 'min:0', 'max:9999999999999'],
             'tanggal' => ['required', 'date'],
             'keterangan' => ['nullable', 'string'],
@@ -71,7 +79,9 @@ class PemasukanManagement extends Component
         $pemasukan = Pemasukan::findOrFail($id);
 
         $this->editingPemasukanId = $id;
-        $this->sumber_dana = $pemasukan->sumber_dana;
+        $this->sumber_dana_id = $pemasukan->sumber_dana_id
+            ?? SumberDana::where('nama', $pemasukan->sumber_dana)->value('id')
+            ?? SumberDana::where('kode', 'DDS')->value('id');
         $this->jumlah = (string) $pemasukan->jumlah;
         $this->tanggal = $pemasukan->tanggal;
         $this->keterangan = $pemasukan->keterangan ?? '';
@@ -82,8 +92,10 @@ class PemasukanManagement extends Component
     public function save(): void
     {
         $validated = $this->validate();
-        $validated['sumber_dana_id'] = SumberDana::where('kode', 'DDS')->value('id');
-        $validated['rekening_anggaran_id'] = RekeningAnggaran::where('kode', '4.2.1')->value('id');
+
+        $sumberDana = SumberDana::findOrFail($validated['sumber_dana_id']);
+        $validated['sumber_dana'] = $sumberDana->nama;
+        $validated['rekening_anggaran_id'] = $this->rekeningPendapatanId($sumberDana->kode);
         $validated['anggaran'] = $validated['jumlah'];
 
         if ($this->editingPemasukanId) {
@@ -142,11 +154,20 @@ class PemasukanManagement extends Component
 
     protected function resetForm(): void
     {
-        $this->sumber_dana = '';
+        $this->sumber_dana_id = null;
         $this->jumlah = '';
         $this->tanggal = date('Y-m-d');
         $this->keterangan = '';
         $this->editingPemasukanId = null;
+    }
+
+    protected function rekeningPendapatanId(string $kode): ?int
+    {
+        $kodeRekening = self::REKENING_PENDAPATAN[$kode] ?? null;
+
+        return $kodeRekening
+            ? RekeningAnggaran::where('kode', $kodeRekening)->value('id')
+            : null;
     }
 
     public function formatRupiah($angka)
@@ -163,9 +184,37 @@ class PemasukanManagement extends Component
         $totalPengeluaran = Pengeluaran::sum('jumlah');
         $sisaAnggaran = $totalPemasukan - $totalPengeluaran;
 
+        $sumberDanas = SumberDana::query()
+            ->where('aktif', true)
+            ->orderBy('id')
+            ->get();
+
+        $rekapSumberDana = $sumberDanas->map(fn (SumberDana $sumber) => [
+            'kode' => $sumber->kode,
+            'nama' => $sumber->nama,
+            'tahun_ini' => (clone $query)->where('sumber_dana_id', $sumber->id)
+                ->whereYear('tanggal', date('Y'))->sum('jumlah'),
+            'total' => (clone $query)->where('sumber_dana_id', $sumber->id)->sum('jumlah'),
+        ]);
+
+        $totalTanpaSumber = (clone $query)->whereNull('sumber_dana_id')->sum('jumlah');
+
+        if ($totalTanpaSumber > 0) {
+            $rekapSumberDana->push([
+                'kode' => '-',
+                'nama' => 'Tanpa Sumber Dana',
+                'tahun_ini' => (clone $query)->whereNull('sumber_dana_id')
+                    ->whereYear('tanggal', date('Y'))->sum('jumlah'),
+                'total' => $totalTanpaSumber,
+            ]);
+        }
+
         $pemasukans = $query->when($this->search, function ($q) {
-            $q->where('sumber_dana', 'like', '%'.$this->search.'%')
-                ->orWhere('keterangan', 'like', '%'.$this->search.'%');
+            $q->where(function ($sub) {
+                $sub->where('sumber_dana', 'like', '%'.$this->search.'%')
+                    ->orWhereHas('sumberDana', fn ($sumber) => $sumber->where('nama', 'like', '%'.$this->search.'%'))
+                    ->orWhere('keterangan', 'like', '%'.$this->search.'%');
+            });
         })
             ->orderBy('tanggal', 'desc')
             ->orderBy('id', 'desc')
@@ -173,6 +222,8 @@ class PemasukanManagement extends Component
 
         return view('livewire.admin.pemasukan-management', [
             'pemasukans' => $pemasukans,
+            'sumberDanas' => $sumberDanas,
+            'rekapSumberDana' => $rekapSumberDana,
             'totalPemasukan' => $totalPemasukan,
             'totalTahunIni' => $totalTahunIni,
             'sisaAnggaran' => $sisaAnggaran,
