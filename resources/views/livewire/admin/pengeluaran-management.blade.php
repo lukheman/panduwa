@@ -1,8 +1,8 @@
 <div>
-    <x-layout.page-header title="Kelola Pengeluaran" subtitle="Catat dan kelola semua pengeluaran keuangan desa">
+    <x-layout.page-header title="Pengeluaran {{ $danaLabel }}" subtitle="Catat dan kelola pengeluaran {{ $danaLabel }} secara terpisah">
         <x-slot:actions>
             <x-ui.button variant="danger" icon="fas fa-minus" wire:click="openCreateModal">
-                Catat Pengeluaran
+                Catat Pengeluaran {{ $danaLabel }}
             </x-ui.button>
         </x-slot:actions>
     </x-layout.page-header>
@@ -15,7 +15,7 @@
             <x-layout.modern-card class="border-start border-4 border-danger h-100">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <p class="text-muted mb-1 fw-semibold text-uppercase small">Total Pengeluaran Bulan Ini</p>
+                        <p class="text-muted mb-1 fw-semibold text-uppercase small">Pengeluaran {{ $danaLabel }} Bulan Ini</p>
                         <h3 class="fw-bold text-body mb-0">{{ $this->formatRupiah($totalBulanIni) }}</h3>
                     </div>
                     <div class="bg-danger bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
@@ -28,7 +28,7 @@
             <x-layout.modern-card class="border-start border-4 border-warning h-100">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <p class="text-muted mb-1 fw-semibold text-uppercase small">Total Pengeluaran Keseluruhan</p>
+                        <p class="text-muted mb-1 fw-semibold text-uppercase small">Total Pengeluaran {{ $danaLabel }}</p>
                         <h3 class="fw-bold text-body mb-0">{{ $this->formatRupiah($totalPengeluaran) }}</h3>
                     </div>
                     <div class="bg-warning bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
@@ -41,7 +41,7 @@
             <x-layout.modern-card class="border-start border-4 border-info h-100">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <p class="text-muted mb-1 fw-semibold text-uppercase small">Sisa Anggaran Total</p>
+                        <p class="text-muted mb-1 fw-semibold text-uppercase small">Sisa Anggaran {{ $danaLabel }}</p>
                         <h3 class="fw-bold {{ $sisaAnggaran < 0 ? 'text-danger' : 'text-body' }} mb-0">{{ $this->formatRupiah($sisaAnggaran) }}</h3>
                     </div>
                     <div class="bg-info bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
@@ -88,7 +88,7 @@
                                         <span class="badge bg-info">Kegiatan: {{ $pengeluaran->kegiatan->nama_kegiatan }}</span>
                                     @endif
                                     @if ($pengeluaran->inventaris)
-                                        <span class="badge bg-primary">Inventaris: {{ $pengeluaran->inventaris->nama_barang }}</span>
+                                        <span class="badge bg-primary">Inventaris: {{ $pengeluaran->inventaris->jumlah }} x {{ $pengeluaran->inventaris->nama_barang }}</span>
                                     @endif
                                     @if (! $pengeluaran->kegiatan && ! $pengeluaran->inventaris)
                                         <span class="text-muted">-</span>
@@ -140,11 +140,45 @@
 
                 <form wire:submit="save">
 
+                        <div class="alert alert-light border d-flex align-items-start gap-2 mb-3">
+                            <i class="fas fa-info-circle text-primary mt-1"></i>
+                            <div>
+                                <strong class="d-block">{{ $danaLabel }}</strong>
+                                <span class="small text-muted">Pengeluaran ini otomatis dicatat menggunakan sumber dana {{ $danaLabel }}.</span>
+                            </div>
+                        </div>
+
                         <div class="mb-3">
                             <label class="form-label">Tanggal Transaksi <span class="text-danger">*</span></label>
                             <input type="date" class="form-control" wire:model="tanggal" required>
                             @error('tanggal') <span class="text-danger small">{{ $message }}</span> @enderror
                         </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Kegiatan Terkait (Opsional)</label>
+                            <select class="form-control" wire:model.live="id_kegiatan">
+                                <option value="">-- Tidak terkait kegiatan --</option>
+                                @foreach($kegiatans as $kegiatan)
+                                    <option value="{{ $kegiatan->id }}">{{ $kegiatan->nama_kegiatan }}</option>
+                                @endforeach
+                            </select>
+                            @error('id_kegiatan') <span class="text-danger small">{{ $message }}</span> @enderror
+                            <small class="text-muted">
+                                @if($danaLabel === 'Dana Desa')
+                                    Pilih kegiatan Dana Desa yang sudah berjalan atau selesai.
+                                @else
+                                    Pilih kegiatan Alokasi Dana Desa. Alokasi Dana Desa tidak menggunakan bidang/sub-bidang.
+                                @endif
+                            </small>
+                        </div>
+
+                        @if ($selectedKegiatanInfo)
+                            <div class="alert alert-info small mb-3">
+                                <div class="d-flex justify-content-between"><span>Rencana Anggaran</span><strong>{{ $this->formatRupiah($selectedKegiatanInfo['anggaran']) }}</strong></div>
+                                <div class="d-flex justify-content-between"><span>Realisasi</span><strong>{{ $this->formatRupiah($selectedKegiatanInfo['realisasi']) }}</strong></div>
+                                <div class="d-flex justify-content-between"><span>Sisa</span><strong>{{ $this->formatRupiah($selectedKegiatanInfo['sisa']) }}</strong></div>
+                            </div>
+                        @endif
 
                         <div class=" mb-3">
                             <label class="form-label">Jumlah (Rp) <span class="text-danger">*</span></label>
@@ -210,6 +244,11 @@
                                     @error('nama_barang') <span class="text-danger small">{{ $message }}</span> @enderror
                                 </div>
                                 <div class="col-md-6">
+                                    <label class="form-label">Jumlah Barang <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" wire:model="jumlah_barang" min="1" placeholder="1">
+                                    @error('jumlah_barang') <span class="text-danger small">{{ $message }}</span> @enderror
+                                </div>
+                                <div class="col-md-6">
                                     <label class="form-label">Kondisi Awal <span class="text-danger">*</span></label>
                                     <select class="form-control" wire:model="kondisi">
                                         @foreach ($kondisiInventaris as $status)
@@ -221,7 +260,7 @@
                             </div>
                             <div class="alert alert-info small mt-3 mb-0">
                                 <i class="fas fa-info-circle me-1"></i>
-                                Tanggal perolehan otomatis mengikuti tanggal transaksi. Nilai aset otomatis mengikuti jumlah pengeluaran.
+                                Tanggal perolehan, jumlah barang, sumber dana, dan nilai aset otomatis mengikuti transaksi pengeluaran ini.
                             </div>
                         </div>
                     @endif
@@ -269,10 +308,14 @@
                             </td>
                         </tr>
                         <tr>
+                            <td class="text-muted">Sumber Dana</td>
+                            <td>: <x-ui.badge variant="primary" icon="fas fa-wallet">{{ $viewingPengeluaran->sumberDana?->nama ?? $danaLabel }}</x-ui.badge></td>
+                        </tr>
+                        <tr>
                             <td class="text-muted">Terkait Inventaris</td>
                             <td>:
                                 @if ($viewingPengeluaran->inventaris)
-                                    <x-ui.badge variant="primary" icon="fas fa-boxes">{{ $viewingPengeluaran->inventaris->nama_barang }}</x-ui.badge>
+                                    <x-ui.badge variant="primary" icon="fas fa-boxes">{{ $viewingPengeluaran->inventaris->jumlah }} x {{ $viewingPengeluaran->inventaris->nama_barang }}</x-ui.badge>
                                 @else
                                     <span class="text-muted">-</span>
                                 @endif

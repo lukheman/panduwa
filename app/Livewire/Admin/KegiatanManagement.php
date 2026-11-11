@@ -27,6 +27,9 @@ class KegiatanManagement extends Component
     #[Url(as: 'q')]
     public string $search = '';
 
+    #[Url(as: 'dana')]
+    public string $dana = SumberDana::KODE_DANA_DESA;
+
     #[Url(as: 'bidang')]
     public string $filterBidang = '';
 
@@ -64,16 +67,38 @@ class KegiatanManagement extends Component
 
     protected function rules(): array
     {
-        return [
+        $rules = [
             'nama_kegiatan' => ['required', 'string', 'max:255'],
             'lokasi' => ['required', 'string', 'max:255'],
-            'bidang_kegiatan_id' => ['required', 'exists:bidang_kegiatan,id'],
-            'sub_bidang_kegiatan_id' => ['required', 'exists:sub_bidang_kegiatan,id'],
             'rencana_anggaran' => ['required', 'numeric', 'min:0', 'max:9999999999999'],
             'realisasi_anggaran' => ['nullable', 'numeric', 'min:0', 'max:9999999999999'],
             'status' => ['required', Rule::enum(StatusKegiatan::class)],
             'foto_progres' => ['nullable', 'image', 'max:2048'],
         ];
+
+        if ($this->menggunakanBidang()) {
+            $rules['bidang_kegiatan_id'] = ['required', 'exists:bidang_kegiatan,id'];
+            $rules['sub_bidang_kegiatan_id'] = ['required', 'exists:sub_bidang_kegiatan,id'];
+        }
+
+        return $rules;
+    }
+
+    public function menggunakanBidang(): bool
+    {
+        return $this->dana === SumberDana::KODE_DANA_DESA;
+    }
+
+    public function updatedDana(): void
+    {
+        $this->dana = SumberDana::normalisasiKode($this->dana);
+        $this->resetForm();
+        $this->resetPage();
+    }
+
+    public function mount(): void
+    {
+        $this->dana = SumberDana::normalisasiKode($this->dana);
     }
 
     public function updatedSearch(): void
@@ -112,7 +137,7 @@ class KegiatanManagement extends Component
     public function openDetailModal(int $id): void
     {
         $this->detailKegiatanId = $id;
-        $this->detailKegiatan = Kegiatan::with('subBidang.bidang')->findOrFail($id);
+        $this->detailKegiatan = Kegiatan::with(['subBidang.bidang', 'sumberDana'])->findOrFail($id);
         $this->showDetailModal = true;
     }
 
@@ -128,6 +153,7 @@ class KegiatanManagement extends Component
         $kegiatan = Kegiatan::with('subBidang.bidang')->findOrFail($id);
 
         $this->editingKegiatanId = $id;
+        $this->dana = SumberDana::normalisasiKode($kegiatan->sumberDana?->kode ?? $this->dana);
         $this->nama_kegiatan = $kegiatan->nama_kegiatan;
         $this->lokasi = $kegiatan->lokasi;
         $this->bidang_kegiatan_id = (string) ($kegiatan->subBidang?->bidang_kegiatan_id ?? '');
@@ -145,16 +171,20 @@ class KegiatanManagement extends Component
     {
         $this->validate();
 
-        $sub = SubBidangKegiatan::findOrFail($this->sub_bidang_kegiatan_id);
-        if ((string) $sub->bidang_kegiatan_id !== (string) $this->bidang_kegiatan_id) {
-            $this->addError('sub_bidang_kegiatan_id', 'Sub-bidang tidak termasuk dalam bidang yang dipilih.');
+        $sumberDanaId = $this->sumberDanaId();
 
-            return;
+        if ($this->menggunakanBidang()) {
+            $sub = SubBidangKegiatan::findOrFail($this->sub_bidang_kegiatan_id);
+            if ((string) $sub->bidang_kegiatan_id !== (string) $this->bidang_kegiatan_id) {
+                $this->addError('sub_bidang_kegiatan_id', 'Sub-bidang tidak termasuk dalam bidang yang dipilih.');
+
+                return;
+            }
         }
 
-        $totalPemasukan = Pemasukan::sum('jumlah');
-        $totalPengeluaranNonKegiatan = Pengeluaran::whereNull('id_kegiatan')->sum('jumlah');
-        $totalAnggaranKegiatanLain = Kegiatan::query();
+        $totalPemasukan = Pemasukan::query()->untukSumberDana($sumberDanaId)->sum('jumlah');
+        $totalPengeluaranNonKegiatan = Pengeluaran::query()->untukSumberDana($sumberDanaId)->whereNull('id_kegiatan')->sum('jumlah');
+        $totalAnggaranKegiatanLain = Kegiatan::query()->untukSumberDana($sumberDanaId);
 
         if ($this->editingKegiatanId) {
             $totalAnggaranKegiatanLain->where('id', '!=', $this->editingKegiatanId);
@@ -191,12 +221,12 @@ class KegiatanManagement extends Component
         $data = [
             'nama_kegiatan' => $this->nama_kegiatan,
             'lokasi' => $this->lokasi,
-            'sub_bidang_kegiatan_id' => $this->sub_bidang_kegiatan_id,
+            'sub_bidang_kegiatan_id' => $this->menggunakanBidang() ? $this->sub_bidang_kegiatan_id : null,
             'rencana_anggaran' => $this->rencana_anggaran,
             'realisasi_anggaran' => $this->realisasi_anggaran ?: null,
             'status' => $this->status,
             'foto_progres' => $path,
-            'sumber_dana_id' => SumberDana::where('kode', 'DDS')->value('id'),
+            'sumber_dana_id' => $sumberDanaId,
         ];
 
         if ($this->editingKegiatanId) {
@@ -349,10 +379,18 @@ class KegiatanManagement extends Component
         return 'fas fa-calendar-alt';
     }
 
+    protected function sumberDanaId(): ?int
+    {
+        return SumberDana::query()->where('kode', $this->dana)->value('id');
+    }
+
     public function render()
     {
+        $sumberDana = SumberDana::query()->where('kode', $this->dana)->first();
+
         $kegiatans = Kegiatan::query()
-            ->with('subBidang.bidang')
+            ->untukSumberDana($sumberDana?->id)
+            ->with(['subBidang.bidang', 'sumberDana'])
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('nama_kegiatan', 'like', '%'.$this->search.'%')
@@ -367,7 +405,7 @@ class KegiatanManagement extends Component
                         });
                 });
             })
-            ->when($this->filterBidang, function ($query) {
+            ->when($this->menggunakanBidang() && $this->filterBidang, function ($query) {
                 $query->whereHas('subBidang', function ($q) {
                     $q->where('bidang_kegiatan_id', $this->filterBidang);
                 });
@@ -375,11 +413,16 @@ class KegiatanManagement extends Component
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        $bidangs = BidangKegiatan::orderBy('kode')->get();
+        $bidangs = $this->menggunakanBidang()
+            ? BidangKegiatan::orderBy('kode')->get()
+            : collect();
 
         return view('livewire.admin.kegiatan-management', [
             'kegiatans' => $kegiatans,
             'bidangs' => $bidangs,
+            'sumberDana' => $sumberDana,
+            'danaLabel' => SumberDana::labelUntukKode($this->dana),
+            'menggunakanBidang' => $this->menggunakanBidang(),
         ]);
     }
 }

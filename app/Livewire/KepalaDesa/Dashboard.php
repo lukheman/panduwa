@@ -6,6 +6,7 @@ use App\Models\Pemasukan;
 use App\Models\Pengeluaran;
 use App\Models\Kegiatan;
 use App\Models\Inventaris;
+use App\Services\RingkasanSumberDanaService;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
@@ -61,6 +62,7 @@ class Dashboard extends Component
             'totalAset' => $totalAset,
             'nilaiAset' => $nilaiAset,
             'kegiatanTerbaru' => $kegiatanTerbaru,
+            'ringkasanSumberDana' => app(RingkasanSumberDanaService::class)->build(),
         ]);
     }
 }

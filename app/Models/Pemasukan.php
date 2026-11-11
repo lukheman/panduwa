@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\FilterBySumberDana;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -9,7 +10,7 @@ class Pemasukan extends Model
 {
     protected $table = 'pemasukan';
 
-    use HasFactory;
+    use FilterBySumberDana, HasFactory;
 
     protected $fillable = [
         'sumber_dana',

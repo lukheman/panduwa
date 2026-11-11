@@ -13,8 +13,8 @@ class LaporanRealisasiApbdesService
 {
     public function build(int $tahun, string $sampaiTanggal, ?int $sumberDanaId = null): array
     {
-        $pendapatanQuery = $this->periode(Pemasukan::query(), $tahun, $sampaiTanggal)
-            ->when($sumberDanaId, fn ($query) => $query->where('sumber_dana_id', $sumberDanaId));
+        $pendapatanQuery = $this->periode(Pemasukan::query()->with('sumberDana'), $tahun, $sampaiTanggal)
+            ->when($sumberDanaId, fn ($query) => $query->untukSumberDana($sumberDanaId));
         $pendapatan = (clone $pendapatanQuery)->get();
 
         $pengeluaranQuery = $this->periode(Pengeluaran::query(), $tahun, $sampaiTanggal)
@@ -22,13 +22,13 @@ class LaporanRealisasiApbdesService
                 $query->whereNull('id_kegiatan')
                     ->orWhereHas('kegiatan', fn ($kegiatan) => $kegiatan->where('status', '!=', StatusKegiatan::PERENCANAAN->value));
             })
-            ->when($sumberDanaId, fn ($query) => $query->where('sumber_dana_id', $sumberDanaId));
+            ->when($sumberDanaId, fn ($query) => $query->untukSumberDana($sumberDanaId));
         $pengeluaran = (clone $pengeluaranQuery)->get();
 
         $kegiatans = Kegiatan::query()
             ->with(['subBidang.bidang', 'belanjaDetails.rekening.parent.parent.parent'])
             ->where('status', '!=', StatusKegiatan::PERENCANAAN->value)
-            ->when($sumberDanaId, fn ($query) => $query->where('sumber_dana_id', $sumberDanaId))
+            ->when($sumberDanaId, fn ($query) => $query->untukSumberDana($sumberDanaId))
             ->get();
 
         $belanjaRows = $this->belanjaRows($kegiatans, $pengeluaran);
@@ -79,25 +79,33 @@ class LaporanRealisasiApbdesService
     {
         return $this->periode(Pembiayaan::query()->with('rekening'), $tahun, $sampaiTanggal)
             ->where('jenis', $jenis)
-            ->when($sumberDanaId, fn ($query) => $query->where('sumber_dana_id', $sumberDanaId))
+            ->when($sumberDanaId, fn ($query) => $query->untukSumberDana($sumberDanaId))
             ->get();
     }
 
     private function pendapatanRows(Collection $items): Collection
     {
-        return $items->map(fn ($item) => [
-            'code' => $item->rekening?->kode ?? '4.2.1',
-            'description' => $item->rekening?->nama ?? ($item->keterangan ?: $item->sumber_dana),
-            'level' => 2,
-            'anggaran' => $item->anggaran ?? $item->jumlah,
-            'realisasi' => $item->jumlah,
-            'class' => '',
-        ]);
+        return $items->map(function ($item) {
+            $kodeSumber = $item->sumberDana?->kode;
+
+            return [
+                'code' => $item->rekening?->kode ?? ($kodeSumber === 'ADD' ? '4.2.2' : '4.2.1'),
+                'description' => $item->rekening?->nama ?? ($item->keterangan ?: $item->sumber_dana),
+                'level' => 2,
+                'anggaran' => $item->anggaran ?? $item->jumlah,
+                'realisasi' => $item->jumlah,
+                'class' => '',
+            ];
+        });
     }
 
     private function belanjaRows(Collection $kegiatans, Collection $pengeluarans): Collection
     {
         $rows = collect();
+
+        if ($kegiatans->isNotEmpty() && $kegiatans->every(fn ($kegiatan) => $kegiatan->subBidang === null)) {
+            return $this->belanjaRowsTanpaBidang($kegiatans, $pengeluarans);
+        }
 
         $kegiatans = $kegiatans->sortBy([
             ['subBidang.bidang.kode', 'asc'],
@@ -147,6 +155,41 @@ class LaporanRealisasiApbdesService
                         $this->pushRekeningRows($rows, $detail, $pengeluarans);
                     }
                 }
+            }
+        }
+
+        $unassigned = $pengeluarans->whereNull('id_kegiatan');
+        if ($unassigned->isNotEmpty()) {
+            $rows->push([
+                'code' => '5.9',
+                'description' => 'Belanja lainnya',
+                'level' => 1,
+                'anggaran' => 0,
+                'realisasi' => (float) $unassigned->sum('jumlah'),
+                'class' => 'type',
+            ]);
+        }
+
+        return $rows;
+    }
+
+    private function belanjaRowsTanpaBidang(Collection $kegiatans, Collection $pengeluarans): Collection
+    {
+        $rows = collect();
+
+        foreach ($kegiatans->sortBy('nama_kegiatan') as $kegiatan) {
+            $realisasi = $pengeluarans->where('id_kegiatan', $kegiatan->id)->sum('jumlah');
+            $rows->push([
+                'code' => $kegiatan->kode_rekening ?: '5.2',
+                'description' => $kegiatan->nama_kegiatan,
+                'level' => 0,
+                'anggaran' => (float) $kegiatan->rencana_anggaran,
+                'realisasi' => (float) $realisasi,
+                'class' => 'activity',
+            ]);
+
+            foreach ($kegiatan->belanjaDetails as $detail) {
+                $this->pushRekeningRows($rows, $detail, $pengeluarans);
             }
         }
 

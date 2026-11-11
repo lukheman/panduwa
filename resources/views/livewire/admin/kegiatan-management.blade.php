@@ -1,8 +1,8 @@
 <div>
-    <x-layout.page-header title="Perencanaan Kegiatan" subtitle="Kelola seluruh program dan kegiatan desa">
+    <x-layout.page-header title="Perencanaan {{ $danaLabel }}" subtitle="Kelola rencana kegiatan dan anggaran {{ $danaLabel }}">
         <x-slot:actions>
             <x-ui.button variant="primary" icon="fas fa-plus" wire:click="openCreateModal">
-                Tambah Kegiatan
+                Tambah Kegiatan {{ $danaLabel }}
             </x-ui.button>
         </x-slot:actions>
     </x-layout.page-header>
@@ -12,14 +12,16 @@
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <h5 class="mb-0 fw-semibold text-body">Daftar Kegiatan</h5>
         <div class="d-flex gap-2 flex-wrap" style="max-width: 640px; width: 100%; justify-content: flex-end;">
-            <div style="max-width: 220px; width: 100%;">
-                <select class="form-control" wire:model.live="filterBidang">
-                    <option value="">Semua Bidang</option>
-                    @foreach($bidangs as $b)
-                        <option value="{{ $b->id }}">{{ $b->kode }} - {{ \Illuminate\Support\Str::limit($b->nama, 30) }}</option>
-                    @endforeach
-                </select>
-            </div>
+            @if ($menggunakanBidang)
+                <div style="max-width: 220px; width: 100%;">
+                    <select class="form-control" wire:model.live="filterBidang">
+                        <option value="">Semua Bidang</option>
+                        @foreach($bidangs as $b)
+                            <option value="{{ $b->id }}">{{ $b->kode }} - {{ \Illuminate\Support\Str::limit($b->nama, 30) }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            @endif
             <div style="max-width: 300px; width: 100%;">
                 <x-form.input
                     wire:model.live.debounce.300ms="search"
@@ -67,14 +69,26 @@
                         </div>
 
                         <div class="d-flex align-items-center text-muted small mb-2 pb-2 border-bottom">
-                            <i class="fas fa-layer-group text-info me-2"></i>
-                            <span class="text-truncate">{{ $kegiatan->subBidang?->bidang?->nama ?? '-' }}</span>
+                            <i class="fas fa-wallet text-success me-2"></i>
+                            <span class="text-truncate">{{ $kegiatan->sumberDana?->nama ?? $danaLabel }}</span>
                         </div>
 
-                        <div class="d-flex align-items-center text-muted small mb-4 pb-3 border-bottom">
-                            <i class="fas fa-sitemap text-warning me-2"></i>
-                            <span class="text-truncate">{{ $kegiatan->subBidang ? $kegiatan->subBidang->kode.' - '.$kegiatan->subBidang->nama : '-' }}</span>
-                        </div>
+                        @if ($menggunakanBidang)
+                            <div class="d-flex align-items-center text-muted small mb-2 pb-2 border-bottom">
+                                <i class="fas fa-layer-group text-info me-2"></i>
+                                <span class="text-truncate">{{ $kegiatan->subBidang?->bidang?->nama ?? '-' }}</span>
+                            </div>
+
+                            <div class="d-flex align-items-center text-muted small mb-4 pb-3 border-bottom">
+                                <i class="fas fa-sitemap text-warning me-2"></i>
+                                <span class="text-truncate">{{ $kegiatan->subBidang ? $kegiatan->subBidang->kode.' - '.$kegiatan->subBidang->nama : '-' }}</span>
+                            </div>
+                        @else
+                            <div class="d-flex align-items-center text-muted small mb-4 pb-3 border-bottom">
+                                <i class="fas fa-info-circle text-info me-2"></i>
+                                <span class="text-truncate">Alokasi Dana Desa tidak menggunakan bidang/sub-bidang</span>
+                            </div>
+                        @endif
 
                         <div class="mt-auto">
                             <div class="d-flex justify-content-between mb-1">
@@ -153,34 +167,52 @@
                             />
                         </div>
 
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Bidang Kegiatan <span class="text-danger">*</span></label>
-                                <select class="form-control" wire:model.live="bidang_kegiatan_id" required>
-                                    <option value="">-- Pilih Bidang --</option>
-                                    @foreach($bidangs as $b)
-                                        <option value="{{ $b->id }}">{{ $b->kode }} - {{ $b->nama }}</option>
-                                    @endforeach
-                                </select>
-                                @error('bidang_kegiatan_id') <span class="text-danger small">{{ $message }}</span> @enderror
+                        <div class="col-12">
+                            <div class="alert alert-light border d-flex align-items-start gap-2 mb-1">
+                                <i class="fas fa-wallet text-primary mt-1"></i>
+                                <div>
+                                    <strong class="d-block">{{ $danaLabel }}</strong>
+                                    <span class="small text-muted">
+                                        @if ($menggunakanBidang)
+                                            Perencanaan Dana Desa menggunakan bidang dan sub-bidang.
+                                        @else
+                                            Perencanaan Alokasi Dana Desa tidak menggunakan bidang maupun sub-bidang.
+                                        @endif
+                                    </span>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Sub-Bidang <span class="text-danger">*</span></label>
-                                <select class="form-control" wire:model="sub_bidang_kegiatan_id" required {{ !$bidang_kegiatan_id ? 'disabled' : '' }}>
-                                    <option value="">-- Pilih Sub-Bidang --</option>
-                                    @foreach($this->subBidangOptions as $sub)
-                                        <option value="{{ $sub->id }}">{{ $sub->kode }} - {{ $sub->nama }}</option>
-                                    @endforeach
-                                </select>
-                                @error('sub_bidang_kegiatan_id') <span class="text-danger small">{{ $message }}</span> @enderror
-                                @if(!$bidang_kegiatan_id)
-                                    <small class="text-muted"><i class="fas fa-info-circle me-1"></i>Pilih bidang terlebih dahulu.</small>
-                                @endif
+                        @if ($menggunakanBidang)
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Bidang Kegiatan <span class="text-danger">*</span></label>
+                                    <select class="form-control" wire:model.live="bidang_kegiatan_id" required>
+                                        <option value="">-- Pilih Bidang --</option>
+                                        @foreach($bidangs as $b)
+                                            <option value="{{ $b->id }}">{{ $b->kode }} - {{ $b->nama }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('bidang_kegiatan_id') <span class="text-danger small">{{ $message }}</span> @enderror
+                                </div>
                             </div>
-                        </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Sub-Bidang <span class="text-danger">*</span></label>
+                                    <select class="form-control" wire:model="sub_bidang_kegiatan_id" required {{ !$bidang_kegiatan_id ? 'disabled' : '' }}>
+                                        <option value="">-- Pilih Sub-Bidang --</option>
+                                        @foreach($this->subBidangOptions as $sub)
+                                            <option value="{{ $sub->id }}">{{ $sub->kode }} - {{ $sub->nama }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('sub_bidang_kegiatan_id') <span class="text-danger small">{{ $message }}</span> @enderror
+                                    @if(!$bidang_kegiatan_id)
+                                        <small class="text-muted"><i class="fas fa-info-circle me-1"></i>Pilih bidang terlebih dahulu.</small>
+                                    @endif
+                                </div>
+                            </div>
+                        @endif
 
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -294,8 +326,13 @@
                             </x-ui.badge>
                         </div>
                         <p class="text-muted"><i class="fas fa-map-marker-alt text-danger me-2"></i>{{ $detailKegiatan->lokasi }}</p>
-                        <p class="text-muted mb-1"><i class="fas fa-layer-group text-info me-2"></i>{{ $detailKegiatan->subBidang?->bidang?->nama ?? '-' }}</p>
-                        <p class="text-muted"><i class="fas fa-sitemap text-warning me-2"></i>{{ $detailKegiatan->subBidang ? $detailKegiatan->subBidang->kode.' - '.$detailKegiatan->subBidang->nama : '-' }}</p>
+                        <p class="text-muted mb-1"><i class="fas fa-wallet text-success me-2"></i>{{ $detailKegiatan->sumberDana?->nama ?? $danaLabel }}</p>
+                        @if ($detailKegiatan->subBidang)
+                            <p class="text-muted mb-1"><i class="fas fa-layer-group text-info me-2"></i>{{ $detailKegiatan->subBidang->bidang?->nama ?? '-' }}</p>
+                            <p class="text-muted"><i class="fas fa-sitemap text-warning me-2"></i>{{ $detailKegiatan->subBidang->kode.' - '.$detailKegiatan->subBidang->nama }}</p>
+                        @else
+                            <p class="text-muted"><i class="fas fa-info-circle text-info me-2"></i>Tanpa bidang/sub-bidang</p>
+                        @endif
                     </div>
 
                     <div class="row g-3 mb-4">

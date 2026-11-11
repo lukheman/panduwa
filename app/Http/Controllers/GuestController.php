@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Kegiatan;
+use App\Services\RingkasanSumberDanaService;
 use Illuminate\Http\Request;
 
 class GuestController extends Controller
@@ -41,17 +42,20 @@ class GuestController extends Controller
         $totalPengeluaran = \App\Models\Pengeluaran::sum('jumlah');
         $sisaAnggaran = $totalPemasukan - $totalPengeluaran;
 
-        $pengeluarans = \App\Models\Pengeluaran::with(['inventaris'])
+        $pengeluarans = \App\Models\Pengeluaran::with(['inventaris', 'sumberDana'])
             ->orderBy('tanggal', 'desc')
             ->orderBy('id', 'desc')
             ->get();
+
+        $ringkasanSumberDana = app(RingkasanSumberDanaService::class)->build();
 
         return view('guest.berita-dana-desa', compact(
             'kegiatans',
             'totalPemasukan',
             'totalPengeluaran',
             'sisaAnggaran',
-            'pengeluarans'
+            'pengeluarans',
+            'ringkasanSumberDana'
         ));
     }
 }

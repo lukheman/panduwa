@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\FilterBySumberDana;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Pembiayaan extends Model
 {
-    use HasFactory;
+    use FilterBySumberDana, HasFactory;
 
     protected $table = 'pembiayaan';
 

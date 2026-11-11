@@ -12,6 +12,7 @@ use App\Models\Kegiatan;
 use App\Models\Inventaris;
 use App\Models\Pemasukan;
 use App\Models\Pengeluaran;
+use App\Services\RingkasanSumberDanaService;
 
 #[Title('Dashboard Admin')]
 class Dashboard extends Component
@@ -51,6 +52,7 @@ class Dashboard extends Component
             'totalInventaris' => $totalInventaris,
             'totalPemasukan' => $totalPemasukan,
             'totalPengeluaran' => $totalPengeluaran,
+            'ringkasanSumberDana' => app(RingkasanSumberDanaService::class)->build(),
             'recentUsers' => $recentUsers,
         ]);
     }

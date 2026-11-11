@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\StatusKegiatan;
+use App\Traits\FilterBySumberDana;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,7 +12,7 @@ class Kegiatan extends Model
 {
     protected $table = 'kegiatan';
 
-    use HasFactory;
+    use FilterBySumberDana, HasFactory;
 
     protected $fillable = [
         'nama_kegiatan',

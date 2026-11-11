@@ -25,6 +25,9 @@ class PengeluaranManagement extends Component
     #[Url(as: 'q')]
     public string $search = '';
 
+    #[Url(as: 'dana')]
+    public string $dana = SumberDana::KODE_DANA_DESA;
+
     public string $tanggal = '';
 
     public string $jumlah = '';
@@ -40,6 +43,8 @@ class PengeluaranManagement extends Component
     public string $kode_barang = '';
 
     public string $nama_barang = '';
+
+    public string $jumlah_barang = '1';
 
     public string $kondisi = KondisiInventaris::BAIK->value;
 
@@ -74,15 +79,25 @@ class PengeluaranManagement extends Component
                 Rule::unique('inventaris', 'kode_barang')->ignore($this->id_inventaris),
             ],
             'nama_barang' => [Rule::requiredIf($this->catatSebagaiInventaris), 'nullable', 'string', 'max:255'],
+            'jumlah_barang' => [Rule::requiredIf($this->catatSebagaiInventaris), 'nullable', 'integer', 'min:1', 'max:100000'],
             'kondisi' => [Rule::requiredIf($this->catatSebagaiInventaris), Rule::enum(KondisiInventaris::class)],
         ];
 
         return $rules;
     }
 
-    public function mount()
+    public function mount(): void
     {
+        $this->dana = SumberDana::normalisasiKode($this->dana);
         $this->tanggal = date('Y-m-d');
+    }
+
+    public function updatedDana(): void
+    {
+        $this->dana = SumberDana::normalisasiKode($this->dana);
+        $this->id_kegiatan = null;
+        $this->selectedKegiatanInfo = null;
+        $this->resetPage();
     }
 
     public function updatedSearch(): void
@@ -93,7 +108,10 @@ class PengeluaranManagement extends Component
     public function updatedIdKegiatan($value): void
     {
         if ($value) {
-            $kegiatan = Kegiatan::withSum('pengeluarans', 'jumlah')->find($value);
+            $kegiatan = Kegiatan::query()
+                ->untukSumberDana($this->sumberDanaId())
+                ->withSum('pengeluarans', 'jumlah')
+                ->find($value);
             if ($kegiatan) {
                 $realisasi = $kegiatan->pengeluarans_sum_jumlah ?? 0;
 
@@ -148,6 +166,7 @@ class PengeluaranManagement extends Component
         $this->id_inventaris = $inventaris?->id;
         $this->kode_barang = $inventaris?->kode_barang ?? '';
         $this->nama_barang = $inventaris?->nama_barang ?? '';
+        $this->jumlah_barang = (string) ($inventaris?->jumlah ?? 1);
         $this->kondisi = $inventaris?->kondisi?->value ?? KondisiInventaris::BAIK->value;
         $this->updatedIdKegiatan($this->id_kegiatan);
 
@@ -156,12 +175,27 @@ class PengeluaranManagement extends Component
 
     public function save(): void
     {
+        $sumberDanaId = $this->sumberDanaId();
+
         $validated = $this->validate();
 
         $validated['id_kegiatan'] = $validated['id_kegiatan'] ?: null;
-        // Check overall sisa anggaran
-        $totalPemasukan = Pemasukan::sum('jumlah');
-        $totalPengeluaran = Pengeluaran::sum('jumlah');
+
+        if ($validated['id_kegiatan']) {
+            $kegiatanValid = Kegiatan::query()
+                ->untukSumberDana($sumberDanaId)
+                ->whereKey($validated['id_kegiatan'])
+                ->exists();
+
+            if (! $kegiatanValid) {
+                $this->addError('id_kegiatan', 'Kegiatan yang dipilih bukan bagian dari '.SumberDana::labelUntukKode($this->dana).'.');
+
+                return;
+            }
+        }
+
+        $totalPemasukan = Pemasukan::query()->untukSumberDana($sumberDanaId)->sum('jumlah');
+        $totalPengeluaran = Pengeluaran::query()->untukSumberDana($sumberDanaId)->sum('jumlah');
 
         if ($this->editingPengeluaranId) {
             $current = Pengeluaran::find($this->editingPengeluaranId);
@@ -173,12 +207,11 @@ class PengeluaranManagement extends Component
         $sisaAnggaran = $totalPemasukan - $totalPengeluaran;
 
         if ($validated['jumlah'] > $sisaAnggaran) {
-            $this->addError('jumlah', 'Sisa Anggaran Keseluruhan Desa ('.$this->formatRupiah($sisaAnggaran).') tidak mencukupi untuk pengeluaran ini.');
+            $this->addError('jumlah', 'Sisa Anggaran '.SumberDana::labelUntukKode($this->dana).' ('.$this->formatRupiah($sisaAnggaran).') tidak mencukupi untuk pengeluaran ini.');
 
             return;
         }
 
-        // Check if kegiatan budget is enough
         if ($validated['id_kegiatan']) {
             $kegiatan = Kegiatan::withSum('pengeluarans', 'jumlah')->find($validated['id_kegiatan']);
             if ($kegiatan) {
@@ -198,7 +231,7 @@ class PengeluaranManagement extends Component
             }
         }
 
-        DB::transaction(function () use ($validated): void {
+        DB::transaction(function () use ($validated, $sumberDanaId): void {
             $pengeluaran = $this->editingPengeluaranId
                 ? Pengeluaran::findOrFail($this->editingPengeluaranId)
                 : new Pengeluaran;
@@ -210,7 +243,7 @@ class PengeluaranManagement extends Component
                 'jumlah' => $validated['jumlah'],
                 'keterangan' => $validated['keterangan'],
                 'id_kegiatan' => $validated['id_kegiatan'],
-                'sumber_dana_id' => SumberDana::where('kode', 'DDS')->value('id'),
+                'sumber_dana_id' => $sumberDanaId,
                 'rekening_anggaran_id' => $validated['id_kegiatan']
                     ? RekeningAnggaran::where('kode', '5.2')->value('id')
                     : RekeningAnggaran::where('kode', '5.9')->value('id'),
@@ -222,10 +255,13 @@ class PengeluaranManagement extends Component
                 $inventaris->fill([
                     'kode_barang' => $validated['kode_barang'],
                     'nama_barang' => $validated['nama_barang'],
+                    'jumlah' => $validated['jumlah_barang'] ?? 1,
                     'tanggal_perolehan' => $validated['tanggal'],
                     'nilai_aset' => $validated['jumlah'],
                     'kondisi' => $validated['kondisi'],
+                    'sumber_dana_id' => $sumberDanaId,
                     'id_pengeluaran' => $pengeluaran->id,
+                    'keterangan' => $validated['keterangan'],
                 ]);
                 $inventaris->save();
             } elseif ($previousInventaris) {
@@ -252,7 +288,7 @@ class PengeluaranManagement extends Component
 
     public function openViewModal(int $id): void
     {
-        $this->viewingPengeluaran = Pengeluaran::with(['kegiatan', 'inventaris'])->findOrFail($id);
+        $this->viewingPengeluaran = Pengeluaran::with(['kegiatan', 'inventaris.sumberDana', 'sumberDana'])->findOrFail($id);
         $this->showViewModal = true;
     }
 
@@ -295,10 +331,15 @@ class PengeluaranManagement extends Component
         $this->catatSebagaiInventaris = false;
         $this->kode_barang = '';
         $this->nama_barang = '';
+        $this->jumlah_barang = '1';
         $this->kondisi = KondisiInventaris::BAIK->value;
         $this->selectedKegiatanInfo = null;
         $this->editingPengeluaranId = null;
+    }
 
+    protected function sumberDanaId(): ?int
+    {
+        return SumberDana::query()->where('kode', $this->dana)->value('id');
     }
 
     public function formatRupiah($angka)
@@ -308,11 +349,16 @@ class PengeluaranManagement extends Component
 
     public function render()
     {
-        $query = Pengeluaran::query()->with(['kegiatan', 'inventaris']);
+        $sumberDana = SumberDana::query()->where('kode', $this->dana)->first();
+        $sumberDanaId = $sumberDana?->id;
+
+        $query = Pengeluaran::query()
+            ->untukSumberDana($sumberDanaId)
+            ->with(['kegiatan.subBidang.bidang', 'inventaris.sumberDana']);
 
         $totalPengeluaran = (clone $query)->sum('jumlah');
         $totalBulanIni = (clone $query)->whereMonth('tanggal', date('m'))->whereYear('tanggal', date('Y'))->sum('jumlah');
-        $totalPemasukan = Pemasukan::sum('jumlah');
+        $totalPemasukan = Pemasukan::query()->untukSumberDana($sumberDanaId)->sum('jumlah');
         $sisaAnggaran = $totalPemasukan - $totalPengeluaran;
 
         $pengeluarans = $query->when($this->search, function ($q) {
@@ -322,11 +368,16 @@ class PengeluaranManagement extends Component
             ->orderBy('id', 'desc')
             ->paginate(10);
 
-        $kegiatans = Kegiatan::where('status', '!=', StatusKegiatan::PERENCANAAN)->get();
+        $kegiatans = Kegiatan::query()
+            ->untukSumberDana($sumberDanaId)
+            ->where('status', '!=', StatusKegiatan::PERENCANAAN)
+            ->orderBy('nama_kegiatan')
+            ->get();
 
         return view('livewire.admin.pengeluaran-management', [
             'pengeluarans' => $pengeluarans,
-
+            'sumberDana' => $sumberDana,
+            'danaLabel' => SumberDana::labelUntukKode($this->dana),
             'kegiatans' => $kegiatans,
             'kondisiInventaris' => KondisiInventaris::cases(),
             'totalPengeluaran' => $totalPengeluaran,

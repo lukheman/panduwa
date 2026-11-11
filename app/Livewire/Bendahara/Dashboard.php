@@ -6,6 +6,7 @@ use App\Enums\StatusKegiatan;
 use App\Models\Kegiatan;
 use App\Models\Pemasukan;
 use App\Models\Pengeluaran;
+use App\Services\RingkasanSumberDanaService;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
@@ -69,6 +70,7 @@ class Dashboard extends Component
             'kegiatanAktif' => $kegiatanAktif,
             'totalAnggaranKegiatan' => $totalAnggaranKegiatan,
             'recentTransactions' => $recentTransactions,
+            'ringkasanSumberDana' => app(RingkasanSumberDanaService::class)->build(),
         ]);
     }
 

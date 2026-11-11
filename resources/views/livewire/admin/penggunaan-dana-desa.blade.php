@@ -1,5 +1,5 @@
 <div>
-    <x-layout.page-header title="Laporan Realisasi Anggaran" subtitle="Laporan Realisasi Anggaran & Realisasi Kegiatan">
+    <x-layout.page-header title="Laporan {{ $danaLabel }}" subtitle="Laporan realisasi anggaran dan realisasi kegiatan {{ $danaLabel }}">
         <x-slot:actions>
             <x-ui.button variant="danger" wire:click="downloadPdf" wire:loading.attr="disabled">
                 <span wire:loading.remove wire:target="downloadPdf">
@@ -15,7 +15,10 @@
     <x-layout.modern-card class="mb-4">
         <div class="row g-3 align-items-end">
             <div class="col-md-4"><label class="form-label">Tahun Anggaran</label><input type="number" min="2000" max="2100" class="form-control" wire:model.live="tahun"></div>
-            <div class="col-md-8"><small class="text-muted">Laporan mencakup seluruh transaksi sampai 31 Desember tahun terpilih.</small></div>
+            <div class="col-md-8">
+                <x-ui.badge variant="primary" icon="fas fa-wallet">{{ $sumberDana?->kode ?? $dana }} - {{ $danaLabel }}</x-ui.badge>
+                <small class="text-muted d-block mt-2">Laporan ini hanya menampilkan transaksi {{ $danaLabel }} sampai 31 Desember tahun terpilih.</small>
+            </div>
         </div>
     </x-layout.modern-card>
 
@@ -25,7 +28,7 @@
             <x-layout.modern-card class="border-start border-4 border-success h-100">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <p class="text-muted mb-1 fw-semibold text-uppercase small">Total Pemasukan</p>
+                        <p class="text-muted mb-1 fw-semibold text-uppercase small">Total Pemasukan {{ $danaLabel }}</p>
                         <h3 class="fw-bold text-body mb-0 fs-4">{{ $this->formatRupiah($totalPemasukan) }}</h3>
                     </div>
                     <div class="bg-success bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
@@ -38,7 +41,7 @@
             <x-layout.modern-card class="border-start border-4 border-danger h-100">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <p class="text-muted mb-1 fw-semibold text-uppercase small">Total Pengeluaran</p>
+                        <p class="text-muted mb-1 fw-semibold text-uppercase small">Total Pengeluaran {{ $danaLabel }}</p>
                         <h3 class="fw-bold text-body mb-0 fs-4">{{ $this->formatRupiah($totalPengeluaran) }}</h3>
                     </div>
                     <div class="bg-danger bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
@@ -51,7 +54,7 @@
             <x-layout.modern-card class="border-start border-4 {{ $saldoKas >= 0 ? 'border-primary' : 'border-danger' }} h-100">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <p class="text-muted mb-1 fw-semibold text-uppercase small">Sisa Saldo Kas Desa</p>
+                        <p class="text-muted mb-1 fw-semibold text-uppercase small">Sisa Saldo {{ $danaLabel }}</p>
                         <h3 class="fw-bold text-body mb-0 fs-4">{{ $this->formatRupiah($saldoKas) }}</h3>
                     </div>
                     <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
@@ -64,7 +67,7 @@
 
     {{-- Detail Pengeluaran --}}
     <x-layout.modern-card class="mb-4">
-        <h5 class="fw-semibold text-body mb-4"><i class="fas fa-list text-primary me-2"></i>Daftar Pengeluaran Dana Desa</h5>
+        <h5 class="fw-semibold text-body mb-4"><i class="fas fa-list text-primary me-2"></i>Daftar Pengeluaran {{ $danaLabel }}</h5>
 
         <div class="table-responsive">
             <table class="table table-modern align-middle">
@@ -94,7 +97,7 @@
                                         @endif
                                     @endif
                                     @if($pengeluaran->inventaris)
-                                        <span class="badge bg-info badge-modern">Inventaris: {{ $pengeluaran->inventaris->nama_barang }}</span>
+                                        <span class="badge bg-info badge-modern">Inventaris: {{ $pengeluaran->inventaris->jumlah }} x {{ $pengeluaran->inventaris->nama_barang }}</span>
                                     @endif
                                     @if(!$pengeluaran->kegiatan && !$pengeluaran->inventaris)
                                         <span class="text-muted small">-</span>

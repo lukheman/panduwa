@@ -71,6 +71,62 @@
                 </div>
             </div>
 
+            <!-- Rekap per Sumber Dana -->
+            <h4 class="fw-bold mb-4 border-start border-4 border-success ps-3">Rekap Dana Desa & Alokasi Dana Desa</h4>
+            <div class="row g-4 mb-5">
+                @foreach($ringkasanSumberDana as $item)
+                    @php
+                        $isAdd = $item['kode'] === \App\Models\SumberDana::KODE_ALOKASI_DANA_DESA;
+                        $variant = $isAdd ? 'success' : 'primary';
+                    @endphp
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden bg-white">
+                            <div class="card-body p-4">
+                                <div class="d-flex align-items-center justify-content-between mb-4">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="bg-{{ $variant }} bg-opacity-10 text-{{ $variant }} rounded-circle p-3">
+                                            <i class="fas {{ $isAdd ? 'fa-coins' : 'fa-wallet' }} fs-4"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="fw-bold mb-0 text-dark">{{ $item['nama'] }}</h5>
+                                            <small class="text-muted">{{ $item['kode'] }}</small>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-{{ $variant }} rounded-pill">{{ $item['kode'] }}</span>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-sm-6">
+                                        <div class="bg-light rounded-3 p-3 h-100">
+                                            <small class="text-muted text-uppercase fw-semibold d-block mb-1">Pemasukan</small>
+                                            <span class="fw-bold text-success">{{ $formatRupiah($item['pemasukan']) }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="bg-light rounded-3 p-3 h-100">
+                                            <small class="text-muted text-uppercase fw-semibold d-block mb-1">Pengeluaran</small>
+                                            <span class="fw-bold text-danger">{{ $formatRupiah($item['pengeluaran']) }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="bg-light rounded-3 p-3 h-100">
+                                            <small class="text-muted text-uppercase fw-semibold d-block mb-1">Rencana Anggaran</small>
+                                            <span class="fw-bold text-dark">{{ $formatRupiah($item['anggaran']) }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="bg-light rounded-3 p-3 h-100">
+                                            <small class="text-muted text-uppercase fw-semibold d-block mb-1">Sisa Saldo</small>
+                                            <span class="fw-bold {{ $item['saldo'] >= 0 ? 'text-primary' : 'text-danger' }}">{{ $formatRupiah($item['saldo']) }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
             <!-- Pelaksanaan Kegiatan -->
             <h4 class="fw-bold mb-4 border-start border-4 border-primary ps-3">Pelaksanaan Kegiatan Desa</h4>
             <div class="row g-4 mb-5">
@@ -127,6 +183,7 @@
                                 <th class="py-3 px-4">Tanggal</th>
 
                                 <th class="py-3">Keterangan / Item</th>
+                                <th class="py-3">Sumber Dana</th>
                                 <th class="py-3 text-end px-4">Nominal (Rp)</th>
                             </tr>
                         </thead>
@@ -148,13 +205,21 @@
                                             </div>
                                         @endif
                                     </td>
+                                    <td>
+                                        @php
+                                            $kodeSumber = $pengeluaran->sumberDana?->kode ?? \App\Models\SumberDana::KODE_DANA_DESA;
+                                        @endphp
+                                        <span class="badge bg-{{ $kodeSumber === \App\Models\SumberDana::KODE_ALOKASI_DANA_DESA ? 'success' : 'primary' }} rounded-pill">
+                                            {{ $pengeluaran->sumberDana?->nama ?? \App\Models\SumberDana::labelUntukKode($kodeSumber) }}
+                                        </span>
+                                    </td>
                                     <td class="text-end px-4 text-danger fw-bold">
                                         {{ $formatRupiah($pengeluaran->jumlah) }}
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="3" class="text-center py-4 text-muted">Belum ada catatan pengeluaran terkini.</td>
+                                    <td colspan="4" class="text-center py-4 text-muted">Belum ada catatan pengeluaran terkini.</td>
                                 </tr>
                             @endforelse
                         </tbody>

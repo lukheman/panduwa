@@ -52,38 +52,42 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th width="12%">No</th>
-                <th width="52%">Nama</th>
-                <th width="16%">Jumlah</th>
-                <th width="20%">Sumber Dana</th>
+                <th width="5%">No</th>
+                <th width="14%">Kode Barang</th>
+                <th width="24%">Nama Barang</th>
+                <th width="8%">Jumlah</th>
+                <th width="17%">Sumber Dana</th>
+                <th width="17%">Nilai Aset (Rp)</th>
+                <th width="15%">Keterangan</th>
             </tr>
         </thead>
         <tbody>
-            @php
-                $daftarAset = $inventaris
-                    ->groupBy(fn ($item) => mb_strtoupper(trim($item->nama_barang)))
-                    ->map(function ($items, $nama) {
-                        return [
-                            'nama' => $nama,
-                            'jumlah' => $items->count(),
-                            'sumber_dana' => '-',
-                        ];
-                    })
-                    ->values();
-            @endphp
-            @forelse($daftarAset as $index => $aset)
+            @forelse($inventaris as $index => $item)
                 <tr>
                     <td class="text-center">{{ $index + 1 }}</td>
-                    <td>{{ $aset['nama'] }}</td>
-                    <td class="text-center">{{ $aset['jumlah'] }}</td>
-                    <td class="text-center">{{ $aset['sumber_dana'] }}</td>
+                    <td class="text-center">{{ $item->kode_barang }}</td>
+                    <td>{{ $item->nama_barang }}</td>
+                    <td class="text-center">{{ $item->jumlah }}</td>
+                    <td class="text-center">{{ $item->sumberDana?->nama ?? $item->pengeluaran?->sumberDana?->nama ?? '-' }}</td>
+                    <td class="text-right">{{ number_format($item->nilai_aset, 0, ',', '.') }}</td>
+                    <td>{{ $item->keterangan ?? '-' }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="4" class="text-center">Tidak ada data inventaris.</td>
+                    <td colspan="7" class="text-center">Tidak ada data inventaris.</td>
                 </tr>
             @endforelse
         </tbody>
+        @if($inventaris->count() > 0)
+            <tfoot>
+                <tr>
+                    <th colspan="3" class="text-right">TOTAL</th>
+                    <th class="text-center">{{ $totalUnit }} unit</th>
+                    <th colspan="2"></th>
+                    <th class="text-right">Rp {{ number_format($totalAset, 0, ',', '.') }}</th>
+                </tr>
+            </tfoot>
+        @endif
     </table>
 
 </body>

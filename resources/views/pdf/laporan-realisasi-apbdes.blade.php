@@ -86,7 +86,11 @@
                         <td>{{ $row['code'] }}</td><td class="description indent-2">{{ $row['description'] }}</td><td class="money">{{ $format($row['anggaran']) }}</td><td class="money">{{ $format($row['realisasi']) }}</td><td class="money">{{ $format($row['anggaran'] - $row['realisasi']) }}</td>
                     </tr>
                 @empty
-                    <tr><td>4.2.1.</td><td class="description indent-2">Dana Desa</td><td class="money">0,00</td><td class="money">0,00</td><td class="money">0,00</td></tr>
+                    @php
+                        $kodeSumber = $sumberDana?->kode ?? \App\Models\SumberDana::KODE_DANA_DESA;
+                        $alokasiDanaDesa = $kodeSumber === \App\Models\SumberDana::KODE_ALOKASI_DANA_DESA;
+                    @endphp
+                    <tr><td>{{ $alokasiDanaDesa ? '4.2.2.' : '4.2.1.' }}</td><td class="description indent-2">{{ $alokasiDanaDesa ? 'Alokasi Dana Desa' : 'Dana Desa' }}</td><td class="money">0,00</td><td class="money">0,00</td><td class="money">0,00</td></tr>
                 @endforelse
                 <tr class="total"><td></td><td class="description">JUMLAH PENDAPATAN</td><td class="money">{{ $format($pendapatanAnggaran) }}</td><td class="money">{{ $format($pendapatanRealisasi) }}</td><td class="money">{{ $format($pendapatanLebih) }}</td></tr>
 

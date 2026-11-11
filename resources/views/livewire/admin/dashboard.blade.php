@@ -53,6 +53,10 @@
         </div>
     </div>
 
+    {{-- Rekap Dana Desa & Alokasi Dana Desa --}}
+    <h5 class="fw-semibold text-body mb-3">Rekap per Sumber Dana</h5>
+    <x-layout.rekap-sumber-dana :ringkasan="$ringkasanSumberDana" />
+
     {{-- Recent Users Table --}}
     <x-layout.table-card title="Pengguna Sistem Terbaru" view-all-href="{{ route('admin.users') }}" :headers="['Nama', 'Email', 'Role', 'Tanggal Bergabung']">
         @forelse($recentUsers as $user)

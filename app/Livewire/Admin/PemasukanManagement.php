@@ -27,6 +27,9 @@ class PemasukanManagement extends Component
     #[Url(as: 'q')]
     public string $search = '';
 
+    #[Url(as: 'dana')]
+    public string $dana = SumberDana::KODE_DANA_DESA;
+
     public ?int $sumber_dana_id = null;
 
     public string $jumlah = '';
@@ -57,9 +60,18 @@ class PemasukanManagement extends Component
         ];
     }
 
-    public function mount()
+    public function mount(): void
     {
+        $this->dana = SumberDana::normalisasiKode($this->dana);
+        $this->sumber_dana_id = $this->sumberDanaId();
         $this->tanggal = date('Y-m-d');
+    }
+
+    public function updatedDana(): void
+    {
+        $this->dana = SumberDana::normalisasiKode($this->dana);
+        $this->tanggal = date('Y-m-d');
+        $this->resetPage();
     }
 
     public function updatedSearch(): void
@@ -81,7 +93,7 @@ class PemasukanManagement extends Component
         $this->editingPemasukanId = $id;
         $this->sumber_dana_id = $pemasukan->sumber_dana_id
             ?? SumberDana::where('nama', $pemasukan->sumber_dana)->value('id')
-            ?? SumberDana::where('kode', 'DDS')->value('id');
+            ?? $this->sumberDanaId();
         $this->jumlah = (string) $pemasukan->jumlah;
         $this->tanggal = $pemasukan->tanggal;
         $this->keterangan = $pemasukan->keterangan ?? '';
@@ -91,6 +103,7 @@ class PemasukanManagement extends Component
 
     public function save(): void
     {
+        $this->sumber_dana_id = $this->sumberDanaId();
         $validated = $this->validate();
 
         $sumberDana = SumberDana::findOrFail($validated['sumber_dana_id']);
@@ -154,11 +167,16 @@ class PemasukanManagement extends Component
 
     protected function resetForm(): void
     {
-        $this->sumber_dana_id = null;
+        $this->sumber_dana_id = $this->sumberDanaId();
         $this->jumlah = '';
         $this->tanggal = date('Y-m-d');
         $this->keterangan = '';
         $this->editingPemasukanId = null;
+    }
+
+    protected function sumberDanaId(): ?int
+    {
+        return SumberDana::query()->where('kode', $this->dana)->value('id');
     }
 
     protected function rekeningPendapatanId(string $kode): ?int
@@ -177,37 +195,24 @@ class PemasukanManagement extends Component
 
     public function render()
     {
-        $query = Pemasukan::query();
+        $sumberDana = SumberDana::query()->where('kode', $this->dana)->first();
+        $sumberDanaId = $sumberDana?->id;
+
+        $query = Pemasukan::query()->untukSumberDana($sumberDanaId);
 
         $totalPemasukan = (clone $query)->sum('jumlah');
         $totalTahunIni = (clone $query)->whereYear('tanggal', date('Y'))->sum('jumlah');
-        $totalPengeluaran = Pengeluaran::sum('jumlah');
+        $totalPengeluaran = Pengeluaran::query()->untukSumberDana($sumberDanaId)->sum('jumlah');
         $sisaAnggaran = $totalPemasukan - $totalPengeluaran;
 
-        $sumberDanas = SumberDana::query()
-            ->where('aktif', true)
-            ->orderBy('id')
-            ->get();
-
-        $rekapSumberDana = $sumberDanas->map(fn (SumberDana $sumber) => [
-            'kode' => $sumber->kode,
-            'nama' => $sumber->nama,
-            'tahun_ini' => (clone $query)->where('sumber_dana_id', $sumber->id)
-                ->whereYear('tanggal', date('Y'))->sum('jumlah'),
-            'total' => (clone $query)->where('sumber_dana_id', $sumber->id)->sum('jumlah'),
+        $rekapSumberDana = collect([
+            [
+                'kode' => $sumberDana?->kode ?? $this->dana,
+                'nama' => $sumberDana?->nama ?? SumberDana::labelUntukKode($this->dana),
+                'tahun_ini' => $totalTahunIni,
+                'total' => $totalPemasukan,
+            ],
         ]);
-
-        $totalTanpaSumber = (clone $query)->whereNull('sumber_dana_id')->sum('jumlah');
-
-        if ($totalTanpaSumber > 0) {
-            $rekapSumberDana->push([
-                'kode' => '-',
-                'nama' => 'Tanpa Sumber Dana',
-                'tahun_ini' => (clone $query)->whereNull('sumber_dana_id')
-                    ->whereYear('tanggal', date('Y'))->sum('jumlah'),
-                'total' => $totalTanpaSumber,
-            ]);
-        }
 
         $pemasukans = $query->when($this->search, function ($q) {
             $q->where(function ($sub) {
@@ -222,7 +227,8 @@ class PemasukanManagement extends Component
 
         return view('livewire.admin.pemasukan-management', [
             'pemasukans' => $pemasukans,
-            'sumberDanas' => $sumberDanas,
+            'sumberDana' => $sumberDana,
+            'danaLabel' => SumberDana::labelUntukKode($this->dana),
             'rekapSumberDana' => $rekapSumberDana,
             'totalPemasukan' => $totalPemasukan,
             'totalTahunIni' => $totalTahunIni,

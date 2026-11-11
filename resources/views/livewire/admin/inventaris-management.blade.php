@@ -15,8 +15,8 @@
             <x-layout.modern-card class="border-start border-4 border-primary h-100">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <p class="text-muted mb-1 fw-semibold text-uppercase small">Total Barang/Aset</p>
-                        <h3 class="fw-bold text-body mb-0">{{ $totalAset }} <span class="fs-6 text-muted fw-normal">Item</span></h3>
+                        <p class="text-muted mb-1 fw-semibold text-uppercase small">Total Unit Barang/Aset</p>
+                        <h3 class="fw-bold text-body mb-0">{{ $totalAset }} <span class="fs-6 text-muted fw-normal">Unit</span></h3>
                     </div>
                     <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
                         <i class="fas fa-boxes text-primary fs-4"></i>
@@ -42,7 +42,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <p class="text-muted mb-1 fw-semibold text-uppercase small">Aset Kondisi Baik</p>
-                        <h3 class="fw-bold text-body mb-0">{{ $asetKondisiBaik }} <span class="fs-6 text-muted fw-normal">Item</span></h3>
+                        <h3 class="fw-bold text-body mb-0">{{ $asetKondisiBaik }} <span class="fs-6 text-muted fw-normal">Unit</span></h3>
                     </div>
                     <div class="bg-info bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
                         <i class="fas fa-check-circle text-info fs-4"></i>
@@ -70,6 +70,8 @@
                 <thead>
                     <tr>
                         <th>Kode & Barang</th>
+                        <th class="text-center">Jumlah</th>
+                        <th>Sumber Dana</th>
                         <th>Nilai Aset (Rp)</th>
                         <th>Kondisi</th>
                         <th style="width: 120px;">Aksi</th>
@@ -81,6 +83,18 @@
                             <td>
                                 <div class="fw-semibold text-body">{{ $inventaris->nama_barang }}</div>
                                 <small class="text-muted font-monospace"><i class="fas fa-barcode me-1"></i>{{ $inventaris->kode_barang }}</small>
+                                @if ($inventaris->keterangan)
+                                    <div class="small text-muted">{{ \Illuminate\Support\Str::limit($inventaris->keterangan, 50) }}</div>
+                                @endif
+                            </td>
+                            <td class="text-center fw-semibold">{{ $inventaris->jumlah }}</td>
+                            <td>
+                                <x-ui.badge variant="primary" icon="fas fa-wallet">
+                                    {{ $inventaris->sumberDana?->nama ?? '-' }}
+                                </x-ui.badge>
+                                @if ($inventaris->pengeluaran)
+                                    <div class="small text-muted mt-1"><i class="fas fa-link me-1"></i>Pengeluaran bendahara</div>
+                                @endif
                             </td>
                             <td class="text-success fw-bold">{{ $this->formatRupiah($inventaris->nilai_aset) }}</td>
                             <td>
@@ -98,7 +112,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center py-5">
+                            <td colspan="6" class="text-center py-5">
                                 <x-ui.empty-state
                                     icon="fas fa-boxes"
                                     title="Belum ada data inventaris"
@@ -120,7 +134,7 @@
 
     @if ($showModal)
         <div class="modal-backdrop-custom" wire:click.self="closeModal">
-            <div class="modal-content-custom" wire:click.stop style="max-height: 90vh; overflow-y: auto; max-width: 600px;">
+            <div class="modal-content-custom" wire:click.stop style="max-height: 90vh; overflow-y: auto; max-width: 720px;">
                 <div class="modal-header-custom">
                     <h5 class="modal-title-custom">
                         {{ $editingInventarisId ? 'Edit Inventaris' : 'Tambah Inventaris Baru' }}
@@ -149,32 +163,77 @@
                         </div>
                     </div>
 
-                    <x-form.input
-                        id="nama_barang"
-                        label="Nama Barang"
-                        wire:model="nama_barang"
-                        placeholder="Contoh: Laptop Asus VivoBook, Kursi Rapat"
-                        required="true"
-                        error="{{ $errors->first('nama_barang') }}"
-                    />
-
-                    <div class="mb-3">
-                        <label class="form-label">Kondisi <span class="text-danger">*</span></label>
-                        <select class="form-control" wire:model="kondisi" required>
-                            @foreach (\App\Enums\KondisiInventaris::cases() as $kondisi)
-                                <option value="{{ $kondisi->value }}">{{ $kondisi->getLabel() }}</option>
-                            @endforeach
-                        </select>
-                        @error('kondisi') <span class="text-danger small">{{ $message }}</span> @enderror
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <x-form.input
+                                id="nama_barang"
+                                label="Nama Barang"
+                                wire:model="nama_barang"
+                                placeholder="Contoh: Kipas angin, Laptop Asus VivoBook, Kursi Rapat"
+                                required="true"
+                                error="{{ $errors->first('nama_barang') }}"
+                            />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Jumlah Barang <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" wire:model="jumlah" min="1" placeholder="1" required>
+                            @error('jumlah') <span class="text-danger small">{{ $message }}</span> @enderror
+                        </div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Nilai Aset (Rp) <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light fw-bold">Rp</span>
-                            <input type="number" class="form-control fs-5" wire:model="nilai_aset" min="0" placeholder="0" required>
+                        <label class="form-label">Sumber Dana / Asal Uang <span class="text-danger">*</span></label>
+                        <select class="form-control" wire:model="sumber_dana_id" required>
+                            <option value="">-- Pilih sumber dana --</option>
+                            @foreach ($sumberDanas as $sumber)
+                                <option value="{{ $sumber->id }}">{{ $sumber->kode }} - {{ $sumber->nama }}</option>
+                            @endforeach
+                        </select>
+                        @error('sumber_dana_id') <span class="text-danger small">{{ $message }}</span> @enderror
+                        <small class="text-muted">Contoh: pembelian kipas angin berasal dari Dana Desa atau Alokasi Dana Desa.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Hubungkan ke Pengeluaran Bendahara (Opsional)</label>
+                        <select class="form-control" wire:model.live="id_pengeluaran">
+                            <option value="">-- Tidak dihubungkan --</option>
+                            @foreach ($pengeluarans as $pengeluaran)
+                                <option value="{{ $pengeluaran->id }}">
+                                    {{ \Carbon\Carbon::parse($pengeluaran->tanggal)->format('d/m/Y') }} -
+                                    {{ $pengeluaran->sumberDana?->nama ?? 'Tanpa sumber' }} -
+                                    {{ $this->formatRupiah($pengeluaran->jumlah) }} -
+                                    {{ \Illuminate\Support\Str::limit($pengeluaran->keterangan ?: 'Pengeluaran', 40) }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('id_pengeluaran') <span class="text-danger small">{{ $message }}</span> @enderror
+                        <small class="text-muted">Kaur Umum dapat menambahkan inventaris, lalu menghubungkannya dengan pengeluaran yang dicatat bendahara.</small>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Kondisi <span class="text-danger">*</span></label>
+                            <select class="form-control" wire:model="kondisi" required>
+                                @foreach (\App\Enums\KondisiInventaris::cases() as $kondisi)
+                                    <option value="{{ $kondisi->value }}">{{ $kondisi->getLabel() }}</option>
+                                @endforeach
+                            </select>
+                            @error('kondisi') <span class="text-danger small">{{ $message }}</span> @enderror
                         </div>
-                        @error('nilai_aset') <span class="text-danger small">{{ $message }}</span> @enderror
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nilai Aset / Total Pembelian (Rp) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light fw-bold">Rp</span>
+                                <input type="number" class="form-control" wire:model="nilai_aset" min="0" placeholder="0" required>
+                            </div>
+                            @error('nilai_aset') <span class="text-danger small">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Keterangan</label>
+                        <textarea class="form-control" rows="2" wire:model="keterangan" placeholder="Contoh: Pembelian 2 unit kipas angin untuk balai desa"></textarea>
+                        @error('keterangan') <span class="text-danger small">{{ $message }}</span> @enderror
                     </div>
 
                     <div class="d-flex justify-content-end gap-2 mt-4">
@@ -210,6 +269,14 @@
                             <td>: <span class="font-monospace text-primary">{{ $viewingInventaris->kode_barang }}</span></td>
                         </tr>
                         <tr>
+                            <td class="text-muted">Jumlah</td>
+                            <td>: <span class="fw-bold">{{ $viewingInventaris->jumlah }} unit</span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Sumber Dana</td>
+                            <td>: <x-ui.badge variant="primary" icon="fas fa-wallet">{{ $viewingInventaris->sumberDana?->nama ?? '-' }}</x-ui.badge></td>
+                        </tr>
+                        <tr>
                             <td class="text-muted">Tanggal Perolehan</td>
                             <td>: {{ \Carbon\Carbon::parse($viewingInventaris->tanggal_perolehan)->format('d F Y') }}</td>
                         </tr>
@@ -220,6 +287,17 @@
                         <tr>
                             <td class="text-muted">Nilai Aset</td>
                             <td>: <span class="fw-bold text-success">{{ $this->formatRupiah($viewingInventaris->nilai_aset) }}</span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Pengeluaran Bendahara</td>
+                            <td>:
+                                @if ($viewingInventaris->pengeluaran)
+                                    <span class="fw-semibold">{{ \Carbon\Carbon::parse($viewingInventaris->pengeluaran->tanggal)->format('d F Y') }} - {{ $this->formatRupiah($viewingInventaris->pengeluaran->jumlah) }}</span>
+                                    <div class="small text-muted">{{ $viewingInventaris->pengeluaran->keterangan ?: '-' }}</div>
+                                @else
+                                    <span class="text-muted">Belum dihubungkan</span>
+                                @endif
+                            </td>
                         </tr>
                         <tr>
                             <td class="text-muted">Keterangan Tambahan</td>

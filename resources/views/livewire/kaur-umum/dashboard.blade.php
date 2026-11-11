@@ -50,13 +50,17 @@
         </div>
     </div>
 
+    {{-- Rekap Dana Desa & Alokasi Dana Desa --}}
+    <h5 class="fw-semibold text-body mb-3">Rekap per Sumber Dana</h5>
+    <x-layout.rekap-sumber-dana :ringkasan="$ringkasanSumberDana" />
+
     <div class="row g-4 mb-4">
         {{-- Section Kiri: Status Kegiatan --}}
         <div class="col-md-8">
             <x-layout.modern-card class="h-100">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h5 class="fw-semibold mb-0"><i class="fas fa-tasks text-primary me-2"></i>Status Program & Kegiatan</h5>
-                    <x-ui.button href="{{ route('kepala_desa.penggunaan-dana-desa') }}">Lihat Detail Realisasi</x-ui.button>
+                    <x-ui.button href="{{ route('kaur_umum.laporan-inventaris') }}">Lihat Laporan Inventaris</x-ui.button>
                 </div>
 
                 <div class="row g-3 mb-4">
@@ -94,13 +98,13 @@
                                 <tr>
                                     <td>
                                         <div class="fw-semibold text-body">{{ $k->nama_kegiatan }}</div>
-                                        <small class="text-muted">{{ \Carbon\Carbon::parse($k->tanggal_mulai)->format('d M Y') }}</small>
+                                        <small class="text-muted">{{ $k->created_at?->format('d M Y') ?? '-' }}</small>
                                     </td>
                                     <td class="fw-medium text-primary">{{ $this->formatRupiah($k->rencana_anggaran) }}</td>
                                     <td>
-                                        @if($k->status === 'selesai')
+                                        @if($k->status === \App\Enums\StatusKegiatan::SELESAI)
                                             <x-ui.badge variant="success">Selesai</x-ui.badge>
-                                        @elseif($k->status === 'berjalan')
+                                        @elseif($k->status === \App\Enums\StatusKegiatan::BERJALAN)
                                             <x-ui.badge variant="primary">Berjalan</x-ui.badge>
                                         @else
                                             <x-ui.badge variant="secondary">Belum Mulai</x-ui.badge>

@@ -20,13 +20,14 @@ class LaporanInventaris extends Component
 
     public function downloadPdf()
     {
-        [$inventaris, $totalAset, $baik, $rusakRingan, $rusakBerat] = $this->getLaporanData();
+        [$inventaris, $totalAset, $totalUnit, $baik, $rusakRingan, $rusakBerat] = $this->getLaporanData();
 
         $pdf = Pdf::loadView('pdf.laporan-inventaris', [
             'tahun' => date('Y'),
             'tanggalCetak' => Carbon::now()->translatedFormat('d F Y'),
             'inventaris' => $inventaris,
             'totalAset' => $totalAset,
+            'totalUnit' => $totalUnit,
             'baik' => $baik,
             'rusakRingan' => $rusakRingan,
             'rusakBerat' => $rusakBerat,
@@ -39,11 +40,12 @@ class LaporanInventaris extends Component
 
     public function render()
     {
-        [$inventaris, $totalAset, $baik, $rusakRingan, $rusakBerat] = $this->getLaporanData();
+        [$inventaris, $totalAset, $totalUnit, $baik, $rusakRingan, $rusakBerat] = $this->getLaporanData();
 
         return view('livewire.admin.laporan-inventaris', [
             'inventaris' => $inventaris,
             'totalAset' => $totalAset,
+            'totalUnit' => $totalUnit,
             'baik' => $baik,
             'rusakRingan' => $rusakRingan,
             'rusakBerat' => $rusakBerat,
@@ -51,17 +53,20 @@ class LaporanInventaris extends Component
     }
 
     /**
-     * @return array{0: Collection<int, Inventaris>, 1: float|int, 2: int, 3: int, 4: int}
+     * @return array{0: Collection<int, Inventaris>, 1: float|int, 2: int, 3: int, 4: int, 5: int}
      */
     protected function getLaporanData(): array
     {
-        $inventaris = Inventaris::orderBy('tanggal_perolehan', 'desc')->get();
+        $inventaris = Inventaris::with(['sumberDana', 'pengeluaran.sumberDana'])
+            ->orderBy('tanggal_perolehan', 'desc')
+            ->get();
         $totalAset = $inventaris->sum('nilai_aset');
+        $totalUnit = $inventaris->sum('jumlah');
 
-        $baik = $inventaris->where('kondisi', KondisiInventaris::BAIK)->count();
-        $rusakRingan = $inventaris->where('kondisi', KondisiInventaris::RUSAK_RINGAN)->count();
-        $rusakBerat = $inventaris->where('kondisi', KondisiInventaris::RUSAK_BERAT)->count();
+        $baik = $inventaris->where('kondisi', KondisiInventaris::BAIK)->sum('jumlah');
+        $rusakRingan = $inventaris->where('kondisi', KondisiInventaris::RUSAK_RINGAN)->sum('jumlah');
+        $rusakBerat = $inventaris->where('kondisi', KondisiInventaris::RUSAK_BERAT)->sum('jumlah');
 
-        return [$inventaris, $totalAset, $baik, $rusakRingan, $rusakBerat];
+        return [$inventaris, $totalAset, $totalUnit, $baik, $rusakRingan, $rusakBerat];
     }
 }

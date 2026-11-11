@@ -4,6 +4,8 @@ namespace App\Livewire\Admin;
 
 use App\Enums\KondisiInventaris;
 use App\Models\Inventaris;
+use App\Models\Pengeluaran;
+use App\Models\SumberDana;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
@@ -22,9 +24,17 @@ class InventarisManagement extends Component
 
     public string $nama_barang = '';
 
+    public string $jumlah = '1';
+
     public string $tanggal_perolehan = '';
 
     public string $nilai_aset = '';
+
+    public ?int $sumber_dana_id = null;
+
+    public ?int $id_pengeluaran = null;
+
+    public string $keterangan = '';
 
     public string $kondisi = KondisiInventaris::BAIK->value;
 
@@ -44,8 +54,12 @@ class InventarisManagement extends Component
     {
         $rules = [
             'nama_barang' => ['required', 'string', 'max:255'],
+            'jumlah' => ['required', 'integer', 'min:1', 'max:100000'],
             'tanggal_perolehan' => ['required', 'date'],
             'nilai_aset' => ['required', 'numeric', 'min:0', 'max:9999999999999'],
+            'sumber_dana_id' => ['required', 'integer', 'exists:sumber_dana,id'],
+            'id_pengeluaran' => ['nullable', 'integer', 'exists:pengeluaran,id'],
+            'keterangan' => ['nullable', 'string'],
             'kondisi' => ['required', Rule::enum(KondisiInventaris::class)],
         ];
 
@@ -68,11 +82,29 @@ class InventarisManagement extends Component
         $this->resetPage();
     }
 
+    public function updatedIdPengeluaran($value): void
+    {
+        if (! $value) {
+            return;
+        }
+
+        $pengeluaran = Pengeluaran::with('sumberDana')->find($value);
+
+        if (! $pengeluaran) {
+            return;
+        }
+
+        $this->sumber_dana_id = $pengeluaran->sumber_dana_id ?? $this->sumberDanaDanaDesaId();
+        $this->nilai_aset = (string) $pengeluaran->jumlah;
+        $this->tanggal_perolehan = $pengeluaran->tanggal;
+    }
+
     public function openCreateModal(): void
     {
         $this->resetForm();
         // Generate automatic Kode Barang template based on timestamp or something similar
         $this->kode_barang = 'INV-'.date('Ymd').'-'.strtoupper(substr(uniqid(), -4));
+        $this->sumber_dana_id = $this->sumberDanaDanaDesaId();
         $this->editingInventarisId = null;
         $this->showModal = true;
     }
@@ -84,8 +116,12 @@ class InventarisManagement extends Component
         $this->editingInventarisId = $id;
         $this->kode_barang = $inventaris->kode_barang;
         $this->nama_barang = $inventaris->nama_barang;
+        $this->jumlah = (string) $inventaris->jumlah;
         $this->tanggal_perolehan = $inventaris->tanggal_perolehan;
         $this->nilai_aset = (string) $inventaris->nilai_aset;
+        $this->sumber_dana_id = $inventaris->sumber_dana_id;
+        $this->id_pengeluaran = $inventaris->id_pengeluaran;
+        $this->keterangan = $inventaris->keterangan ?? '';
         $this->kondisi = $inventaris->kondisi->value;
 
         $this->showModal = true;
@@ -94,6 +130,13 @@ class InventarisManagement extends Component
     public function save(): void
     {
         $validated = $this->validate();
+
+        if ($validated['id_pengeluaran'] ?? null) {
+            $pengeluaran = Pengeluaran::findOrFail($validated['id_pengeluaran']);
+            $validated['sumber_dana_id'] = $pengeluaran->sumber_dana_id ?? $this->sumberDanaDanaDesaId();
+            $validated['nilai_aset'] = $pengeluaran->jumlah;
+            $validated['tanggal_perolehan'] = $pengeluaran->tanggal;
+        }
 
         if ($this->editingInventarisId) {
             $inventaris = Inventaris::findOrFail($this->editingInventarisId);
@@ -116,7 +159,7 @@ class InventarisManagement extends Component
 
     public function openViewModal(int $id): void
     {
-        $this->viewingInventaris = Inventaris::with('pengeluaran')->findOrFail($id);
+        $this->viewingInventaris = Inventaris::with(['pengeluaran.sumberDana', 'sumberDana'])->findOrFail($id);
         $this->showViewModal = true;
     }
 
@@ -153,10 +196,19 @@ class InventarisManagement extends Component
     {
         $this->kode_barang = '';
         $this->nama_barang = '';
+        $this->jumlah = '1';
         $this->tanggal_perolehan = date('Y-m-d');
         $this->nilai_aset = '';
+        $this->sumber_dana_id = null;
+        $this->id_pengeluaran = null;
+        $this->keterangan = '';
         $this->kondisi = KondisiInventaris::BAIK->value;
         $this->editingInventarisId = null;
+    }
+
+    protected function sumberDanaDanaDesaId(): ?int
+    {
+        return SumberDana::query()->where('kode', SumberDana::KODE_DANA_DESA)->value('id');
     }
 
     public function formatRupiah($angka)
@@ -175,21 +227,41 @@ class InventarisManagement extends Component
 
     public function render()
     {
-        $query = Inventaris::query()->with(['pengeluaran']);
+        $query = Inventaris::query()->with(['pengeluaran.sumberDana', 'sumberDana']);
 
-        $totalAset = (clone $query)->count();
+        $totalAset = (clone $query)->sum('jumlah');
         $totalNilaiAset = (clone $query)->sum('nilai_aset');
-        $asetKondisiBaik = (clone $query)->where('kondisi', KondisiInventaris::BAIK)->count();
+        $asetKondisiBaik = (clone $query)->where('kondisi', KondisiInventaris::BAIK)->sum('jumlah');
 
         $inventarises = $query->when($this->search, function ($q) {
-            $q->where('nama_barang', 'like', '%'.$this->search.'%')
-                ->orWhere('kode_barang', 'like', '%'.$this->search.'%');
+            $q->where(function ($sub) {
+                $sub->where('nama_barang', 'like', '%'.$this->search.'%')
+                    ->orWhere('kode_barang', 'like', '%'.$this->search.'%')
+                    ->orWhere('keterangan', 'like', '%'.$this->search.'%');
+            });
         })
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
+        $sumberDanas = SumberDana::query()->where('aktif', true)->orderBy('id')->get();
+
+        $pengeluarans = Pengeluaran::query()
+            ->with('sumberDana')
+            ->where(function ($q) {
+                $q->whereDoesntHave('inventaris');
+
+                if ($this->id_pengeluaran) {
+                    $q->orWhere('id', $this->id_pengeluaran);
+                }
+            })
+            ->orderBy('tanggal', 'desc')
+            ->orderBy('id', 'desc')
+            ->get();
+
         return view('livewire.admin.inventaris-management', [
             'inventarises' => $inventarises,
+            'sumberDanas' => $sumberDanas,
+            'pengeluarans' => $pengeluarans,
             'totalAset' => $totalAset,
             'totalNilaiAset' => $totalNilaiAset,
             'asetKondisiBaik' => $asetKondisiBaik,

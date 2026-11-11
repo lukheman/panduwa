@@ -75,6 +75,10 @@
         </div>
     </div>
 
+    {{-- Rekap Dana Desa & Alokasi Dana Desa --}}
+    <h5 class="fw-semibold text-body mb-3">Rekap per Sumber Dana</h5>
+    <x-layout.rekap-sumber-dana :ringkasan="$ringkasanSumberDana" />
+
     <!-- Main Content Area -->
     <div class="row g-4">
         <!-- Recent Transactions -->

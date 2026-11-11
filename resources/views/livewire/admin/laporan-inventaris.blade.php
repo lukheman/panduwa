@@ -18,8 +18,9 @@
             <x-layout.modern-card class="border-start border-4 border-primary h-100">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <p class="text-muted mb-1 fw-semibold text-uppercase small">Total Nilai Aset</p>
-                        <h4 class="fw-bold text-body mb-0">{{ $this->formatRupiah($totalAset) }}</h4>
+                        <p class="text-muted mb-1 fw-semibold text-uppercase small">Total Aset</p>
+                        <h4 class="fw-bold text-body mb-0">{{ $totalUnit }} Unit</h4>
+                        <small class="text-muted">{{ $this->formatRupiah($totalAset) }}</small>
                     </div>
                 </div>
             </x-layout.modern-card>
@@ -66,7 +67,9 @@
                     <tr>
                         <th>Kode Barang</th>
                         <th>Nama Barang</th>
-                            <th>Tanggal Perolehan</th>
+                        <th class="text-center">Jumlah</th>
+                        <th>Sumber Dana</th>
+                        <th>Tanggal Perolehan</th>
                         <th>Kondisi</th>
                         <th class="text-end">Nilai Aset (Rp)</th>
                     </tr>
@@ -75,7 +78,14 @@
                     @forelse ($inventaris as $item)
                         <tr>
                             <td><span class="badge bg-secondary">{{ $item->kode_barang }}</span></td>
-                            <td class="fw-semibold text-body">{{ $item->nama_barang }}</td>
+                            <td>
+                                <div class="fw-semibold text-body">{{ $item->nama_barang }}</div>
+                                @if ($item->keterangan)
+                                    <small class="text-muted">{{ \Illuminate\Support\Str::limit($item->keterangan, 60) }}</small>
+                                @endif
+                            </td>
+                            <td class="text-center fw-semibold">{{ $item->jumlah }}</td>
+                            <td>{{ $item->sumberDana?->nama ?? $item->pengeluaran?->sumberDana?->nama ?? '-' }}</td>
                             <td>{{ \Carbon\Carbon::parse($item->tanggal_perolehan)->format('d M Y') }}</td>
                             <td>
                                 @if($item->kondisi === \App\Enums\KondisiInventaris::BAIK)
@@ -90,7 +100,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="text-center py-5 text-muted">
+                            <td colspan="7" class="text-center py-5 text-muted">
                                 <i class="fas fa-box-open fs-1 text-light mb-3"></i>
                                 <p>Belum ada data inventaris desa.</p>
                             </td>
@@ -100,7 +110,7 @@
                 @if($inventaris->count() > 0)
                 <tfoot class="bg-light">
                     <tr>
-                        <th colspan="5" class="fw-bold text-end">TOTAL NILAI ASET</th>
+                        <th colspan="6" class="fw-bold text-end">TOTAL NILAI ASET ({{ $totalUnit }} UNIT)</th>
                         <th class="text-end text-primary fw-bold">{{ $this->formatRupiah($totalAset) }}</th>
                     </tr>
                 </tfoot>

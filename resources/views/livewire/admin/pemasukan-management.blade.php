@@ -1,8 +1,8 @@
 <div>
-    <x-layout.page-header title="Kelola Pemasukan" subtitle="Catat dan kelola semua dana pemasukan desa">
+    <x-layout.page-header title="Kelola Anggaran {{ $danaLabel }}" subtitle="Pemasukan dan anggaran {{ $danaLabel }} dicatat terpisah dari sumber dana lainnya">
         <x-slot:actions>
             <x-ui.button variant="primary" icon="fas fa-plus" wire:click="openCreateModal">
-                Catat Pemasukan
+                Catat Pemasukan {{ $danaLabel }}
             </x-ui.button>
         </x-slot:actions>
     </x-layout.page-header>
@@ -15,7 +15,7 @@
             <x-layout.modern-card class="border-start border-4 border-success h-100">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <p class="text-muted mb-1 fw-semibold text-uppercase small">Total Pemasukan Tahun Ini</p>
+                        <p class="text-muted mb-1 fw-semibold text-uppercase small">Pemasukan {{ $danaLabel }} Tahun Ini</p>
                         <h3 class="fw-bold text-body mb-0">{{ $this->formatRupiah($totalTahunIni) }}</h3>
                     </div>
                     <div class="bg-success bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
@@ -28,7 +28,7 @@
             <x-layout.modern-card class="border-start border-4 border-primary h-100">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <p class="text-muted mb-1 fw-semibold text-uppercase small">Total Pemasukan Keseluruhan</p>
+                        <p class="text-muted mb-1 fw-semibold text-uppercase small">Total Pemasukan {{ $danaLabel }}</p>
                         <h3 class="fw-bold text-body mb-0">{{ $this->formatRupiah($totalPemasukan) }}</h3>
                     </div>
                     <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
@@ -41,7 +41,7 @@
             <x-layout.modern-card class="border-start border-4 border-info h-100">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <p class="text-muted mb-1 fw-semibold text-uppercase small">Sisa Anggaran Total</p>
+                        <p class="text-muted mb-1 fw-semibold text-uppercase small">Sisa Anggaran {{ $danaLabel }}</p>
                         <h3 class="fw-bold {{ $sisaAnggaran < 0 ? 'text-danger' : 'text-body' }} mb-0">{{ $this->formatRupiah($sisaAnggaran) }}</h3>
                     </div>
                     <div class="bg-info bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
@@ -55,7 +55,7 @@
     {{-- Rekap per Sumber Dana --}}
     <x-layout.modern-card class="mb-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="mb-0 fw-semibold text-body">Rekap Pemasukan per Sumber Dana</h5>
+            <h5 class="mb-0 fw-semibold text-body">Rekap Pemasukan {{ $danaLabel }}</h5>
             <span class="badge bg-primary bg-opacity-10 text-primary">Tahun {{ date('Y') }}</span>
         </div>
 
@@ -184,17 +184,15 @@
                         @error('tanggal') <span class="text-danger small">{{ $message }}</span> @enderror
                     </div>
 
-                    <x-form.select
-                        id="sumber_dana_id"
-                        label="Sumber Dana"
-                        wire:model="sumber_dana_id"
-                        :options="$sumberDanas->pluck('nama', 'id')->all()"
-                        :selected="$sumber_dana_id"
-                        placeholder="Pilih sumber dana..."
-                        required="true"
-                        hint="Pilih Dana Desa atau Alokasi Dana Desa agar anggaran tercatat terpisah."
-                        error="{{ $errors->first('sumber_dana_id') }}"
-                    />
+                    <div class="alert alert-light border d-flex align-items-start gap-2 mb-3">
+                        <i class="fas fa-info-circle text-primary mt-1"></i>
+                        <div>
+                            <strong class="d-block">{{ $danaLabel }}</strong>
+                            <span class="small text-muted">
+                                Pemasukan ini otomatis masuk ke anggaran {{ $danaLabel }}. Untuk mencatat sumber dana lain, gunakan menu Dana Desa atau Alokasi Dana Desa yang terpisah.
+                            </span>
+                        </div>
+                    </div>
 
                     <div class="mb-3">
                         <label class="form-label">Jumlah (Rp) <span class="text-danger">*</span></label>

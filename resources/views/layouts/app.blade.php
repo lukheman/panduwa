@@ -540,6 +540,7 @@
                      (Auth::guard('kepala_desa')->check() ? 'kepala_desa' :
                      (Auth::guard('kaur_umum')->check() ? 'kaur_umum' : 'admin')));
             $routePrefix = $guard . '.';
+            $danaAktif = request()->query('dana', \App\Models\SumberDana::KODE_DANA_DESA);
         @endphp
 
         <x-layout.sidebar-section title="Main">
@@ -554,20 +555,24 @@
         @endif
 
         @if(Route::has($routePrefix . 'pemasukan'))
-        <x-layout.sidebar-section title="Keuangan">
-            <x-layout.sidebar-link href="{{ route($routePrefix . 'pemasukan') }}" icon="fas fa-wallet" :active="request()->routeIs($routePrefix . 'pemasukan')">Kelola Anggaran</x-layout.sidebar-link>
-            <x-layout.sidebar-link href="{{ route($routePrefix . 'pengeluaran') }}" icon="fas fa-hand-holding-usd" :active="request()->routeIs($routePrefix . 'pengeluaran')">Kelola Pengeluaran</x-layout.sidebar-link>
+        <x-layout.sidebar-section title="Dana Desa">
+            <x-layout.sidebar-link href="{{ route($routePrefix . 'pemasukan', ['dana' => \App\Models\SumberDana::KODE_DANA_DESA]) }}" icon="fas fa-wallet" :active="request()->routeIs($routePrefix . 'pemasukan') && $danaAktif === \App\Models\SumberDana::KODE_DANA_DESA">Anggaran Dana Desa</x-layout.sidebar-link>
+            <x-layout.sidebar-link href="{{ route($routePrefix . 'kegiatan', ['dana' => \App\Models\SumberDana::KODE_DANA_DESA]) }}" icon="fas fa-tasks" :active="request()->routeIs($routePrefix . 'kegiatan') && $danaAktif === \App\Models\SumberDana::KODE_DANA_DESA">Perencanaan Dana Desa</x-layout.sidebar-link>
+            <x-layout.sidebar-link href="{{ route($routePrefix . 'pengeluaran', ['dana' => \App\Models\SumberDana::KODE_DANA_DESA]) }}" icon="fas fa-hand-holding-usd" :active="request()->routeIs($routePrefix . 'pengeluaran') && $danaAktif === \App\Models\SumberDana::KODE_DANA_DESA">Pengeluaran Dana Desa</x-layout.sidebar-link>
+        </x-layout.sidebar-section>
+
+        <x-layout.sidebar-section title="Alokasi Dana Desa">
+            <x-layout.sidebar-link href="{{ route($routePrefix . 'pemasukan', ['dana' => \App\Models\SumberDana::KODE_ALOKASI_DANA_DESA]) }}" icon="fas fa-coins" :active="request()->routeIs($routePrefix . 'pemasukan') && $danaAktif === \App\Models\SumberDana::KODE_ALOKASI_DANA_DESA">Anggaran ADD</x-layout.sidebar-link>
+            <x-layout.sidebar-link href="{{ route($routePrefix . 'kegiatan', ['dana' => \App\Models\SumberDana::KODE_ALOKASI_DANA_DESA]) }}" icon="fas fa-clipboard-list" :active="request()->routeIs($routePrefix . 'kegiatan') && $danaAktif === \App\Models\SumberDana::KODE_ALOKASI_DANA_DESA">Perencanaan ADD</x-layout.sidebar-link>
+            <x-layout.sidebar-link href="{{ route($routePrefix . 'pengeluaran', ['dana' => \App\Models\SumberDana::KODE_ALOKASI_DANA_DESA]) }}" icon="fas fa-money-bill-transfer" :active="request()->routeIs($routePrefix . 'pengeluaran') && $danaAktif === \App\Models\SumberDana::KODE_ALOKASI_DANA_DESA">Pengeluaran ADD</x-layout.sidebar-link>
         </x-layout.sidebar-section>
         @endif
 
 
-        @if(Route::has($routePrefix . 'kegiatan') || Route::has($routePrefix . 'inventaris') || Route::has($routePrefix . 'bidang-kegiatan'))
+        @if(Route::has($routePrefix . 'inventaris') || Route::has($routePrefix . 'bidang-kegiatan'))
         <x-layout.sidebar-section title="Operasional & Aset">
             @if(Route::has($routePrefix . 'bidang-kegiatan'))
-            <x-layout.sidebar-link href="{{ route($routePrefix . 'bidang-kegiatan') }}" icon="fas fa-layer-group" :active="request()->routeIs($routePrefix . 'bidang-kegiatan')">Bidang & Sub-Bidang</x-layout.sidebar-link>
-            @endif
-            @if(Route::has($routePrefix . 'kegiatan'))
-            <x-layout.sidebar-link href="{{ route($routePrefix . 'kegiatan') }}" icon="fas fa-tasks" :active="request()->routeIs($routePrefix . 'kegiatan')">Perencanaan Kegiatan</x-layout.sidebar-link>
+            <x-layout.sidebar-link href="{{ route($routePrefix . 'bidang-kegiatan') }}" icon="fas fa-layer-group" :active="request()->routeIs($routePrefix . 'bidang-kegiatan')">Bidang & Sub-Bidang (Dana Desa)</x-layout.sidebar-link>
             @endif
             @if(Route::has($routePrefix . 'inventaris'))
             <x-layout.sidebar-link href="{{ route($routePrefix . 'inventaris') }}" icon="fas fa-boxes" :active="request()->routeIs($routePrefix . 'inventaris')">Kelola Inventaris</x-layout.sidebar-link>
@@ -579,7 +584,8 @@
         @if(Route::has($routePrefix . 'penggunaan-dana-desa') || Route::has($routePrefix . 'laporan-inventaris'))
         <x-layout.sidebar-section title="Laporan">
             @if(Route::has($routePrefix . 'penggunaan-dana-desa'))
-            <x-layout.sidebar-link href="{{ route($routePrefix . 'penggunaan-dana-desa') }}" icon="fas fa-chart-pie" :active="request()->routeIs($routePrefix . 'penggunaan-dana-desa')">Laporan Realisasi Anggaran</x-layout.sidebar-link>
+            <x-layout.sidebar-link href="{{ route($routePrefix . 'penggunaan-dana-desa', ['dana' => \App\Models\SumberDana::KODE_DANA_DESA]) }}" icon="fas fa-chart-pie" :active="request()->routeIs($routePrefix . 'penggunaan-dana-desa') && $danaAktif === \App\Models\SumberDana::KODE_DANA_DESA">Laporan Dana Desa</x-layout.sidebar-link>
+            <x-layout.sidebar-link href="{{ route($routePrefix . 'penggunaan-dana-desa', ['dana' => \App\Models\SumberDana::KODE_ALOKASI_DANA_DESA]) }}" icon="fas fa-chart-line" :active="request()->routeIs($routePrefix . 'penggunaan-dana-desa') && $danaAktif === \App\Models\SumberDana::KODE_ALOKASI_DANA_DESA">Laporan Alokasi Dana Desa</x-layout.sidebar-link>
             @endif
             @if(Route::has($routePrefix . 'laporan-inventaris'))
             <x-layout.sidebar-link href="{{ route($routePrefix . 'laporan-inventaris') }}" icon="fas fa-file-invoice" :active="request()->routeIs($routePrefix . 'laporan-inventaris')">Laporan Inventaris</x-layout.sidebar-link>
@@ -646,31 +652,52 @@
 
             @if(Route::has($routePrefix . 'pemasukan'))
             routes.push({
-                id: 'pemasukan',
-                title: 'Pemasukan',
+                id: 'pemasukan-dana-desa',
+                title: 'Anggaran Dana Desa',
                 icon: '<i class="fas fa-wallet"></i>',
-                section: 'Keuangan',
-                handler: () => { window.location.href = "{{ route($routePrefix . 'pemasukan') }}"; }
+                section: 'Dana Desa',
+                handler: () => { window.location.href = "{{ route($routePrefix . 'pemasukan', ['dana' => \App\Models\SumberDana::KODE_DANA_DESA]) }}"; }
+            });
+            routes.push({
+                id: 'pemasukan-add',
+                title: 'Anggaran Alokasi Dana Desa',
+                icon: '<i class="fas fa-coins"></i>',
+                section: 'Alokasi Dana Desa',
+                handler: () => { window.location.href = "{{ route($routePrefix . 'pemasukan', ['dana' => \App\Models\SumberDana::KODE_ALOKASI_DANA_DESA]) }}"; }
             });
             @endif
 
             @if(Route::has($routePrefix . 'pengeluaran'))
             routes.push({
-                id: 'pengeluaran',
-                title: 'Pengeluaran',
+                id: 'pengeluaran-dana-desa',
+                title: 'Pengeluaran Dana Desa',
                 icon: '<i class="fas fa-hand-holding-usd"></i>',
-                section: 'Keuangan',
-                handler: () => { window.location.href = "{{ route($routePrefix . 'pengeluaran') }}"; }
+                section: 'Dana Desa',
+                handler: () => { window.location.href = "{{ route($routePrefix . 'pengeluaran', ['dana' => \App\Models\SumberDana::KODE_DANA_DESA]) }}"; }
+            });
+            routes.push({
+                id: 'pengeluaran-add',
+                title: 'Pengeluaran Alokasi Dana Desa',
+                icon: '<i class="fas fa-money-bill-transfer"></i>',
+                section: 'Alokasi Dana Desa',
+                handler: () => { window.location.href = "{{ route($routePrefix . 'pengeluaran', ['dana' => \App\Models\SumberDana::KODE_ALOKASI_DANA_DESA]) }}"; }
             });
             @endif
 
             @if(Route::has($routePrefix . 'penggunaan-dana-desa'))
             routes.push({
-                id: 'penggunaan-dana-desa',
-                title: 'Laporan Realisasi Anggaran',
+                id: 'laporan-dana-desa',
+                title: 'Laporan Dana Desa',
                 icon: '<i class="fas fa-chart-pie"></i>',
                 section: 'Laporan',
-                handler: () => { window.location.href = "{{ route($routePrefix . 'penggunaan-dana-desa') }}"; }
+                handler: () => { window.location.href = "{{ route($routePrefix . 'penggunaan-dana-desa', ['dana' => \App\Models\SumberDana::KODE_DANA_DESA]) }}"; }
+            });
+            routes.push({
+                id: 'laporan-add',
+                title: 'Laporan Alokasi Dana Desa',
+                icon: '<i class="fas fa-chart-line"></i>',
+                section: 'Laporan',
+                handler: () => { window.location.href = "{{ route($routePrefix . 'penggunaan-dana-desa', ['dana' => \App\Models\SumberDana::KODE_ALOKASI_DANA_DESA]) }}"; }
             });
             @endif
             @if(Route::has($routePrefix . 'laporan-inventaris'))
@@ -688,11 +715,18 @@
 
             @if(Route::has($routePrefix . 'kegiatan'))
             routes.push({
-                id: 'kegiatan',
-                title: 'Kegiatan',
+                id: 'kegiatan-dana-desa',
+                title: 'Perencanaan Dana Desa',
                 icon: '<i class="fas fa-tasks"></i>',
-                section: 'Operasional & Aset',
-                handler: () => { window.location.href = "{{ route($routePrefix . 'kegiatan') }}"; }
+                section: 'Dana Desa',
+                handler: () => { window.location.href = "{{ route($routePrefix . 'kegiatan', ['dana' => \App\Models\SumberDana::KODE_DANA_DESA]) }}"; }
+            });
+            routes.push({
+                id: 'kegiatan-add',
+                title: 'Perencanaan Alokasi Dana Desa',
+                icon: '<i class="fas fa-clipboard-list"></i>',
+                section: 'Alokasi Dana Desa',
+                handler: () => { window.location.href = "{{ route($routePrefix . 'kegiatan', ['dana' => \App\Models\SumberDana::KODE_ALOKASI_DANA_DESA]) }}"; }
             });
             @endif
 
