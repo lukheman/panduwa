@@ -177,10 +177,10 @@ class LaporanRealisasiApbdesService
     {
         $rows = collect();
 
-        foreach ($kegiatans->sortBy('nama_kegiatan') as $kegiatan) {
+        foreach ($kegiatans->sortBy('id') as $kegiatan) {
             $realisasi = $pengeluarans->where('id_kegiatan', $kegiatan->id)->sum('jumlah');
             $rows->push([
-                'code' => $kegiatan->kode_rekening ?: '5.2',
+                'code' => $kegiatan->kode_rekening ?: '',
                 'description' => $kegiatan->nama_kegiatan,
                 'level' => 0,
                 'anggaran' => (float) $kegiatan->rencana_anggaran,
@@ -220,11 +220,9 @@ class LaporanRealisasiApbdesService
         }
 
         foreach ($ancestors as $index => $rekening) {
-            $anggaran = $index === $ancestors->count() - 1 ? (float) $detail->anggaran : 0;
-            $realisasi = $index === $ancestors->count() - 1
-                    ? (float) $pengeluarans->where('kegiatan_belanja_id', $detail->id)->sum('jumlah')
-                    : 0;
-            $existing = $rows->search(fn ($row) => $row['code'] === $rekening->kode);
+            $anggaran = (float) $detail->anggaran;
+            $realisasi = (float) $pengeluarans->where('kegiatan_belanja_id', $detail->id)->sum('jumlah');
+            $existing = $rows->search(fn ($row) => ($row['kind'] ?? null) === 'rekening' && $row['code'] === $rekening->kode);
 
             if ($existing !== false) {
                 $row = $rows->get($existing);
@@ -239,6 +237,7 @@ class LaporanRealisasiApbdesService
                     'anggaran' => $anggaran,
                     'realisasi' => $realisasi,
                     'class' => $index === 0 ? 'type' : ($index === 1 ? 'group' : ''),
+                    'kind' => 'rekening',
                 ]);
             }
         }

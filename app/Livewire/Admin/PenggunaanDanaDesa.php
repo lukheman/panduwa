@@ -50,7 +50,7 @@ class PenggunaanDanaDesa extends Component
             'ringkasan' => $ringkasan,
             'sampaiTanggal' => $sampaiTanggal,
             'sumberDana' => $sumberDana,
-        ]);
+        ])->setOption('isPhpEnabled', true);
 
         return response()->streamDownload(function () use ($pdf) {
             echo $pdf->output();
