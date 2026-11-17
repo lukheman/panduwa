@@ -47,6 +47,8 @@ class KegiatanManagement extends Component
 
     public string $status = 'perencanaan';
 
+    public $foto_progres;
+
     public array $detailBelanja = [];
 
     public ?string $existing_foto_progres = null;
