@@ -14,6 +14,10 @@
         .identity h2 { font-size: 13px; }
         .identity h3 { font-size: 13px; }
         .identity p { font-size: 13px; }
+        .signature { width: 42%; margin: 24px 0 0 auto; text-align: center; page-break-inside: avoid; }
+        .signature .space { height: 58px; }
+        .signature p { margin: 3px 0; }
+        .report .indent-4 { padding-left: 50px; }
         .metadata { width: 100%; border-collapse: collapse; border-bottom: 1.4px solid #111; }
         .metadata td { padding: 7px 30px; font-size: 10px; font-weight: bold; }
         .metadata td:last-child { text-align: right; }
@@ -43,8 +47,14 @@
 </head>
 <body>
     @php
-        $format = fn ($value) => number_format((float) $value, 2, ',', '.');
-        $kode = fn ($value) => filled($value) ? rtrim((string) $value, '.').'.' : '';
+        $format = function ($value): string {
+            $value = (float) $value;
+
+            return $value < 0
+                ? '('.number_format(abs($value), 2, ',', '.').')'
+                : number_format($value, 2, ',', '.');
+        };
+        $kode = fn ($value): string => filled($value) ? rtrim((string) $value, '.').'.' : '';
         $pendapatanRows = $ringkasan['pendapatanRows'];
         $pendapatanAnggaran = $ringkasan['pendapatanAnggaran'];
         $pendapatanRealisasi = $ringkasan['pendapatanRealisasi'];
@@ -117,7 +127,7 @@
                 @foreach($ringkasan['belanjaRows'] as $row)
                     <tr class="{{ $row['class'] }}">
                         <td class="code">{{ $kode($row['code']) }}</td>
-                        <td class="description indent-{{ min($row['level'], 3) }}">{{ $row['description'] }}</td>
+                        <td class="description indent-{{ min($row['level'], 4) }}">{{ $row['description'] }}</td>
                         <td class="money">{{ $format($row['anggaran']) }}</td>
                         <td class="money">{{ $format($row['realisasi']) }}</td>
                         <td class="money">{{ $format($row['anggaran'] - $row['realisasi']) }}</td>
@@ -139,6 +149,12 @@
                 <tr class="total"><td class="code"></td><td class="description">SISA LEBIH/(KURANG) PERHITUNGAN ANGGARAN (SiLPA)</td><td class="money">{{ $format($ringkasan['silpaAnggaran']) }}</td><td class="money">{{ $format($ringkasan['silpaRealisasi']) }}</td><td class="money">{{ $format($ringkasan['silpaAnggaran'] - $ringkasan['silpaRealisasi']) }}</td></tr>
             </tbody>
         </table>
+        <div class="signature">
+            <p>Waindawula, {{ \Carbon\Carbon::parse($sampaiTanggal)->translatedFormat('d F Y') }}</p>
+            <p><strong>KEPALA DESA</strong></p>
+            <div class="space"></div>
+            <p><strong>................................</strong></p>
+        </div>
     </div>
 
     <script type="text/php">

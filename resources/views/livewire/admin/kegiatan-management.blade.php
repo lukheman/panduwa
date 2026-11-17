@@ -236,6 +236,23 @@
                                 @error('rencana_anggaran') <span class="text-danger small">{{ $message }}</span> @enderror
                             </div>
                         </div>
+                        <div class="col-12">
+                            <div class="border rounded p-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <strong>Detail rekening belanja</strong>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" wire:click="addDetailBelanja">Tambah rekening</button>
+                                </div>
+                                @error('detailBelanja') <div class="text-danger small mb-2">{{ $message }}</div> @enderror
+                                @foreach ($detailBelanja as $index => $detail)
+                                    <div class="row g-2 mb-2" wire:key="detail-belanja-{{ $index }}">
+                                        <div class="col-md-5"><select class="form-control" wire:model.live="detailBelanja.{{ $index }}.rekening_id" required><option value="">-- Pilih rekening obyek --</option>@foreach ($rekeningOptions as $rekening)<option value="{{ $rekening->id }}">{{ $rekening->kode }} - {{ $rekening->nama }}</option>@endforeach</select></div>
+                                        <div class="col-md-4"><input class="form-control" wire:model="detailBelanja.{{ $index }}.uraian" placeholder="Uraian"></div>
+                                        <div class="col-md-2"><input type="number" class="form-control" wire:model="detailBelanja.{{ $index }}.anggaran" min="0" placeholder="Anggaran" required></div>
+                                        <div class="col-md-1"><button type="button" class="btn btn-outline-danger" wire:click="removeDetailBelanja({{ $index }})">×</button></div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
 
                         @if(in_array($this->status, ['berjalan', 'selesai']))
                             <div class="col-md-6">

@@ -5,7 +5,7 @@ namespace App\Livewire\Admin;
 use App\Enums\StatusKegiatan;
 use App\Models\BidangKegiatan;
 use App\Models\Kegiatan;
-use App\Models\Pemasukan;
+use App\Models\KegiatanBelanja;
 use App\Models\Pengeluaran;
 use App\Models\RekeningAnggaran;
 use App\Models\SubBidangKegiatan;
@@ -47,7 +47,7 @@ class KegiatanManagement extends Component
 
     public string $status = 'perencanaan';
 
-    public $foto_progres;
+    public array $detailBelanja = [];
 
     public ?string $existing_foto_progres = null;
 
@@ -74,6 +74,10 @@ class KegiatanManagement extends Component
             'realisasi_anggaran' => ['nullable', 'numeric', 'min:0', 'max:9999999999999'],
             'status' => ['required', Rule::enum(StatusKegiatan::class)],
             'foto_progres' => ['nullable', 'image', 'max:2048'],
+            'detailBelanja' => ['required', 'array', 'min:1'],
+            'detailBelanja.*.rekening_id' => ['required', 'integer', 'exists:rekening_anggaran,id'],
+            'detailBelanja.*.uraian' => ['required', 'string', 'max:255'],
+            'detailBelanja.*.anggaran' => ['required', 'numeric', 'min:0'],
         ];
 
         if ($this->menggunakanBidang()) {
@@ -150,7 +154,7 @@ class KegiatanManagement extends Component
 
     public function openEditModal(int $id): void
     {
-        $kegiatan = Kegiatan::with('subBidang.bidang')->findOrFail($id);
+        $kegiatan = Kegiatan::with(['subBidang.bidang', 'belanjaDetails'])->findOrFail($id);
 
         $this->editingKegiatanId = $id;
         $this->dana = SumberDana::normalisasiKode($kegiatan->sumberDana?->kode ?? $this->dana);
@@ -163,6 +167,11 @@ class KegiatanManagement extends Component
         $this->status = $kegiatan->status->value;
         $this->existing_foto_progres = $kegiatan->foto_progres;
         $this->foto_progres = null;
+        $this->detailBelanja = $kegiatan->belanjaDetails->map(fn (KegiatanBelanja $detail): array => [
+            'rekening_id' => (string) $detail->rekening_anggaran_id,
+            'uraian' => $detail->uraian,
+            'anggaran' => (string) $detail->anggaran,
+        ])->all() ?: [['rekening_id' => '', 'uraian' => '', 'anggaran' => '']];
 
         $this->showModal = true;
     }
@@ -180,6 +189,12 @@ class KegiatanManagement extends Component
 
                 return;
             }
+        }
+        $totalDetail = collect($this->detailBelanja)->sum(fn (array $detail): float => (float) ($detail['anggaran'] ?? 0));
+        if (abs($totalDetail - (float) $this->rencana_anggaran) > 0.01) {
+            $this->addError('detailBelanja', 'Total detail rekening harus sama dengan anggaran kegiatan ('.$this->formatRupiah($totalDetail).' vs '.$this->formatRupiah($this->rencana_anggaran).').');
+
+            return;
         }
 
         $totalPemasukan = Pemasukan::query()->untukSumberDana($sumberDanaId)->sum('jumlah');
@@ -232,7 +247,7 @@ class KegiatanManagement extends Component
         if ($this->editingKegiatanId) {
             $kegiatan = Kegiatan::findOrFail($this->editingKegiatanId);
             $kegiatan->update($data);
-
+            $this->saveDetailBelanja($kegiatan);
             if ($this->status === StatusKegiatan::PERENCANAAN->value) {
                 $this->hapusOtomatisPengeluaran($kegiatan);
 
@@ -255,7 +270,7 @@ class KegiatanManagement extends Component
             }
         } else {
             $kegiatan = Kegiatan::create($data);
-
+            $this->saveDetailBelanja($kegiatan);
             $perluCatat = $this->status === StatusKegiatan::SELESAI->value
                 || ($this->status === StatusKegiatan::BERJALAN->value && $this->realisasi_anggaran);
 
@@ -283,21 +298,27 @@ class KegiatanManagement extends Component
 
     protected function syncOtomatisPengeluaran(Kegiatan $kegiatan, $nominal): void
     {
-        $pengeluaran = (clone $this->queryOtomatisPengeluaran($kegiatan))->first();
+        $this->hapusOtomatisPengeluaran($kegiatan);
+        $details = $kegiatan->belanjaDetails()->orderBy('id')->get();
+        $remaining = (float) $nominal;
 
-        $payload = [
-            'jumlah' => $nominal,
-            'tanggal' => $pengeluaran?->tanggal ?? date('Y-m-d'),
-            'keterangan' => 'Realisasi Anggaran Kegiatan: '.$kegiatan->nama_kegiatan,
-            'id_kegiatan' => $kegiatan->id,
-            'sumber_dana_id' => $kegiatan->sumber_dana_id,
-            'rekening_anggaran_id' => RekeningAnggaran::where('kode', '5.2')->value('id'),
-        ];
+        foreach ($details as $index => $detail) {
+            $amount = $index === $details->count() - 1 ? $remaining : min((float) $detail->anggaran, $remaining);
+            $remaining -= $amount;
 
-        if ($pengeluaran) {
-            $pengeluaran->update($payload);
-        } else {
-            Pengeluaran::create($payload);
+            if ($amount <= 0) {
+                continue;
+            }
+
+            Pengeluaran::create([
+                'jumlah' => $amount,
+                'tanggal' => date('Y-m-d'),
+                'keterangan' => 'Realisasi Anggaran Kegiatan: '.$kegiatan->nama_kegiatan,
+                'id_kegiatan' => $kegiatan->id,
+                'kegiatan_belanja_id' => $detail->id,
+                'sumber_dana_id' => $kegiatan->sumber_dana_id,
+                'rekening_anggaran_id' => $detail->rekening_anggaran_id,
+            ]);
         }
     }
 
@@ -311,6 +332,44 @@ class KegiatanManagement extends Component
         $this->showModal = false;
         $this->resetForm();
         $this->resetValidation();
+    }
+
+    public function addDetailBelanja(): void
+    {
+        $this->detailBelanja[] = ['rekening_id' => '', 'uraian' => '', 'anggaran' => ''];
+    }
+
+    public function removeDetailBelanja(int $index): void
+    {
+        unset($this->detailBelanja[$index]);
+        $this->detailBelanja = array_values($this->detailBelanja);
+    }
+
+    public function updatedDetailBelanja($value, string $key): void
+    {
+        if (str_ends_with($key, '.rekening_id') && $value) {
+            $index = (int) explode('.', $key)[0];
+            $this->detailBelanja[$index]['uraian'] = (string) RekeningAnggaran::whereKey($value)->value('nama');
+        }
+    }
+
+    protected function saveDetailBelanja(Kegiatan $kegiatan): void
+    {
+        $kegiatan->belanjaDetails()->delete();
+        foreach ($this->detailBelanja as $detail) {
+            $rekening = RekeningAnggaran::withCount('children')->findOrFail($detail['rekening_id']);
+            if ($rekening->children_count > 0) {
+                $this->addError('detailBelanja', 'Detail belanja harus menggunakan rekening paling bawah.');
+
+                return;
+            }
+            $kegiatan->belanjaDetails()->create([
+                'rekening_anggaran_id' => $rekening->id,
+                'kode_rekening' => $rekening->kode,
+                'uraian' => $detail['uraian'],
+                'anggaran' => $detail['anggaran'],
+            ]);
+        }
     }
 
     public function confirmDelete(int $id): void
@@ -354,6 +413,7 @@ class KegiatanManagement extends Component
         $this->foto_progres = null;
         $this->existing_foto_progres = null;
         $this->editingKegiatanId = null;
+        $this->detailBelanja = [['rekening_id' => '', 'uraian' => '', 'anggaran' => '']];
     }
 
     public function formatRupiah($angka)
@@ -420,6 +480,7 @@ class KegiatanManagement extends Component
         return view('livewire.admin.kegiatan-management', [
             'kegiatans' => $kegiatans,
             'bidangs' => $bidangs,
+            'rekeningOptions' => RekeningAnggaran::query()->where('aktif', true)->where('kode', 'like', '5.%')->whereDoesntHave('children')->orderBy('kode')->get(),
             'sumberDana' => $sumberDana,
             'danaLabel' => SumberDana::labelUntukKode($this->dana),
             'menggunakanBidang' => $this->menggunakanBidang(),

@@ -584,8 +584,8 @@
         @if(Route::has($routePrefix . 'penggunaan-dana-desa') || Route::has($routePrefix . 'laporan-inventaris'))
         <x-layout.sidebar-section title="Laporan">
             @if(Route::has($routePrefix . 'penggunaan-dana-desa'))
-            <x-layout.sidebar-link href="{{ route($routePrefix . 'penggunaan-dana-desa', ['dana' => \App\Models\SumberDana::KODE_DANA_DESA]) }}" icon="fas fa-chart-pie" :active="request()->routeIs($routePrefix . 'penggunaan-dana-desa') && $danaAktif === \App\Models\SumberDana::KODE_DANA_DESA">Laporan Dana Desa</x-layout.sidebar-link>
-            <x-layout.sidebar-link href="{{ route($routePrefix . 'penggunaan-dana-desa', ['dana' => \App\Models\SumberDana::KODE_ALOKASI_DANA_DESA]) }}" icon="fas fa-chart-line" :active="request()->routeIs($routePrefix . 'penggunaan-dana-desa') && $danaAktif === \App\Models\SumberDana::KODE_ALOKASI_DANA_DESA">Laporan Alokasi Dana Desa</x-layout.sidebar-link>
+            <x-layout.sidebar-link href="{{ route($routePrefix . 'penggunaan-dana-desa', ['dana' => \App\Models\SumberDana::KODE_DANA_DESA]) }}" icon="fas fa-chart-pie" :active="request()->routeIs($routePrefix . 'penggunaan-dana-desa') && $danaAktif === \App\Models\SumberDana::KODE_DANA_DESA">Laporan Realisasi Dana Desa</x-layout.sidebar-link>
+            <x-layout.sidebar-link href="{{ route($routePrefix . 'penggunaan-dana-desa', ['dana' => \App\Models\SumberDana::KODE_ALOKASI_DANA_DESA]) }}" icon="fas fa-chart-line" :active="request()->routeIs($routePrefix . 'penggunaan-dana-desa') && $danaAktif === \App\Models\SumberDana::KODE_ALOKASI_DANA_DESA">Laporan Realisasi Alokasi Dana Desa</x-layout.sidebar-link>
             @endif
             @if(Route::has($routePrefix . 'laporan-inventaris'))
             <x-layout.sidebar-link href="{{ route($routePrefix . 'laporan-inventaris') }}" icon="fas fa-file-invoice" :active="request()->routeIs($routePrefix . 'laporan-inventaris')">Laporan Inventaris</x-layout.sidebar-link>
@@ -687,14 +687,14 @@
             @if(Route::has($routePrefix . 'penggunaan-dana-desa'))
             routes.push({
                 id: 'laporan-dana-desa',
-                title: 'Laporan Dana Desa',
+                title: 'Laporan Realisasi Dana Desa',
                 icon: '<i class="fas fa-chart-pie"></i>',
                 section: 'Laporan',
                 handler: () => { window.location.href = "{{ route($routePrefix . 'penggunaan-dana-desa', ['dana' => \App\Models\SumberDana::KODE_DANA_DESA]) }}"; }
             });
             routes.push({
                 id: 'laporan-add',
-                title: 'Laporan Alokasi Dana Desa',
+                title: 'Laporan Realisasi Alokasi Dana Desa',
                 icon: '<i class="fas fa-chart-line"></i>',
                 section: 'Laporan',
                 handler: () => { window.location.href = "{{ route($routePrefix . 'penggunaan-dana-desa', ['dana' => \App\Models\SumberDana::KODE_ALOKASI_DANA_DESA]) }}"; }

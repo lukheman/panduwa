@@ -171,6 +171,18 @@
                                 @endif
                             </small>
                         </div>
+                        @if ($id_kegiatan && $this->detailBelanjaOptions->isNotEmpty())
+                            <div class="mb-3">
+                                <label class="form-label">Obyek Belanja</label>
+                                <select class="form-control" wire:model="kegiatan_belanja_id">
+                                    <option value="">-- Pilih obyek rekening --</option>
+                                    @foreach ($this->detailBelanjaOptions as $detail)
+                                        <option value="{{ $detail->id }}">{{ $detail->kode_rekening }} - {{ $detail->uraian }}</option>
+                                    @endforeach
+                                </select>
+                                @error('kegiatan_belanja_id') <span class="text-danger small">{{ $message }}</span> @enderror
+                            </div>
+                        @endif
 
                         @if ($selectedKegiatanInfo)
                             <div class="alert alert-info small mb-3">

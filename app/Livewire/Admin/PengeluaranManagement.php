@@ -6,6 +6,7 @@ use App\Enums\KondisiInventaris;
 use App\Enums\StatusKegiatan;
 use App\Models\Inventaris;
 use App\Models\Kegiatan;
+use App\Models\KegiatanBelanja;
 use App\Models\Pemasukan;
 use App\Models\Pengeluaran;
 use App\Models\RekeningAnggaran;
@@ -35,6 +36,8 @@ class PengeluaranManagement extends Component
     public string $keterangan = '';
 
     public ?int $id_kegiatan = null;
+
+    public ?int $kegiatan_belanja_id = null;
 
     public bool $catatSebagaiInventaris = false;
 
@@ -68,8 +71,8 @@ class PengeluaranManagement extends Component
             'tanggal' => ['required', 'date'],
             'jumlah' => ['required', 'numeric', 'min:0', 'max:9999999999999'],
             'keterangan' => ['nullable', 'string'],
-
             'id_kegiatan' => ['nullable', 'exists:kegiatan,id'],
+            'kegiatan_belanja_id' => ['nullable', 'exists:kegiatan_belanja,id'],
             'catatSebagaiInventaris' => ['boolean'],
             'kode_barang' => [
                 Rule::requiredIf($this->catatSebagaiInventaris),
@@ -107,34 +110,22 @@ class PengeluaranManagement extends Component
 
     public function updatedIdKegiatan($value): void
     {
+        $this->kegiatan_belanja_id = null;
         if ($value) {
-            $kegiatan = Kegiatan::query()
-                ->untukSumberDana($this->sumberDanaId())
-                ->withSum('pengeluarans', 'jumlah')
-                ->find($value);
-            if ($kegiatan) {
-                $realisasi = $kegiatan->pengeluarans_sum_jumlah ?? 0;
-
-                // Jika sedang mengedit, kurangi jumlah pengeluaran ini agar sisa anggaran akurat
-                if ($this->editingPengeluaranId) {
-                    $currentPengeluaran = Pengeluaran::find($this->editingPengeluaranId);
-                    if ($currentPengeluaran && $currentPengeluaran->id_kegiatan == $value) {
-                        $realisasi -= $currentPengeluaran->jumlah;
-                    }
-                }
-
-                $sisa = $kegiatan->rencana_anggaran - $realisasi;
-                $this->selectedKegiatanInfo = [
-                    'anggaran' => $kegiatan->rencana_anggaran,
-                    'realisasi' => $realisasi,
-                    'sisa' => $sisa,
-                ];
-            } else {
-                $this->selectedKegiatanInfo = null;
+            $kegiatan = Kegiatan::query()->untukSumberDana($this->sumberDanaId())->withSum('pengeluarans', 'jumlah')->find($value);
+            $realisasi = $kegiatan?->pengeluarans_sum_jumlah ?? 0;
+            if ($this->editingPengeluaranId) {
+                $realisasi -= Pengeluaran::find($this->editingPengeluaranId)?->jumlah ?? 0;
             }
+            $this->selectedKegiatanInfo = $kegiatan ? ['anggaran' => $kegiatan->rencana_anggaran, 'realisasi' => $realisasi, 'sisa' => $kegiatan->rencana_anggaran - $realisasi] : null;
         } else {
             $this->selectedKegiatanInfo = null;
         }
+    }
+
+    public function getDetailBelanjaOptionsProperty()
+    {
+        return $this->id_kegiatan ? Kegiatan::find($this->id_kegiatan)?->belanjaDetails()->orderBy('kode_rekening')->get() ?? collect() : collect();
     }
 
     public function updatedCatatSebagaiInventaris(bool $value): void
@@ -160,8 +151,7 @@ class PengeluaranManagement extends Component
         $this->jumlah = (string) $pengeluaran->jumlah;
         $this->keterangan = $pengeluaran->keterangan ?? '';
 
-        $this->id_kegiatan = $pengeluaran->id_kegiatan;
-        $inventaris = $pengeluaran->inventaris;
+        $this->kegiatan_belanja_id = $pengeluaran->kegiatan_belanja_id;
         $this->catatSebagaiInventaris = $inventaris !== null;
         $this->id_inventaris = $inventaris?->id;
         $this->kode_barang = $inventaris?->kode_barang ?? '';
@@ -180,7 +170,7 @@ class PengeluaranManagement extends Component
         $validated = $this->validate();
 
         $validated['id_kegiatan'] = $validated['id_kegiatan'] ?: null;
-
+        $validated['kegiatan_belanja_id'] = $validated['kegiatan_belanja_id'] ?: null;
         if ($validated['id_kegiatan']) {
             $kegiatanValid = Kegiatan::query()
                 ->untukSumberDana($sumberDanaId)
@@ -243,10 +233,11 @@ class PengeluaranManagement extends Component
                 'jumlah' => $validated['jumlah'],
                 'keterangan' => $validated['keterangan'],
                 'id_kegiatan' => $validated['id_kegiatan'],
+                'kegiatan_belanja_id' => $validated['kegiatan_belanja_id'],
                 'sumber_dana_id' => $sumberDanaId,
-                'rekening_anggaran_id' => $validated['id_kegiatan']
-                    ? RekeningAnggaran::where('kode', '5.2')->value('id')
-                    : RekeningAnggaran::where('kode', '5.9')->value('id'),
+                'rekening_anggaran_id' => $validated['kegiatan_belanja_id']
+                    ? KegiatanBelanja::find($validated['kegiatan_belanja_id'])->rekening_anggaran_id
+                    : ($validated['id_kegiatan'] ? RekeningAnggaran::where('kode', '5.2')->value('id') : RekeningAnggaran::where('kode', '5.9')->value('id')),
             ]);
             $pengeluaran->save();
 
