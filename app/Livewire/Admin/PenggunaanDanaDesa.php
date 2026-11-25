@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Models\KepalaDesa;
 use App\Models\Pemasukan;
 use App\Models\Pengeluaran;
 use App\Models\SumberDana;
@@ -47,9 +48,14 @@ class PenggunaanDanaDesa extends Component
         $pdf = Pdf::loadView('pdf.laporan-realisasi-apbdes', [
             'tahun' => $tahun,
             'tanggalCetak' => Carbon::now()->translatedFormat('d F Y'),
+            'dicetakPada' => Carbon::now()->format('d/m/Y H:i:s'),
             'ringkasan' => $ringkasan,
             'sampaiTanggal' => $sampaiTanggal,
             'sumberDana' => $sumberDana,
+            'namaDesa' => config('desa.nama', 'WAINDAWULA'),
+            'namaKepalaDesa' => KepalaDesa::query()->value('nama') ?: config('desa.kepala_desa', '-'),
+            'tanggalTandaTangan' => Carbon::now()->translatedFormat('d F Y'),
+            'footerLabel' => 'Printed by PANDUWA',
         ])->setOption('isPhpEnabled', true);
 
         return response()->streamDownload(function () use ($pdf) {

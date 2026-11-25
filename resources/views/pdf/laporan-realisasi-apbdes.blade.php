@@ -2,63 +2,67 @@
 <html lang="id">
 <head>
     <meta charset="utf-8">
-    <title>Laporan Realisasi Pelaksanaan APBDes</title>
+    <title>Laporan Realisasi Pelaksanaan APBDes per Sumberdana</title>
     <style>
-        @page { size: A4 portrait; margin: 18px 18px 42px 18px; }
+        @page { size: A4 portrait; margin: 122px 16px 58px 16px; }
         * { box-sizing: border-box; }
-        body { margin: 0; color: #111; font-family: Arial, Helvetica, sans-serif; font-size: 9.2px; }
-        .report-wrapper { border: 1.4px solid #111; }
-        .identity { padding: 11px 12px 9px; text-align: center; border-bottom: 1.4px solid #111; }
-        .identity h1, .identity h2, .identity h3, .identity p { margin: 0; font-weight: bold; line-height: 1.42; }
-        .identity h1 { font-size: 13.5px; }
-        .identity h2 { font-size: 13px; }
-        .identity h3 { font-size: 13px; }
-        .identity p { font-size: 13px; }
-        .signature { width: 42%; margin: 24px 0 0 auto; text-align: center; page-break-inside: avoid; }
-        .signature .space { height: 58px; }
-        .signature p { margin: 3px 0; }
-        .report .indent-4 { padding-left: 50px; }
-        .metadata { width: 100%; border-collapse: collapse; border-bottom: 1.4px solid #111; }
-        .metadata td { padding: 7px 30px; font-size: 10px; font-weight: bold; }
-        .metadata td:last-child { text-align: right; }
-        .report { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        body { margin: 0; color: #000; font-family: Arial, Helvetica, sans-serif; font-size: 9px; }
+
+        table.report { width: 100%; border-collapse: collapse; table-layout: fixed; }
         .report thead { display: table-header-group; }
-        .report th, .report td { border-right: 1px solid #666; border-bottom: 1px solid #666; }
-        .report th:last-child, .report td:last-child { border-right: 0; }
-        .report th { height: 27px; padding: 3px 4px; text-align: center; vertical-align: middle; font-size: 9.2px; font-weight: bold; }
-        .report th small { display: block; font-size: 9px; font-weight: bold; }
-        .report td { height: 18px; padding: 2px 5px; vertical-align: middle; }
-        .report th.code, .report td.code { width: 10%; padding-left: 6px; white-space: nowrap; }
-        .report th.description, .report td.description { width: 45%; }
-        .report th.money, .report td.money { width: 15%; text-align: right; white-space: nowrap; padding-right: 7px; }
-        .report .section td { font-weight: bold; text-transform: uppercase; }
-        .report .field td { font-weight: bold; text-transform: uppercase; }
-        .report .subfield td { font-weight: bold; }
-        .report .subfield .description { font-style: italic; text-decoration: underline; }
-        .report .activity td { font-weight: normal; }
-        .report .type td { font-weight: bold; }
-        .report .group td { font-weight: bold; font-style: italic; }
-        .report .total td { font-weight: bold; border-top: 1.4px solid #111; }
-        .report .total .description { text-align: center; }
-        .report .indent-1 { padding-left: 14px; }
-        .report .indent-2 { padding-left: 26px; }
-        .report .indent-3 { padding-left: 38px; }
+        .report tr { page-break-inside: avoid; }
+        .report th, .report td { border: 0.6px solid #000; padding: 2px 4px; vertical-align: middle; }
+        .report th:last-child, .report td:last-child { border-right: 0.6px solid #000; }
+        .report thead th { height: 25px; text-align: center; font-weight: bold; }
+        .report thead th small { display: block; font-size: 8.5px; font-weight: bold; }
+        .report td { height: 15px; }
+        .report td.kode { width: 12%; padding-left: 6px; white-space: nowrap; }
+        .report td.uraian { width: 43%; }
+        .report td.money { width: 15%; text-align: right; white-space: nowrap; padding-right: 6px; }
+
+        .filter th { padding: 4px 2px; font-weight: bold; }
+        .filter table { width: 100%; border-collapse: collapse; }
+        .filter table td { border: 0; padding: 0 2px; font-size: 9px; font-weight: bold; }
+        .filter table td:last-child { text-align: right; }
+
+        .baris-akun td { font-weight: bold; }
+        .baris-kelompok td { font-weight: bold; }
+        .baris-jenis td { font-weight: normal; }
+        .baris-bidang td { font-weight: bold; text-decoration: underline; text-transform: uppercase; }
+        .baris-sub_bidang td { font-weight: bold; text-decoration: underline; }
+        .baris-kegiatan td { font-weight: bold; }
+        .baris-kelompok_belanja td { font-weight: bold; }
+        .baris-jenis_belanja td { font-weight: bold; font-style: italic; }
+        .baris-obyek td { font-weight: normal; }
+        .baris-total td { font-weight: bold; }
+        .baris-total td.uraian { text-align: center; }
+
+        .tanda-tangan { width: 250px; margin: 22px 0 0 auto; text-align: center; page-break-inside: avoid; }
+        .tanda-tangan p { margin: 0; line-height: 1.5; }
+        .tanda-tangan .jabatan { font-weight: bold; }
+        .tanda-tangan .ruang { height: 72px; position: relative; }
+        .tanda-tangan .ruang img { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); max-height: 70px; }
+        .tanda-tangan .ruang .stempel { max-height: 62px; left: 22%; }
+        .tanda-tangan .ruang .ttd { max-height: 52px; left: 76%; }
+        .tanda-tangan .nama { font-weight: bold; text-decoration: underline; }
     </style>
 </head>
 <body>
     @php
-        $format = function ($value): string {
-            $value = (float) $value;
+        $formatAngka = function ($nilai) {
+            if ($nilai === null) {
+                return '';
+            }
 
-            return $value < 0
-                ? '('.number_format(abs($value), 2, ',', '.').')'
-                : number_format($value, 2, ',', '.');
+            $nilai = round((float) $nilai, 2);
+            if (abs($nilai) < 0.005) {
+                $nilai = 0.0;
+            }
+
+            $teks = number_format(abs($nilai), 2, ',', '.');
+
+            return $nilai < 0 ? '('.$teks.')' : $teks;
         };
-        $kode = fn ($value): string => filled($value) ? rtrim((string) $value, '.').'.' : '';
-        $pendapatanRows = $ringkasan['pendapatanRows'];
-        $pendapatanAnggaran = $ringkasan['pendapatanAnggaran'];
-        $pendapatanRealisasi = $ringkasan['pendapatanRealisasi'];
-        $pendapatanLebih = $pendapatanAnggaran - $pendapatanRealisasi;
 
         $kodeSumber = $sumberDana?->kode ?? \App\Models\SumberDana::KODE_DANA_DESA;
         $namaSumber = $sumberDana?->nama ?? 'Dana Desa';
@@ -69,108 +73,112 @@
         } elseif ($kodeSumber === \App\Models\SumberDana::KODE_ALOKASI_DANA_DESA && ! str_contains(strtolower($labelSumber), 'apbd')) {
             $labelSumber .= ' (APBD)';
         }
+
+        $namaDesa = $namaDesa ?? config('desa.nama', 'WAINDAWULA');
+        $namaKepalaDesa = $namaKepalaDesa ?? '-';
+        $tanggalTandaTangan = $tanggalTandaTangan ?? $tanggalCetak ?? now()->translatedFormat('d F Y');
+        $dicetakPada = $dicetakPada ?? now()->format('d/m/Y H:i:s');
+        $footerLabel = $footerLabel ?? 'Printed by PANDUWA';
     @endphp
 
-    <div class="report-wrapper">
-        <div class="identity">
-            <h1>LAPORAN REALISASI PELAKSANAAN</h1>
-            <h2>ANGGARAN PENDAPATAN DAN BELANJA DESA PER SUMBERDANA</h2>
-            <h3>PEMERINTAH DESA WAINDAWULA</h3>
-            <p>TAHUN ANGGARAN {{ $tahun }}</p>
-        </div>
-
-        <table class="metadata">
-            <tr>
-                <td>Sumberdana&nbsp;&nbsp;:&nbsp;&nbsp; {{ $labelSumber }}</td>
-                <td>Realisasi s.d {{ \Carbon\Carbon::parse($sampaiTanggal)->format('d/m/Y') }}</td>
+    <table class="report">
+        <thead>
+            <tr class="filter">
+                <th colspan="5">
+                    <table>
+                        <tr>
+                            <td>Sumberdana&nbsp;:&nbsp;{{ $labelSumber }}</td>
+                            <td>Realisasi s.d {{ \Carbon\Carbon::parse($sampaiTanggal)->format('d/m/Y') }}</td>
+                        </tr>
+                    </table>
+                </th>
             </tr>
-        </table>
-
-        <table class="report">
-            <thead>
-                <tr>
-                    <th class="code" style="width: 10%;">KODE REK</th>
-                    <th class="description" style="width: 45%;">URAIAN</th>
-                    <th class="money" style="width: 15%;">ANGGARAN<small>(Rp)</small></th>
-                    <th class="money" style="width: 15%;">REALISASI<small>(Rp)</small></th>
-                    <th class="money" style="width: 15%;">LEBIH/(KURANG)<small>(Rp)</small></th>
+            <tr>
+                <th>KODE REK</th>
+                <th>URAIAN</th>
+                <th>ANGGARAN<small>(Rp)</small></th>
+                <th>REALISASI<small>(Rp)</small></th>
+                <th>LEBIH/(KURANG)<small>(Rp)</small></th>
+            </tr>
+            <tr>
+                <th>1</th>
+                <th>2</th>
+                <th>3</th>
+                <th>4</th>
+                <th>5</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($ringkasan['rows'] as $baris)
+                <tr class="baris-{{ $baris['gaya'] }}">
+                    <td class="kode">{{ $baris['kode'] }}</td>
+                    <td class="uraian" style="padding-left: {{ 5 + $baris['indent'] * 10 }}px;">{{ $baris['uraian'] }}</td>
+                    <td class="money">{{ $formatAngka($baris['anggaran']) }}</td>
+                    <td class="money">{{ $formatAngka($baris['realisasi']) }}</td>
+                    <td class="money">{{ $formatAngka($baris['lebih']) }}</td>
                 </tr>
-                <tr>
-                    <th class="code">1</th>
-                    <th class="description">2</th>
-                    <th class="money">3</th>
-                    <th class="money">4</th>
-                    <th class="money">5</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr class="section"><td class="code">4.</td><td class="description">PENDAPATAN</td><td class="money"></td><td class="money"></td><td class="money"></td></tr>
-                <tr class="type"><td class="code">4.2.</td><td class="description indent-1">Pendapatan Transfer</td><td class="money">{{ $format($pendapatanAnggaran) }}</td><td class="money">{{ $format($pendapatanRealisasi) }}</td><td class="money">{{ $format($pendapatanLebih) }}</td></tr>
-                @forelse($pendapatanRows as $row)
-                    <tr class="{{ $row['class'] }}">
-                        <td class="code">{{ $kode($row['code']) }}</td>
-                        <td class="description indent-2">{{ $row['description'] }}</td>
-                        <td class="money">{{ $format($row['anggaran']) }}</td>
-                        <td class="money">{{ $format($row['realisasi']) }}</td>
-                        <td class="money">{{ $format($row['anggaran'] - $row['realisasi']) }}</td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td class="code">{{ $kode($kodeSumber === \App\Models\SumberDana::KODE_ALOKASI_DANA_DESA ? '4.2.2' : '4.2.1') }}</td>
-                        <td class="description indent-2">{{ $kodeSumber === \App\Models\SumberDana::KODE_ALOKASI_DANA_DESA ? 'Alokasi Dana Desa' : 'Dana Desa' }}</td>
-                        <td class="money">0,00</td><td class="money">0,00</td><td class="money">0,00</td>
-                    </tr>
-                @endforelse
-                <tr class="total"><td class="code"></td><td class="description">JUMLAH PENDAPATAN</td><td class="money">{{ $format($pendapatanAnggaran) }}</td><td class="money">{{ $format($pendapatanRealisasi) }}</td><td class="money">{{ $format($pendapatanLebih) }}</td></tr>
+            @endforeach
+        </tbody>
+    </table>
 
-                <tr class="section"><td class="code">5.</td><td class="description">BELANJA</td><td class="money"></td><td class="money"></td><td class="money"></td></tr>
-                @foreach($ringkasan['belanjaRows'] as $row)
-                    <tr class="{{ $row['class'] }}">
-                        <td class="code">{{ $kode($row['code']) }}</td>
-                        <td class="description indent-{{ min($row['level'], 4) }}">{{ $row['description'] }}</td>
-                        <td class="money">{{ $format($row['anggaran']) }}</td>
-                        <td class="money">{{ $format($row['realisasi']) }}</td>
-                        <td class="money">{{ $format($row['anggaran'] - $row['realisasi']) }}</td>
-                    </tr>
-                @endforeach
-                <tr class="total"><td class="code"></td><td class="description">JUMLAH BELANJA</td><td class="money">{{ $format($ringkasan['belanjaAnggaran']) }}</td><td class="money">{{ $format($ringkasan['belanjaRealisasi']) }}</td><td class="money">{{ $format($ringkasan['belanjaAnggaran'] - $ringkasan['belanjaRealisasi']) }}</td></tr>
-                <tr class="total"><td class="code"></td><td class="description">SURPLUS/(DEFISIT)</td><td class="money">{{ $format($ringkasan['surplusAnggaran']) }}</td><td class="money">{{ $format($ringkasan['surplusRealisasi']) }}</td><td class="money">{{ $format($ringkasan['surplusAnggaran'] - $ringkasan['surplusRealisasi']) }}</td></tr>
-
-                <tr class="section"><td class="code">6.</td><td class="description">PEMBIAYAAN</td><td class="money"></td><td class="money"></td><td class="money"></td></tr>
-                <tr class="type"><td class="code">6.1.</td><td class="description indent-1">Penerimaan Pembiayaan</td><td class="money">{{ $format($ringkasan['penerimaanAnggaran']) }}</td><td class="money">{{ $format($ringkasan['penerimaanRealisasi']) }}</td><td class="money">{{ $format($ringkasan['penerimaanAnggaran'] - $ringkasan['penerimaanRealisasi']) }}</td></tr>
-                @foreach($ringkasan['pembiayaanPenerimaan'] as $item)
-                    <tr><td class="code">{{ $kode($item->rekening?->kode) }}</td><td class="description indent-2">{{ $item->uraian }}</td><td class="money">{{ $format($item->anggaran) }}</td><td class="money">{{ $format($item->realisasi) }}</td><td class="money">{{ $format($item->anggaran - $item->realisasi) }}</td></tr>
-                @endforeach
-                <tr class="type"><td class="code">6.2.</td><td class="description indent-1">Pengeluaran Pembiayaan</td><td class="money">{{ $format($ringkasan['pengeluaranAnggaran']) }}</td><td class="money">{{ $format($ringkasan['pengeluaranRealisasi']) }}</td><td class="money">{{ $format($ringkasan['pengeluaranAnggaran'] - $ringkasan['pengeluaranRealisasi']) }}</td></tr>
-                @foreach($ringkasan['pembiayaanPengeluaran'] as $item)
-                    <tr><td class="code">{{ $kode($item->rekening?->kode) }}</td><td class="description indent-2">{{ $item->uraian }}</td><td class="money">{{ $format($item->anggaran) }}</td><td class="money">{{ $format($item->realisasi) }}</td><td class="money">{{ $format($item->anggaran - $item->realisasi) }}</td></tr>
-                @endforeach
-                <tr class="total"><td class="code"></td><td class="description">PEMBIAYAAN NETTO</td><td class="money">{{ $format($ringkasan['nettoAnggaran']) }}</td><td class="money">{{ $format($ringkasan['nettoRealisasi']) }}</td><td class="money">{{ $format($ringkasan['nettoAnggaran'] - $ringkasan['nettoRealisasi']) }}</td></tr>
-                <tr class="total"><td class="code"></td><td class="description">SISA LEBIH/(KURANG) PERHITUNGAN ANGGARAN (SiLPA)</td><td class="money">{{ $format($ringkasan['silpaAnggaran']) }}</td><td class="money">{{ $format($ringkasan['silpaRealisasi']) }}</td><td class="money">{{ $format($ringkasan['silpaAnggaran'] - $ringkasan['silpaRealisasi']) }}</td></tr>
-            </tbody>
-        </table>
-        <div class="signature">
-            <p>Waindawula, {{ \Carbon\Carbon::parse($sampaiTanggal)->translatedFormat('d F Y') }}</p>
-            <p><strong>KEPALA DESA</strong></p>
-            <div class="space"></div>
-            <p><strong>................................</strong></p>
+    <div class="tanda-tangan">
+        <p>{{ $namaDesa }}, {{ $tanggalTandaTangan }}</p>
+        <p class="jabatan">KEPALA DESA</p>
+        <div class="ruang">
+            @if (! empty($stempelPath))
+                <img class="stempel" src="{{ $stempelPath }}" alt="Stempel">
+            @endif
+            @if (! empty($ttdPath))
+                <img class="ttd" src="{{ $ttdPath }}" alt="Tanda tangan">
+            @endif
         </div>
+        <p class="nama">{{ strtoupper((string) $namaKepalaDesa) }}</p>
     </div>
 
     <script type="text/php">
         if (isset($pdf)) {
-            $font = $fontMetrics->getFont('Arial', 'normal');
-            $size = 7.5;
-            $black = [0, 0, 0];
-            $left = 38;
-            $bottom = $pdf->get_height() - 26;
+            $judulDesa = @json('PEMERINTAH DESA '.strtoupper((string) $namaDesa));
+            $judulTahun = @json('TAHUN ANGGARAN '.$tahun);
+            $teksFooter = @json($footerLabel);
+            $teksCetak = @json('Tanggal Cetak : '.$dicetakPada);
 
-            $pdf->page_text($left, $bottom, 'Printed by Sistem PANDUWA', $font, $size, $black);
-            $pdf->page_text($left, $bottom + 10, '{{ \Carbon\Carbon::now()->format('d/m/Y H:i:s') }}', $font, $size, $black);
+            $pdf->page_script(function ($pageNumber, $pageCount, $canvas, $fontMetrics) use ($judulDesa, $judulTahun, $teksFooter, $teksCetak) {
+                $font = $fontMetrics->getFont('Helvetica', 'normal');
+                $fontTebal = $fontMetrics->getFont('Helvetica', 'bold') ?: $font;
+                $hitam = [0, 0, 0];
+                $putih = [1, 1, 1];
+                $tinggiHalaman = $canvas->get_height();
+                $lebarHalaman = $canvas->get_width();
 
-            $pageText = 'Halaman {PAGE_NUM}';
-            $pageWidth = $fontMetrics->get_text_width($pageText, $font, $size);
-            $pdf->page_text($pdf->get_width() - $pageWidth - 38, $bottom, $pageText, $font, $size, $black);
+                $tulisTengah = function ($teks, $y, $ukuran, $jenisFont) use ($canvas, $fontMetrics, $hitam) {
+                    $lebarTeks = $fontMetrics->get_text_width($teks, $jenisFont, $ukuran);
+                    $canvas->text(($canvas->get_width() - $lebarTeks) / 2, $y, $teks, $jenisFont, $ukuran, $hitam);
+                };
+
+                if ((int) $pageNumber === 1) {
+                    $tulisTengah('LAPORAN REALISASI PELAKSANAAN', 18, 12, $fontTebal);
+                    $tulisTengah('ANGGARAN PENDAPATAN DAN BELANJA DESA PER SUMBERDANA', 34, 10.5, $fontTebal);
+                    $tulisTengah($judulDesa, 50, 10.5, $fontTebal);
+                    $tulisTengah($judulTahun, 66, 10.5, $fontTebal);
+                } else {
+                    $tulisTengah($judulDesa, 30, 10.5, $fontTebal);
+                    $tulisTengah($judulTahun, 46, 10.5, $fontTebal);
+                }
+
+                $canvas->filled_rectangle(16, $tinggiHalaman - 40, 94, 13, $hitam);
+                $canvas->text(20, $tinggiHalaman - 36, $teksFooter, $font, 7.5, $putih);
+                $canvas->text(16, $tinggiHalaman - 20, $teksCetak, $font, 7.5, $hitam);
+
+                $teksHalaman = 'Halaman '.(int) $pageNumber;
+                $canvas->text(
+                    $lebarHalaman - $fontMetrics->get_text_width($teksHalaman, $font, 7.5) - 16,
+                    $tinggiHalaman - 20,
+                    $teksHalaman,
+                    $font,
+                    7.5,
+                    $hitam
+                );
+            });
         }
     </script>
 </body>
