@@ -245,12 +245,19 @@
                                 @error('detailBelanja') <div class="text-danger small mb-2">{{ $message }}</div> @enderror
                                 @foreach ($detailBelanja as $index => $detail)
                                     <div class="row g-2 mb-2" wire:key="detail-belanja-{{ $index }}">
-                                        <div class="col-md-5"><select class="form-control" wire:model.live="detailBelanja.{{ $index }}.rekening_id" required><option value="">-- Pilih rekening obyek --</option>@foreach ($rekeningOptions as $rekening)<option value="{{ $rekening->id }}">{{ $rekening->kode }} - {{ $rekening->nama }}</option>@endforeach</select></div>
-                                        <div class="col-md-4"><input class="form-control" wire:model="detailBelanja.{{ $index }}.uraian" placeholder="Uraian"></div>
+                                        <div class="col-md-4"><select class="form-control" wire:model.live="detailBelanja.{{ $index }}.rekening_id" required><option value="">-- Pilih rekening obyek --</option>@foreach ($rekeningOptions as $rekening)<option value="{{ $rekening->id }}">{{ $rekening->kode }} - {{ $rekening->nama }}</option>@endforeach</select></div>
+                                        <div class="col-md-3"><input class="form-control" wire:model="detailBelanja.{{ $index }}.uraian" placeholder="Uraian"></div>
                                         <div class="col-md-2"><input type="number" class="form-control" wire:model="detailBelanja.{{ $index }}.anggaran" min="0" placeholder="Anggaran" required></div>
+                                        <div class="col-md-2"><input class="form-control" value="{{ $this->formatRupiah($detail['realisasi'] ?? 0) }}" readonly title="Realisasi dihitung otomatis dari data pengeluaran"></div>
                                         <div class="col-md-1"><button type="button" class="btn btn-outline-danger" wire:click="removeDetailBelanja({{ $index }})">×</button></div>
                                     </div>
                                 @endforeach
+                                <div class="d-flex flex-wrap gap-3 small pt-2 border-top mt-2">
+                                    <span class="text-muted">Total detail: <strong class="text-body">{{ $this->formatRupiah($this->totalDetailAnggaran) }}</strong></span>
+                                    <span class="text-muted">Rencana anggaran: <strong class="text-success">{{ $this->formatRupiah($this->rencana_anggaran ?: 0) }}</strong></span>
+                                    <span class="text-muted">Selisih: <strong class="{{ abs($this->selisihDetailAnggaran) > 0.01 ? 'text-warning' : 'text-body' }}">{{ $this->formatRupiah($this->selisihDetailAnggaran) }}</strong></span>
+                                </div>
+                                <small class="text-muted d-block mt-1"><i class="fas fa-info-circle me-1"></i>Total detail boleh berbeda dengan rencana anggaran. Realisasi dihitung dari pengeluaran yang tercatat.</small>
                             </div>
                         </div>
 
@@ -361,12 +368,59 @@
                         </div>
                     </div>
 
-                    <div class="p-3 border rounded shadow-sm">
+                    <div class="p-3 border rounded shadow-sm mb-3">
                         <h6 class="fw-bold border-bottom pb-2 mb-3">Informasi Anggaran</h6>
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted">Rencana Anggaran:</span>
                             <span class="fw-bold text-success">{{ $this->formatRupiah($detailKegiatan->rencana_anggaran) }}</span>
                         </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Total Detail Rekening:</span>
+                            <span class="fw-bold">{{ $this->formatRupiah($detailKegiatan->belanjaDetails->sum('anggaran')) }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Selisih:</span>
+                            <span class="fw-bold text-warning">{{ $this->formatRupiah((float) $detailKegiatan->rencana_anggaran - (float) $detailKegiatan->belanjaDetails->sum('anggaran')) }}</span>
+                        </div>
+                    </div>
+
+                    <div class="p-3 border rounded shadow-sm">
+                        <h6 class="fw-bold border-bottom pb-2 mb-3">Detail Rekening Belanja</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm mb-0">
+                                <thead>
+                                    <tr class="text-muted small text-uppercase">
+                                        <th>Rekening / Uraian</th>
+                                        <th class="text-end">Anggaran</th>
+                                        <th class="text-end">Realisasi</th>
+                                        <th class="text-end">Sisa</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse ($detailKegiatan->belanjaDetails as $detail)
+                                        <tr>
+                                            <td class="small">{{ $detail->kode_rekening }} - {{ $detail->uraian }}</td>
+                                            <td class="text-end small">{{ $this->formatRupiah($detail->anggaran) }}</td>
+                                            <td class="text-end small text-primary">{{ $this->formatRupiah($detail->pengeluarans_sum_jumlah ?? 0) }}</td>
+                                            <td class="text-end small">{{ $this->formatRupiah((float) $detail->anggaran - (float) ($detail->pengeluarans_sum_jumlah ?? 0)) }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted small py-3">Belum ada detail rekening belanja.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                                <tfoot class="border-top fw-bold">
+                                    <tr>
+                                        <td class="small">Total</td>
+                                        <td class="text-end small">{{ $this->formatRupiah($detailKegiatan->belanjaDetails->sum('anggaran')) }}</td>
+                                        <td class="text-end small text-primary">{{ $this->formatRupiah($detailKegiatan->belanjaDetails->sum('pengeluarans_sum_jumlah')) }}</td>
+                                        <td class="text-end small">{{ $this->formatRupiah((float) $detailKegiatan->belanjaDetails->sum('anggaran') - (float) $detailKegiatan->belanjaDetails->sum('pengeluarans_sum_jumlah')) }}</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                        <small class="text-muted d-block mt-2"><i class="fas fa-info-circle me-1"></i>Realisasi berasal dari pengeluaran yang tercatat pada masing-masing obyek rekening.</small>
                     </div>
 
 
