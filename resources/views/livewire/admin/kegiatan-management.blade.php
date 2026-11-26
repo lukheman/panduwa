@@ -248,7 +248,7 @@
                                         <div class="col-md-4"><select class="form-control" wire:model.live="detailBelanja.{{ $index }}.rekening_id" required><option value="">-- Pilih rekening obyek --</option>@foreach ($rekeningOptions as $rekening)<option value="{{ $rekening->id }}">{{ $rekening->kode }} - {{ $rekening->nama }}</option>@endforeach</select></div>
                                         <div class="col-md-3"><input class="form-control" wire:model="detailBelanja.{{ $index }}.uraian" placeholder="Uraian"></div>
                                         <div class="col-md-2"><input type="number" class="form-control" wire:model="detailBelanja.{{ $index }}.anggaran" min="0" placeholder="Anggaran" required></div>
-                                        <div class="col-md-2"><input class="form-control" value="{{ $this->formatRupiah($detail['realisasi'] ?? 0) }}" readonly title="Realisasi dihitung otomatis dari data pengeluaran"></div>
+                                        <div class="col-md-2"><input class="form-control bg-light" value="{{ $this->formatRupiah($detail['realisasi'] ?? 0) }}" readonly aria-label="Realisasi (otomatis)" title="Realisasi dihitung otomatis dari data pengeluaran"></div>
                                         <div class="col-md-1"><button type="button" class="btn btn-outline-danger" wire:click="removeDetailBelanja({{ $index }})">×</button></div>
                                     </div>
                                 @endforeach
@@ -257,7 +257,8 @@
                                     <span class="text-muted">Rencana anggaran: <strong class="text-success">{{ $this->formatRupiah($this->rencana_anggaran ?: 0) }}</strong></span>
                                     <span class="text-muted">Selisih: <strong class="{{ abs($this->selisihDetailAnggaran) > 0.01 ? 'text-warning' : 'text-body' }}">{{ $this->formatRupiah($this->selisihDetailAnggaran) }}</strong></span>
                                 </div>
-                                <small class="text-muted d-block mt-1"><i class="fas fa-info-circle me-1"></i>Total detail boleh berbeda dengan rencana anggaran. Realisasi dihitung dari pengeluaran yang tercatat.</small>
+                                <small class="text-muted d-block mt-1"><i class="fas fa-lock me-1"></i>Kolom <strong>Realisasi</strong> hanya-baca: nilainya dihitung otomatis dari transaksi pengeluaran yang tercatat, jadi tidak diisi di form ini.</small>
+                                <small class="text-muted d-block mt-1"><i class="fas fa-info-circle me-1"></i>Total detail boleh berbeda dengan rencana anggaran.</small>
                             </div>
                         </div>
 
