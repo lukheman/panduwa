@@ -226,7 +226,10 @@ class KegiatanManagement extends Component
             }
         }
 
-        $totalPemasukan = Pemasukan::query()->untukSumberDana($sumberDanaId)->sum('jumlah');
+        $totalPemasukan = Pemasukan::query()
+            ->untukSumberDana($sumberDanaId)
+            ->get()
+            ->sum(fn (Pemasukan $pemasukan) => $pemasukan->anggaran ?? $pemasukan->jumlah);
         $totalPengeluaranNonKegiatan = Pengeluaran::query()->untukSumberDana($sumberDanaId)->whereNull('id_kegiatan')->sum('jumlah');
         $totalAnggaranKegiatanLain = Kegiatan::query()->untukSumberDana($sumberDanaId);
 

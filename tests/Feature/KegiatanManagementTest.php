@@ -170,3 +170,73 @@ it('mengisi otomatis uraian saat rekening pada detail dipilih', function () {
         ->set('detailBelanja.0.rekening_id', $rekening->id)
         ->assertSet('detailBelanja.0.uraian', 'Belanja Barang Konsumsi');
 });
+
+it('menghitung sisa anggaran dari kolom anggaran pemasukan', function () {
+    Pemasukan::query()->delete();
+
+    Pemasukan::create([
+        'sumber_dana' => 'Alokasi Dana Desa',
+        'sumber_dana_id' => $this->sumberDana->id,
+        'jumlah' => 360000000,
+        'anggaran' => 450000000,
+        'tanggal' => '2026-11-25',
+    ]);
+
+    foreach ([180000000, 100000000, 100000000, 50000000] as $rencana) {
+        Kegiatan::create([
+            'nama_kegiatan' => 'Kegiatan Existing '.$rencana,
+            'lokasi' => 'Kantor Desa',
+            'rencana_anggaran' => $rencana,
+            'status' => 'perencanaan',
+            'sumber_dana_id' => $this->sumberDana->id,
+        ]);
+    }
+
+    Livewire::test(KegiatanManagement::class)
+        ->set('dana', SumberDana::KODE_ALOKASI_DANA_DESA)
+        ->set('nama_kegiatan', 'Kegiatan Sisa Anggaran')
+        ->set('lokasi', 'Kantor Desa')
+        ->set('rencana_anggaran', '333333')
+        ->set('detailBelanja.0.rekening_id', (string) $this->rekening->id)
+        ->set('detailBelanja.0.uraian', 'Belanja Jasa Honorarium')
+        ->set('detailBelanja.0.anggaran', '333333')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect(Kegiatan::where('nama_kegiatan', 'Kegiatan Sisa Anggaran')->exists())->toBeTrue();
+});
+
+it('tetap menolak rencana yang melebihi sisa anggaran', function () {
+    Pemasukan::query()->delete();
+
+    Pemasukan::create([
+        'sumber_dana' => 'Alokasi Dana Desa',
+        'sumber_dana_id' => $this->sumberDana->id,
+        'jumlah' => 360000000,
+        'anggaran' => 450000000,
+        'tanggal' => '2026-11-25',
+    ]);
+
+    foreach ([180000000, 100000000, 100000000, 50000000] as $rencana) {
+        Kegiatan::create([
+            'nama_kegiatan' => 'Kegiatan Existing '.$rencana,
+            'lokasi' => 'Kantor Desa',
+            'rencana_anggaran' => $rencana,
+            'status' => 'perencanaan',
+            'sumber_dana_id' => $this->sumberDana->id,
+        ]);
+    }
+
+    Livewire::test(KegiatanManagement::class)
+        ->set('dana', SumberDana::KODE_ALOKASI_DANA_DESA)
+        ->set('nama_kegiatan', 'Kegiatan Over Budget')
+        ->set('lokasi', 'Kantor Desa')
+        ->set('rencana_anggaran', '21000000')
+        ->set('detailBelanja.0.rekening_id', (string) $this->rekening->id)
+        ->set('detailBelanja.0.uraian', 'Belanja Jasa Honorarium')
+        ->set('detailBelanja.0.anggaran', '21000000')
+        ->call('save')
+        ->assertHasErrors(['rencana_anggaran' => fn ($rules, $messages) => str_contains(implode(' ', $messages), 'Rp 20.000.000')]);
+
+    expect(Kegiatan::where('nama_kegiatan', 'Kegiatan Over Budget')->exists())->toBeFalse();
+});
