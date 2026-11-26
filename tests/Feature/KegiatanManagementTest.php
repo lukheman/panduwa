@@ -139,3 +139,34 @@ it('mencatat otomatis maksimal total detail ketika rencana anggaran lebih besar'
 
     expect((float) $kegiatan->pengeluarans()->sum('jumlah'))->toBe(13000000.0);
 });
+
+it('menerima pembaruan detailBelanja sebagai satu array tanpa error', function () {
+    $rekening = RekeningAnggaran::create([
+        'kode' => '5.2.1.05',
+        'nama' => 'Belanja Barang Cetak dan Penggandaan',
+        'jenis' => 'belanja',
+        'level' => 4,
+    ]);
+
+    Livewire::test(KegiatanManagement::class)
+        ->set('detailBelanja', [
+            ['rekening_id' => $rekening->id, 'uraian' => '', 'anggaran' => 100000],
+        ])
+        ->assertSet('detailBelanja.0.uraian', '');
+});
+
+it('mengisi otomatis uraian saat rekening pada detail dipilih', function () {
+    $rekening = RekeningAnggaran::create([
+        'kode' => '5.2.1.06',
+        'nama' => 'Belanja Barang Konsumsi',
+        'jenis' => 'belanja',
+        'level' => 4,
+    ]);
+
+    Livewire::test(KegiatanManagement::class)
+        ->set('detailBelanja', [
+            ['rekening_id' => '', 'uraian' => '', 'anggaran' => 100000],
+        ])
+        ->set('detailBelanja.0.rekening_id', $rekening->id)
+        ->assertSet('detailBelanja.0.uraian', 'Belanja Barang Konsumsi');
+});

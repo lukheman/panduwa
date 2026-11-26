@@ -378,12 +378,18 @@ class KegiatanManagement extends Component
         $this->detailBelanja = array_values($this->detailBelanja);
     }
 
-    public function updatedDetailBelanja($value, string $key): void
+    public function updatedDetailBelanja($value, ?string $key = null): void
     {
-        if (str_ends_with($key, '.rekening_id') && $value) {
-            $index = (int) explode('.', $key)[0];
-            $this->detailBelanja[$index]['uraian'] = (string) RekeningAnggaran::whereKey($value)->value('nama');
+        if ($key === null || ! str_ends_with($key, '.rekening_id') || ! $value) {
+            return;
         }
+
+        $index = (int) explode('.', $key)[0];
+        if (! isset($this->detailBelanja[$index])) {
+            return;
+        }
+
+        $this->detailBelanja[$index]['uraian'] = (string) RekeningAnggaran::whereKey($value)->value('nama');
     }
 
     protected function saveDetailBelanja(Kegiatan $kegiatan): bool
