@@ -81,6 +81,7 @@ class KegiatanManagement extends Component
             'detailBelanja.*.rekening_id' => ['required', 'integer', 'exists:rekening_anggaran,id'],
             'detailBelanja.*.uraian' => ['required', 'string', 'max:255'],
             'detailBelanja.*.anggaran' => ['required', 'numeric', 'min:0'],
+            'detailBelanja.*.realisasi' => ['nullable', 'numeric', 'min:0'],
         ];
 
         if ($this->menggunakanBidang()) {
@@ -146,7 +147,7 @@ class KegiatanManagement extends Component
 
     protected function detailBelanjaBaru(): array
     {
-        return [['id' => null, 'rekening_id' => '', 'uraian' => '', 'anggaran' => '', 'realisasi' => 0]];
+        return [['id' => null, 'rekening_id' => '', 'uraian' => '', 'anggaran' => '', 'realisasi' => 0, 'realisasi_awal' => 0]];
     }
 
     public function openCreateModal(): void
@@ -198,6 +199,7 @@ class KegiatanManagement extends Component
             'uraian' => $detail->uraian,
             'anggaran' => (string) $detail->anggaran,
             'realisasi' => (float) ($detail->pengeluarans_sum_jumlah ?? 0),
+            'realisasi_awal' => (float) ($detail->pengeluarans_sum_jumlah ?? 0),
         ])->all() ?: $this->detailBelanjaBaru();
 
         $this->showModal = true;
@@ -282,6 +284,7 @@ class KegiatanManagement extends Component
             if (! $this->saveDetailBelanja($kegiatan)) {
                 return;
             }
+            $this->hapusRealisasiManual($kegiatan);
             if ($this->status === StatusKegiatan::PERENCANAAN->value) {
                 $this->hapusOtomatisPengeluaran($kegiatan);
 
@@ -307,6 +310,7 @@ class KegiatanManagement extends Component
             if (! $this->saveDetailBelanja($kegiatan)) {
                 return;
             }
+            $this->hapusRealisasiManual($kegiatan);
             $perluCatat = $this->status === StatusKegiatan::SELESAI->value
                 || ($this->status === StatusKegiatan::BERJALAN->value && $this->realisasi_anggaran);
 
@@ -320,6 +324,7 @@ class KegiatanManagement extends Component
             }
         }
 
+        $this->terapkanRealisasiManual($kegiatan);
         $this->closeModal();
     }
 
@@ -330,6 +335,46 @@ class KegiatanManagement extends Component
                 $q->where('keterangan', 'like', 'Alokasi Dana Kegiatan:%')
                     ->orWhere('keterangan', 'like', 'Realisasi Anggaran Kegiatan:%');
             });
+    }
+
+    protected function hapusRealisasiManual(Kegiatan $kegiatan): void
+    {
+        Pengeluaran::where('id_kegiatan', $kegiatan->id)
+            ->where('keterangan', 'like', 'Realisasi Manual Kegiatan:%')
+            ->delete();
+    }
+
+    protected function terapkanRealisasiManual(Kegiatan $kegiatan): void
+    {
+        foreach ($this->detailBelanja as $detail) {
+            if (empty($detail['id'])) {
+                continue;
+            }
+
+            $manual = $detail['realisasi'] ?? null;
+            $manual = $manual === '' || $manual === null ? 0.0 : (float) $manual;
+            $awal = (float) ($detail['realisasi_awal'] ?? 0);
+
+            if (abs($manual - $awal) < 0.005) {
+                continue;
+            }
+
+            Pengeluaran::where('kegiatan_belanja_id', $detail['id'])->delete();
+
+            if ($manual <= 0) {
+                continue;
+            }
+
+            Pengeluaran::create([
+                'jumlah' => $manual,
+                'tanggal' => date('Y-m-d'),
+                'keterangan' => 'Realisasi Manual Kegiatan: '.$kegiatan->nama_kegiatan,
+                'id_kegiatan' => $kegiatan->id,
+                'kegiatan_belanja_id' => $detail['id'],
+                'sumber_dana_id' => $kegiatan->sumber_dana_id,
+                'rekening_anggaran_id' => $detail['rekening_id'],
+            ]);
+        }
     }
 
     protected function syncOtomatisPengeluaran(Kegiatan $kegiatan, $nominal): void
@@ -399,7 +444,7 @@ class KegiatanManagement extends Component
     {
         $idsTetap = [];
 
-        foreach ($this->detailBelanja as $detail) {
+        foreach ($this->detailBelanja as $index => $detail) {
             $rekening = RekeningAnggaran::withCount('children')->findOrFail($detail['rekening_id']);
             if ($rekening->children_count > 0) {
                 $this->addError('detailBelanja', 'Detail belanja harus menggunakan rekening paling bawah.');
@@ -420,9 +465,12 @@ class KegiatanManagement extends Component
 
             if ($detailTersedia) {
                 $detailTersedia->update($atribut);
+                $this->detailBelanja[$index]['id'] = $detailTersedia->id;
                 $idsTetap[] = $detailTersedia->id;
             } else {
-                $idsTetap[] = $kegiatan->belanjaDetails()->create($atribut)->id;
+                $detailBaru = $kegiatan->belanjaDetails()->create($atribut);
+                $this->detailBelanja[$index]['id'] = $detailBaru->id;
+                $idsTetap[] = $detailBaru->id;
             }
         }
 

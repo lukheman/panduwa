@@ -240,3 +240,100 @@ it('tetap menolak rencana yang melebihi sisa anggaran', function () {
 
     expect(Kegiatan::where('nama_kegiatan', 'Kegiatan Over Budget')->exists())->toBeFalse();
 });
+
+it('menampilkan realisasi otomatis di form edit dan menyimpan perubahan manual', function () {
+    $kegiatan = Kegiatan::create([
+        'nama_kegiatan' => 'Kegiatan Realisasi Otomatis',
+        'lokasi' => 'Kantor Desa',
+        'rencana_anggaran' => 20000000,
+        'status' => 'berjalan',
+        'sumber_dana_id' => $this->sumberDana->id,
+    ]);
+
+    $detail = $kegiatan->belanjaDetails()->create([
+        'rekening_anggaran_id' => $this->rekening->id,
+        'kode_rekening' => $this->rekening->kode,
+        'uraian' => 'Belanja Jasa Honorarium',
+        'anggaran' => 13000000,
+    ]);
+
+    Pengeluaran::create([
+        'jumlah' => 5000000,
+        'tanggal' => '2026-11-25',
+        'keterangan' => 'Realisasi Anggaran Kegiatan: Kegiatan Realisasi Otomatis',
+        'id_kegiatan' => $kegiatan->id,
+        'kegiatan_belanja_id' => $detail->id,
+        'sumber_dana_id' => $this->sumberDana->id,
+        'rekening_anggaran_id' => $this->rekening->id,
+    ]);
+
+    Livewire::test(KegiatanManagement::class)
+        ->set('dana', SumberDana::KODE_ALOKASI_DANA_DESA)
+        ->call('openEditModal', $kegiatan->id)
+        ->assertSet('detailBelanja.0.realisasi', 5000000.0)
+        ->set('detailBelanja.0.realisasi', '7000000')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect((float) $detail->fresh()->pengeluarans()->sum('jumlah'))->toBe(7000000.0)
+        ->and($detail->fresh()->pengeluarans()->first()->keterangan)->toContain('Realisasi Manual Kegiatan');
+});
+
+it('menyimpan realisasi manual yang diisi saat membuat kegiatan', function () {
+    Livewire::test(KegiatanManagement::class)
+        ->set('dana', SumberDana::KODE_ALOKASI_DANA_DESA)
+        ->set('nama_kegiatan', 'Kegiatan Realisasi Manual')
+        ->set('lokasi', 'Kantor Desa')
+        ->set('rencana_anggaran', '20000000')
+        ->set('status', 'berjalan')
+        ->set('detailBelanja.0.rekening_id', (string) $this->rekening->id)
+        ->set('detailBelanja.0.uraian', 'Belanja Jasa Honorarium')
+        ->set('detailBelanja.0.anggaran', '13000000')
+        ->set('detailBelanja.0.realisasi', '3000000')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $detail = Kegiatan::where('nama_kegiatan', 'Kegiatan Realisasi Manual')
+        ->firstOrFail()
+        ->belanjaDetails()
+        ->firstOrFail();
+
+    expect((float) $detail->pengeluarans()->sum('jumlah'))->toBe(3000000.0)
+        ->and($detail->pengeluarans()->first()->keterangan)->toContain('Realisasi Manual Kegiatan');
+});
+
+it('membiarkan realisasi otomatis ketika tidak diubah', function () {
+    Livewire::test(KegiatanManagement::class)
+        ->set('dana', SumberDana::KODE_ALOKASI_DANA_DESA)
+        ->set('nama_kegiatan', 'Kegiatan Selesai Otomatis')
+        ->set('lokasi', 'Kantor Desa')
+        ->set('rencana_anggaran', '20000000')
+        ->set('status', 'selesai')
+        ->set('detailBelanja.0.rekening_id', (string) $this->rekening->id)
+        ->set('detailBelanja.0.uraian', 'Belanja Jasa Honorarium')
+        ->set('detailBelanja.0.anggaran', '13000000')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $detail = Kegiatan::where('nama_kegiatan', 'Kegiatan Selesai Otomatis')
+        ->firstOrFail()
+        ->belanjaDetails()
+        ->firstOrFail();
+
+    expect((float) $detail->pengeluarans()->sum('jumlah'))->toBe(13000000.0)
+        ->and($detail->pengeluarans()->first()->keterangan)->toContain('Realisasi Anggaran Kegiatan');
+});
+
+it('menolak realisasi manual bernilai negatif', function () {
+    Livewire::test(KegiatanManagement::class)
+        ->set('dana', SumberDana::KODE_ALOKASI_DANA_DESA)
+        ->set('nama_kegiatan', 'Kegiatan Realisasi Negatif')
+        ->set('lokasi', 'Kantor Desa')
+        ->set('rencana_anggaran', '20000000')
+        ->set('detailBelanja.0.rekening_id', (string) $this->rekening->id)
+        ->set('detailBelanja.0.uraian', 'Belanja Jasa Honorarium')
+        ->set('detailBelanja.0.anggaran', '13000000')
+        ->set('detailBelanja.0.realisasi', '-1')
+        ->call('save')
+        ->assertHasErrors('detailBelanja.0.realisasi');
+});
